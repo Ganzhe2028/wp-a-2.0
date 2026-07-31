@@ -4,8 +4,6 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { unlink } from "node:fs/promises";
-import path from "node:path";
 
 let s3: S3Client | null = null;
 
@@ -41,9 +39,6 @@ export async function createPresignedUploadUrl(
   key: string,
   contentType: string
 ): Promise<string> {
-  if (process.env.LOCAL_UPLOAD_DIR) {
-    return `/api/local-upload?key=${encodeURIComponent(key)}`;
-  }
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET!,
     Key: key,
@@ -54,9 +49,6 @@ export async function createPresignedUploadUrl(
 }
 
 export function getPublicUrl(key: string): string {
-  if (process.env.LOCAL_UPLOAD_DIR) {
-    return `/api/local-upload?key=${encodeURIComponent(key)}`;
-  }
   const base = process.env.R2_PUBLIC_BASE_URL!.replace(/\/$/, "");
   return `${base}/${key}`;
 }
@@ -68,12 +60,6 @@ export function getKeyFromPublicUrl(url: string): string | null {
 }
 
 export async function deleteFromR2(key: string): Promise<void> {
-  if (process.env.LOCAL_UPLOAD_DIR) {
-    await unlink(path.join(process.env.LOCAL_UPLOAD_DIR, key)).catch((error: NodeJS.ErrnoException) => {
-      if (error.code !== "ENOENT") throw error;
-    });
-    return;
-  }
   const command = new DeleteObjectCommand({
     Bucket: process.env.R2_BUCKET!,
     Key: key,

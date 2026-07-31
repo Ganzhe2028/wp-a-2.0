@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyStudentSession } from "@/lib/auth";
-import { getKeyFromPublicUrl, getPublicUrl } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 
 const MAX_NAME_LENGTH = 40;
@@ -29,23 +28,9 @@ function validateOptionalText(
   return null;
 }
 
-function isOwnedAvatarUrl(value: string, personId: string) {
-  // Upload keys are `${personId}/${nanoid()}.${ext}` (see /api/upload-url),
-  // so ownership is verified by the key prefix plus URL/key equality,
-  // matching the gallery-image check in /api/me/images.
-  if (process.env.LOCAL_UPLOAD_DIR) {
-    const prefix = "/api/local-upload?key=";
-    if (!value.startsWith(prefix)) return false;
-    let key: string;
-    try {
-      key = decodeURIComponent(value.slice(prefix.length));
-    } catch {
-      return false;
-    }
-    return key.startsWith(`${personId}/`);
-  }
-  const key = getKeyFromPublicUrl(value);
-  return !!key && key.startsWith(`${personId}/`) && value === getPublicUrl(key);
+function isValidAvatarUrl(value: string) {
+  const base = process.env.R2_PUBLIC_BASE_URL?.replace(/\/$/, "");
+  return !!base && value.startsWith(`${base}/`) && !value.includes("?");
 }
 
 export async function GET() {
@@ -114,10 +99,10 @@ export async function PATCH(_request: NextRequest) {
     normalizedAvatarUrl !== undefined &&
     normalizedAvatarUrl !== null &&
     (typeof normalizedAvatarUrl !== "string" ||
-      !isOwnedAvatarUrl(normalizedAvatarUrl, session.personId))
+      !isValidAvatarUrl(normalizedAvatarUrl))
   ) {
     return NextResponse.json(
-      { error: "avatarUrl must be your own uploaded image URL or null" },
+      { error: "avatarUrl must be an R2 public URL or null" },
       { status: 400 }
     );
   }

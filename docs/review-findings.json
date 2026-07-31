@@ -73,18 +73,5 @@
     ],
     "expectedFix": "When all Serializable-transaction retries are exhausted due to P2034, the endpoint returns the explicit 503 retry-exhaustion response instead of throwing an unhandled 500.",
     "verification": "app/api/me/images/route.ts breaks out of the retry loop on the final P2034 attempt, allowing the 503 response to be returned."
-  },
-  {
-    "id": "OWK-007",
-    "title": "Avatar URL must be validated for per-user ownership",
-    "severity": "P1",
-    "status": "fixed",
-    "source": "7.3-bugReview-report (codex.md), fixed 2026-07-31",
-    "evidence": [
-      "app/api/me/route.ts",
-      "app/api/upload-url/route.ts"
-    ],
-    "expectedFix": "PATCH /api/me must verify the avatar key belongs to the session user, not just that the URL sits on the R2 public domain.",
-    "verification": "app/api/me/route.ts uses isOwnedAvatarUrl(): the key resolved from the URL must start with `${personId}/` and the URL must equal getPublicUrl(key); LOCAL_UPLOAD_DIR mode applies the same personId-prefix rule after decodeURIComponent."
   }
 ]

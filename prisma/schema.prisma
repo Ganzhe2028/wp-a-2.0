@@ -9,32 +9,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Person {
-  id           String        @id @default(cuid())
-  code         String        @unique
-  editToken    String        @unique
-  username     String        @unique
-  passwordHash String?
-  englishName  String?
-  chineseName  String?
-  grade        String?
-  bio          String?
-  avatarUrl    String?
-  role         String        @default("LEARNER")
-  groupName    String?
-  day1SubmittedAt DateTime?
-  day3Answers  Json?
-  day3SubmittedAt DateTime?
-  published    Boolean       @default(false)
-  hidden       Boolean       @default(false)
-  images       Image[]
-  favoritesGiven    Favorite[] @relation("Favoriter")
-  favoritesReceived Favorite[] @relation("Favoritee")
-  location     LocationCard?
-  updatedAt    DateTime      @updatedAt
-  createdAt    DateTime      @default(now())
+enum UserRole {
+  LEARNER
+  SENIOR
+  ADMIN
+}
 
-  @@index([role, groupName])
+enum UserStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum SubmissionSection {
+  DAY1
+  DAY3
+}
+
+enum SubmissionStatus {
+  NOT_STARTED
+  DRAFT
+  SUBMITTED
+}
+
+enum AssetScanStatus {
+  PENDING
+  PROCESSING
+  PASSED
+  FAILED
+}
+
+enum AssetProcessingStatus {
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
+}
+
+model Person {
+  id                String        @id @default(cuid())
+  code              String        @unique
+  editToken         String        @unique
+  username          String        @unique
+  passwordHash      String?
+  englishName       String?
+  chineseName       String?
+  grade             String?
+  bio               String?
+  avatarUrl         String?
+  published         Boolean       @default(false)
+  hidden            Boolean       @default(false)
+  images            Image[]
+  favoritesGiven    Favorite[]    @relation("Favoriter")
+  favoritesReceived Favorite[]    @relation("Favoritee")
+  location          LocationCard?
+  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime      @default(now())
 }
 
 model Image {
@@ -75,4 +104,214 @@ model Favorite {
 model SystemSetting {
   key   String @id
   value String
+}
+
+model Event {
+  id               String             @id @default(cuid())
+  eventKey         String             @unique @db.VarChar(64)
+  name             String
+  settings         EventSettings?
+  users            User[]
+  groups           Group[]
+  submissions      Submission[]
+  assets           Asset[]
+  anonymousIds     EventAnonymousId[]
+  artworkPublicIds ArtworkPublicId[]
+  auditLogs        AdminAuditLog[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model EventSettings {
+  eventId            String   @id
+  event              Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  day1Open           Boolean  @default(false)
+  day3Open           Boolean  @default(false)
+  authoringEnabled   Boolean  @default(false)
+  allowEditing       Boolean  @default(false)
+  showName           Boolean  @default(false)
+  fullProfileVisible Boolean  @default(false)
+  version            Int      @default(1)
+  updatedBy          String?
+  updater            User?    @relation("EventSettingsUpdater", fields: [updatedBy, eventId], references: [id, eventId], onDelete: Restrict)
+  updatedAt          DateTime @updatedAt
+
+  @@index([updatedBy])
+}
+
+model User {
+  id                 String             @id @default(cuid())
+  eventId            String
+  event              Event              @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  issuer             String
+  externalSubject    String
+  email              String
+  displayName        String
+  displayNameSortKey String
+  role               UserRole           @default(LEARNER)
+  groupId            String?
+  group              Group?             @relation(fields: [groupId, eventId], references: [id, eventId], onDelete: Restrict)
+  status             UserStatus         @default(ACTIVE)
+  lastLoginAt        DateTime?
+  version            Int                @default(1)
+  archivedAt         DateTime?
+  archivedBy         String?
+  submissions        Submission[]
+  assets             Asset[]
+  anonymousIds       EventAnonymousId[]
+  artworkPublicIds   ArtworkPublicId[]
+  auditLogs          AdminAuditLog[]    @relation("AuditActor")
+  settingsUpdates    EventSettings[]    @relation("EventSettingsUpdater")
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([eventId, issuer, externalSubject])
+  @@unique([id, eventId])
+  @@index([eventId, status, role])
+  @@index([eventId, displayNameSortKey])
+  @@index([groupId])
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  stableKey String
+  name      String
+  sortOrder Int      @default(0)
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, stableKey])
+  @@unique([eventId, name])
+  @@unique([id, eventId])
+  @@index([eventId, sortOrder])
+}
+
+model Submission {
+  id              String            @id @default(cuid())
+  eventId         String
+  event           Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  userId          String
+  user            User              @relation(fields: [userId, eventId], references: [id, eventId], onDelete: Restrict)
+  section         SubmissionSection
+  status          SubmissionStatus  @default(NOT_STARTED)
+  templateVersion String
+  version         Int               @default(1)
+  submittedAt     DateTime?
+  day1Slots       Day1Slot[]
+  day3Bottles     Day3Bottle[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([eventId, userId, section])
+  @@unique([id, eventId])
+  @@index([eventId, section, status])
+  @@index([userId, status])
+}
+
+model Asset {
+  id               String                @id @default(cuid())
+  eventId          String
+  event            Event                 @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  ownerUserId      String
+  owner            User                  @relation(fields: [ownerUserId, eventId], references: [id, eventId], onDelete: Restrict)
+  storageKey       String                @unique
+  mimeType         String
+  width            Int
+  height           Int
+  byteSize         BigInt
+  checksum         String
+  scanStatus       AssetScanStatus       @default(PENDING)
+  processingStatus AssetProcessingStatus @default(UPLOADING)
+  day1Slots        Day1Slot[]
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@unique([id, eventId])
+  @@index([eventId, ownerUserId, createdAt])
+  @@index([eventId, checksum])
+  @@index([processingStatus, scanStatus])
+}
+
+model Day1Slot {
+  id           String     @id @default(cuid())
+  submissionId String
+  eventId      String
+  submission   Submission @relation(fields: [submissionId, eventId], references: [id, eventId], onDelete: Cascade)
+  slotKey      String
+  assetId      String?
+  asset        Asset?     @relation(fields: [assetId, eventId], references: [id, eventId], onDelete: Restrict)
+  cropX        Float?
+  cropY        Float?
+  cropScale    Float?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([submissionId, slotKey])
+  @@index([assetId])
+}
+
+model Day3Bottle {
+  id            String     @id @default(cuid())
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  bottleKey     String
+  labelSnapshot String
+  level         Int?
+  isConfirmed   Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([submissionId, bottleKey])
+}
+
+model EventAnonymousId {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  userId      String
+  user        User     @relation(fields: [userId, eventId], references: [id, eventId], onDelete: Restrict)
+  anonymousId String   @db.VarChar(8)
+  createdAt   DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@unique([eventId, anonymousId])
+  @@index([userId])
+}
+
+model ArtworkPublicId {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  userId    String
+  user      User      @relation(fields: [userId, eventId], references: [id, eventId], onDelete: Restrict)
+  publicId  String    @unique @db.VarChar(64)
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  @@index([eventId, userId, revokedAt])
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  actorUserId String?
+  actor       User?    @relation("AuditActor", fields: [actorUserId, eventId], references: [id, eventId], onDelete: Restrict)
+  action      String
+  targetType  String
+  targetId    String
+  before      Json?
+  after       Json?
+  requestId   String
+  summary     String
+  createdAt   DateTime @default(now())
+
+  @@index([requestId])
+  @@index([eventId, createdAt])
+  @@index([eventId, actorUserId, createdAt])
+  @@index([eventId, targetType, targetId, createdAt])
+  @@index([eventId, action, createdAt])
 }

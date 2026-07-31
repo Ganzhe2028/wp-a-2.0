@@ -3,11 +3,12 @@
 ## Source of Truth
 
 Read these before writing code:
-- `docs/01_PRD_OWeek个人主页系统_v1.0.md` — product spec, user flows, states
-- `docs/02_开发文档_OWeek个人主页系统_v1.0.md` — v1.0 tech stack, data model (historical reference)
-- `docs/04_开发文档_v2.0_账号系统迁移.md` — v2.0 account system spec (current executable target)
+- `docs/08_v1.1_工程基线与契约.md` — current executable v1.1 baseline and contract rules
+- `docs/01_PRD_OWeek个人主页系统_v1.0.md` — migration/historical reference only
+- `docs/02_开发文档_OWeek个人主页系统_v1.0.md` — migration/historical reference only
+- `docs/04_开发文档_v2.0_账号系统迁移.md` — migration/historical reference only
 
-The v2.0 dev doc (04) is the current spec. It covers v1.0 constraints that remain valid. Follow it literally — it was written for agents.
+v1.1 is the Source of Truth. The two 2026-07-30 v1.1 collaboration task books have been reviewed and are summarized in doc 08. The full referenced product document, `O-Week 数字迎新作品展与 Package Hunt 网站 v1.1`, was not present in the repository or supplied attachments. Exact values not transcribed in the task books (including Preset combinations, final slot templates, bottle configuration, and Anonymous ID symbols) are blocked and must not be inferred. Older documents may only inform migration and cannot override v1.1.
 
 ## Working Philosophy
 
@@ -89,28 +90,9 @@ Define completion criteria before starting. Verify against them before delivery.
 Never return unfinished work; fix issues and retest until the criteria are met
 or a genuine blocker requires user input.
 
-## Design Reference: WP26 (Figma)
+## Design Reference: Welcom👀n (Figma)
 
-The current UI design lives in Figma at `UDxMPWHZeGorGTfgTDVoGr` (file name: "WP26"), board `1058:886` "O-WEEK · WEBSITE PRODUCT UI · Mobile + Admin". The gap analysis against the codebase is `docs/08_UI差距分析_WP26设计稿对齐.md` (2026-07-31).
-
-**The older Figma file `qHFGyH41gsFG4BQMHft8i0` ("Welcom👀n") and the `monk/index.html` prototype are LEGACY** — their tokens (#FF530F, 75/30/20/12px radii, Platform Medium / HYQiHei 80S) no longer apply.
-
-### Design tokens (WP26, implemented in `app/globals.css`)
-
-```
-ACTION:     #FF5311  (orange — interactive elements only)
-INK:        #0B0B0A  (text/dark)
-PAPER:      #F4F3F0  (muted card bg)
-WHITE:      #FFFFFF  (page bg)
-BORDER:     #E0E0DB  (hairlines)
-Muted text: #61615C
-Radii:      4px (buttons), 14px (pills/tabs), 16px (cards/modals), 12px (image tiles)
-Grid:       8pt, mobile margin 16, touch targets ≥ 44px
-Fonts:      target 汉仪旗黑 (CN) + Platform (EN) — commercial, not bundled;
-            shipping fallback is Inter (next/font) + PingFang SC / system CN, headings weight 900
-```
-
-CSS variables: `--orange --foreground --paper --line --muted --orange-soft` + `--radius-btn/pill/card/tile` in `app/globals.css`. Shared classes: `.ow-phone .ow-title .ow-heading .ow-btn .ow-btn-outline .ow-card .ow-chip .ow-nav .ow-scrim .ow-modal .ow-enter`.
+The current UI design lives in Figma at `qHFGyH41gsFG4BQMHft8i0` (file name: "Welcom👀n"). A clickable HTML prototype is at `monk/index.html` — open it in browser and use ← → to navigate.
 
 ### Figma data extraction methodology (2026-06-26)
 
@@ -121,9 +103,37 @@ Two approaches, complementary:
 | **REST API** (`/v1/files/:key`) | Node tree, absolute positions, RGBA colors, fonts, text content, prototype animations (trigger/easing/duration/spring params), image export | Auto Layout properties (layoutMode/gap/padding/align), component variants, variable bindings, mixed font sizes within text nodes |
 | **Plugin API** (local script at `/Users/mac/New/dump-layout/`) | All of the above + Auto Layout, component properties, variable bindings, per-character text styling | Only works on Figma desktop app |
 
-**This design uses NO Auto Layout** — all elements are manually positioned with FIXED sizing. Padding/gap values must be derived from absolute coordinate math rather than read directly.
+**This specific design uses NO Auto Layout** — all elements are manually positioned with FIXED sizing. This means padding/gap values must be derived from absolute coordinate math rather than read directly.
 
-Animations: only micro-interactions are implemented (220ms `.ow-enter`, 180ms button hover, 200ms bottle fill, toggle slide, `prefers-reduced-motion` fallback). No page-level transitions — deliberate decision (2026-07-31).
+### Design tokens extracted
+
+```
+Primary:    #FF530F  (orange-red, all buttons/circles)
+Background: #FFFFFF
+Card bg:    #F7F7F7
+Card border:#D9D9D9, 20px stroke
+Grey:       #E6E6E6, #EBEBEB (placeholders)
+Text dark:  #000000
+Text muted: #D9D9D9 (subtitles), #808080 (labels)
+Font EN:    Platform Medium, weight 500
+Font CN:    HYQiHei 80S, weight 400
+Corner radii: 75px (card frame), 30px (buttons/avatar), 20px (small buttons), 12px (placeholders)
+```
+
+### Page flow & animations
+
+```
+Splash → Welcome → Profile View → Edit → Edit v2 → Adjective
+  PUSH↑    PUSH↑      fade       spring    PUSH↑
+  2084ms   2084ms      300ms      3798ms    2084ms
+  SLOW     SLOW       LINEAR     CUSTOM_SPRING  SLOW
+```
+
+Spring parameters: mass:1, stiffness:222, damping:3.7 (underdamped bounce).
+
+### Prototype (`monk/index.html`)
+
+Self-contained HTML with all 6 screens. Click through or use arrow keys. Animations match Figma prototype timing and easing. No dependencies.
 
 ## Tech Stack (locked)
 
@@ -145,45 +155,41 @@ Next.js App Router v16+, React, TypeScript, Prisma + Neon PostgreSQL (with `@pri
 - Session cookie MUST be server-side `Set-Cookie` (never `document.cookie` or localStorage) — this is critical for Safari ITP survival over 10+ days.
 - `ADMIN_PASSWORD` and `SESSION_SECRET` have no hard-coded fallback. Missing auth env vars must fail closed instead of silently signing JWTs with a default secret.
 - Password hash uses Node built-in `node:crypto` scrypt + `timingSafeEqual`. Format: `"salt_hex:hash_hex"`.
+- Favorites are server-side (Favorite table), one-way (no "who favorited me" reads), no localStorage caching.
 
 ### Images: Presigned upload, not server passthrough
 1. Frontend compresses with `browser-image-compression` (≤1600px, ≤500KB, webp)
-2. Requests presigned PUT URL from `/api/upload-url` (server checks session + image count < 14)
+2. Requests presigned PUT URL from `/api/upload-url` (server checks session + image count < 4)
 3. PUTs directly to R2 — **never through server**
 4. POSTs `/api/me/images` to save the record
-5. Avatar uses same flow but stored on `Person.avatarUrl`, not counted toward the 14-image limit
-- Persist the exact `key` returned by `/api/upload-url`; never derive it from `publicUrl`. `/api/me/images` validates key ownership (`key` must start with `{personId}/`) and URL equality, then performs the final image-count check inside a Serializable transaction. `/api/me` PATCH applies the same ownership check to `avatarUrl` (fixed 2026-07-31, was domain-prefix-only).
+5. Avatar uses same flow but stored on `Person.avatarUrl`, not counted toward the 4-image limit
+- Persist the exact `key` returned by `/api/upload-url`; never derive it from `publicUrl`. `/api/me/images` validates key ownership and URL equality, then performs the final image-count check inside a Serializable transaction.
 
 ### Short codes: shared between pages
-The same `Person.code` serves `/u/{code}` (profile), `/nfc/{code}` (anonymous NFC landing) and `/package/{code}` (package handoff, name only). Each person gets one code. Default username = code. (`/loc/{code}` and the favorites feature were removed 2026-07-31; `Favorite`/`LocationCard` tables remain in the schema but have no UI or API.)
+The same `Person.code` serves both `/u/{code}` (profile) and `/loc/{code}` (location card). Each person gets one code. Default username = code.
 
 ### Validation quirks
-- `bio` counted by code points, not characters or bytes — cap at 80. (Legacy field: no current UI edits it.)
-- Image count must be < 14 **and** verified server-side on both upload-url and image-save endpoints.
+- `bio` counted by code points, not characters or bytes — cap at 80.
+- Image count must be < 4 **and** verified server-side on both upload-url and image-save endpoints.
 
 ### System settings (stored in SystemSetting table, PATCH via `/api/admin/settings`)
-Six live keys (admin Dashboard toggles, labels per Figma WP26):
-- `day1Open` / `day3Open` — Day 1 / Day 3 开放： unsubmitted users can enter the editors.
-- `allowEdit` — 允许编辑： when ON, submitted Day 1/Day 3 content can be edited again (uploads, deletes, day3 saves un-block; re-submit stays 409). Default OFF.
-- `showNames` — 显示姓名： when OFF, names render as anonymous symbol IDs everywhere.
-- `profileComplete` — 显示完整资料： when OFF, `/u/[code]` and `/nfc/[code]` return identity title only (no images/bottles).
-- `navEnabled` — 目录与跨页导航： gates `/browse` and the BROWSE card on `/home`; NFC direct links still work.
-- Retired keys: `browseOpen` (replaced by `navEnabled`), `nfcEnabled` (NFC page is always available per Figma contract).
-- Admin can hide individual pages via the `hidden` flag (DB-level; the admin takedown UI/API was removed 2026-07-31).
+- `allowStudentVisibilityControl` is **not implemented**. The simplified model auto-publishes a profile when the student uploads an avatar and saves their profile. There is no student-facing "主页可见" toggle.
+- `/api/me` PATCH automatically sets `published = true` when `avatarUrl` is present; the `published` field is ignored if sent by the client.
+- Admin can still hide individual pages via the `hidden` flag (takedown).
 
 ### States ≠ pages
 - `hidden=true` → show "该页面已隐藏" placeholder, not blank screen.
-- `/u/[code]` visibility is driven by `day1SubmittedAt`/`day3SubmittedAt` (mutual-unlock: you see others' Day N only after submitting your own Day N). The `published` column is still written but no longer read for gating.
-- `/u/[code]` requires login (session gate); `/nfc/[code]` and `/package/[code]` are public. Unauthenticated users redirect to `/?next=<path>`.
-- Client editors render a `SessionExpired` card (components/SessionExpired.tsx) on API 401, and an inline "上传失败，图片仍保留在本机 + 重试" card on upload failure.
+- `published=false` → show "这位同学还没布置主页" placeholder (only when visibility control enabled).
+- Both `/u/[code]` and `/loc/[code]` require login (session gate). Unauthenticated users redirect to `/?next=<path>`.
 
 ### Build order
 For v2.0, follow the 10-step sequence in section 11 of docs/04_开发文档_v2.0_账号系统迁移.md.
 
 ## What NOT to build (v2.0 exclusions)
 Comments, likes, social links, pairing algorithms, notifications, student self-service password reset.
-- Account login: built. Server-side favorites: **removed 2026-07-31** (tables kept, no UI/API).
+- Account login and server-side favorites: now built.
 - Password reset: admin-only, no student self-service.
+- "Who favorited me": never query `favoritesReceived`. It exists for cascade delete only.
 - No bcrypt/argon2 — use built-in `node:crypto` scrypt.
 
 ## Deployed URL
@@ -216,11 +222,8 @@ Account passwords are 12-char scrypt hashes using `PRINTABLE_PASSWORD_ALPHABET` 
 - Login route has per-IP and per-username rate limiting to slow online brute-force attempts.
 - Admin batch import is transactional: Person and LocationCard rows are created as an all-or-nothing batch, and uniqueness conflicts return 409.
 
-### Favorites: removed (2026-07-31)
-The favorites feature was removed with `/loc`: `app/api/favorites`, `app/api/me/favorites` and all UI entries are gone. The `Favorite` table and relations remain in the schema for cascade delete only — do not build new reads on them. Historical note: "who favorited me" reverse reads were always forbidden.
-
-### Local build needs .env.local sourced (2026-07-31)
-`npm run build` runs `prisma generate`, and `prisma.config.ts` only loads `.env` via `dotenv/config` — this repo keeps secrets in `.env.local`, so a bare `npm run build` fails with `Missing required environment variable: DATABASE_URL`. Run `set -a; source .env.local; set +a; npm run build` locally. Vercel is unaffected (env vars injected).
+### Favorites: one-way, no reverse reads (2026-06-26)
+`Favorite.favoriteeId` and `Person.favoritesReceived` exist ONLY for cascade delete. Never query "who favorited me" — this is a product hard-decision, not a performance optimization.
 
 ### System settings gate: silent drop, not reject (2026-06-26)
 The original `v2.0` implementation rejected PATCH with 403 when `published` was in the body and the admin setting was OFF. This blocked ALL saves (including non-published edits). **Fix**: when the setting is OFF, the server silently drops `published` from the body. Students can always save; they just can't change visibility.
@@ -236,8 +239,8 @@ The account system migration (v1.0→v2.0) does NOT affect: R2 presigned URL flo
 - `POST /api/admin/logout` — clears `owk_admin` cookie server-side via `clearAdminCookie()`.
 - `clearAdminCookie()` mirrors `clearStudentCookie()` but uses admin's `COOKIE_NAME`.
 
-### Admin: export now includes code (2026-06-26, updated 2026-07-31)
-- Export CSV header: `chineseName,englishName,username,code,homepage` (the `location` column was dropped together with `/loc`).
+### Admin: export now includes code (2026-06-26)
+- Export CSV header: `chineseName,englishName,username,code,homepage,location`.
 - The `code` column enables the "重置" button on each row in the export table — clicking it navigates to the reset-password tab with the code pre-filled via `sessionStorage`.
 
 ### handleLogin e.preventDefault() (2026-06-26)

@@ -1,20 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import { createRequestId, failure } from "@/lib/contracts";
 
 /**
- * Public endpoint: read a specific system setting by key.
- * Used by the edit page to check whether publish self-control is enabled.
+ * Legacy public settings reads are disabled. EventSettings does not exist yet,
+ * so exposing arbitrary SystemSetting values could only broaden access.
  */
-export async function GET(request: NextRequest) {
-  const key = request.nextUrl.searchParams.get("key");
-  if (!key) {
-    return NextResponse.json({ error: "key required" }, { status: 400 });
-  }
+export async function GET() {
+  const requestId = createRequestId();
 
-  const setting = await prisma.systemSetting.findUnique({
-    where: { key },
-    select: { value: true },
-  });
-
-  return NextResponse.json({ value: setting?.value ?? null });
+  return NextResponse.json(
+    failure("FORBIDDEN", "公开设置读取已禁用", requestId),
+    { status: 403 },
+  );
 }

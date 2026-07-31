@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
 
-  const header = "chineseName,englishName,username,code,homepage";
+  const header = "chineseName,englishName,username,code,homepage,location";
   const rows = persons.map((p: (typeof persons)[number]) =>
     [
       csvCell(p.chineseName || ""),
@@ -21,6 +21,7 @@ export async function GET(_request: NextRequest) {
       csvCell(p.username || ""),
       csvCell(p.code),
       csvCell(`${baseUrl}/u/${p.code}`),
+      csvCell(`${baseUrl}/loc/${p.code}`),
     ].join(",")
   );
 
