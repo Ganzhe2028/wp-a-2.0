@@ -66,8 +66,21 @@ img { max-width: 100%; }
 .ow-btn-outline { background: #fff; color: var(--orange); }
 .ow-btn-outline:hover { background: var(--orange-soft); }
 .ow-card { border: 2px solid #111; background: #fff; }
-.ow-chip { min-height: 44px; border: 2px solid var(--orange); border-radius: 999px; padding: 8px 20px; font-weight: 900; }
+.ow-chip {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--orange);
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
 .ow-chip-active { background: var(--orange); color: #050505; }
+.ow-chip-white { border-color: #fff; background: transparent; color: #050505; }
+.ow-arrow { font-family: var(--font-inter), Arial, sans-serif; font-weight: 700; line-height: 1; }
 .ow-nav {
   min-height: 64px;
   display: grid;
