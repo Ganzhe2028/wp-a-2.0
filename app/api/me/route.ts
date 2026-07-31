@@ -29,6 +29,9 @@ function validateOptionalText(
 }
 
 function isValidAvatarUrl(value: string) {
+  if (process.env.LOCAL_UPLOAD_DIR && value.startsWith("/api/local-upload?key=")) {
+    return true;
+  }
   const base = process.env.R2_PUBLIC_BASE_URL?.replace(/\/$/, "");
   return !!base && value.startsWith(`${base}/`) && !value.includes("?");
 }

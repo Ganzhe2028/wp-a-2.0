@@ -5,7 +5,7 @@ import imageCompression from "browser-image-compression";
 
 interface AvatarUploaderProps {
   currentUrl: string | null;
-  onAvatarChange: (url: string | null) => void;
+  onAvatarChange: (url: string | null) => void | Promise<void>;
   disabled?: boolean;
 }
 
@@ -33,7 +33,7 @@ export default function AvatarUploader({
       const presignRes = await fetch("/api/upload-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contentType: `image/${ext}` }),
+        body: JSON.stringify({ contentType: `image/${ext}`, purpose: "avatar" }),
       });
 
       if (!presignRes.ok) {
@@ -43,17 +43,30 @@ export default function AvatarUploader({
 
       const { putUrl, publicUrl } = await presignRes.json();
 
-      await fetch(putUrl, {
-        method: "PUT",
-        body: compressed,
-        headers: { "Content-Type": `image/${ext}` },
-      });
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 30_000);
+      let uploadRes: Response;
+      try {
+        uploadRes = await fetch(putUrl, {
+          method: "PUT",
+          body: compressed,
+          headers: { "Content-Type": `image/${ext}` },
+          signal: controller.signal,
+        });
+      } finally {
+        window.clearTimeout(timeout);
+      }
+      if (!uploadRes.ok) throw new Error("图片上传失败，请重试");
 
-      onAvatarChange(publicUrl);
+      await onAvatarChange(publicUrl);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Upload failed");
+      const message = err instanceof DOMException && err.name === "AbortError"
+        ? "上传超时，请检查网络后重试"
+        : err instanceof Error ? err.message : "Upload failed";
+      alert(message);
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 

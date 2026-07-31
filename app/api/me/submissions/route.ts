@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyStudentSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { DAY3_SECTIONS, parseDay3Answers } from "@/lib/flow";
+import { parseDay3Answers } from "@/lib/flow";
 import { settingEnabled } from "@/lib/event-settings";
 
 export async function GET() {
@@ -31,10 +31,6 @@ export async function PATCH(request: NextRequest) {
     if (!(await settingEnabled("day3Open"))) return NextResponse.json({ error: "DAY 3 is closed" }, { status: 403 });
     if (person.day3SubmittedAt) return NextResponse.json({ error: "DAY 3 is already submitted" }, { status: 409 });
     const answers = parseDay3Answers(body.answers);
-    if (body.action === "submitDay3") {
-      const complete = answers.length === DAY3_SECTIONS.length && answers.every((section, index) => section.length === DAY3_SECTIONS[index].prompts.length && section.every((value) => value > 0));
-      if (!complete) return NextResponse.json({ error: "请先完成 64 / 64 个小瓶子" }, { status: 400 });
-    }
     const updated = await prisma.person.update({ where: { id: session.personId }, data: { day3Answers: answers, ...(body.action === "submitDay3" && { day3SubmittedAt: new Date() }) }, select: { day3Answers: true, day3SubmittedAt: true } });
     return NextResponse.json({ ok: true, ...updated });
   }

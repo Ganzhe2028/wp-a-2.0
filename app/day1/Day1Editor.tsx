@@ -21,8 +21,12 @@ export default function Day1Editor({ person }: { person: Person }) {
   const submitted = Boolean(person.day1SubmittedAt);
 
   async function saveAvatar(url: string | null) {
+    const response = await fetch("/api/me", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ avatarUrl: url || null }) });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || "头像保存失败");
+    }
     setAvatarUrl(url);
-    await fetch("/api/me", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ avatarUrl: url || null }) });
   }
 
   async function submit() {

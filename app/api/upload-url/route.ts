@@ -31,12 +31,14 @@ export async function POST(request: NextRequest) {
   }
 
   let contentType: string;
+  let purpose: unknown;
   try {
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       throw new Error("Invalid request body");
     }
     contentType = body.contentType;
+    purpose = body.purpose;
   } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
@@ -59,15 +61,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const imageCount = await prisma.image.count({
-    where: { personId: session.personId, hidden: false },
-  });
+  if (purpose !== "avatar") {
+    const imageCount = await prisma.image.count({
+      where: { personId: session.personId, hidden: false },
+    });
 
-  if (imageCount >= 14) {
-    return NextResponse.json(
-      { error: "Maximum 14 gallery images allowed" },
-      { status: 409 }
-    );
+    if (imageCount >= 14) {
+      return NextResponse.json(
+        { error: "Maximum 14 gallery images allowed" },
+        { status: 409 }
+      );
+    }
   }
 
   const ext = contentType.split("/")[1] || "webp";
