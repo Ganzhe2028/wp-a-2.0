@@ -139,7 +139,7 @@ export default function ImageGrid({
         ))}
         {uploading && (
           <div className="flex aspect-square items-center justify-center rounded-[var(--radius-tile)] bg-[var(--paper)]">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--orange)]" />
+            <div className="h-6 w-6 animate-spin rounded-full border-[1.5px] border-[var(--line)] border-t-[var(--orange)]" />
           </div>
         )}
         {!disabled && !uploading && Array.from({ length: remaining }).map((_, i) => {
@@ -149,7 +149,7 @@ export default function ImageGrid({
               key={`empty-${activeImages.length + i}`}
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="relative aspect-square rounded-[var(--radius-tile)] border-2 border-dashed border-[var(--line)] bg-[var(--paper)] transition-colors hover:border-[var(--orange)]"
+              className="relative aspect-square rounded-[var(--radius-tile)] border-[1.5px] border-dashed border-[var(--line)] bg-[var(--paper)] transition-colors hover:border-[var(--orange)]"
             >
               <span className="flex h-full w-full items-center justify-center text-2xl font-black text-[var(--orange)]">+</span>
               {label && <span className="absolute inset-x-0 bottom-0 px-2 py-1 text-xs font-bold text-[var(--muted)]">{label}</span>}
@@ -162,7 +162,7 @@ export default function ImageGrid({
       </div>
 
       {error && (
-        <div className="mt-3 rounded-[var(--radius-card)] border-2 border-[var(--orange)] bg-[var(--orange-soft)] p-4" role="alert">
+        <div className="mt-3 rounded-[var(--radius-card)] border-[1.5px] border-[var(--orange)] bg-[var(--orange-soft)] p-4" role="alert">
           <b>{error.includes("删除") ? "删除失败" : "上传失败"}</b>
           <p className="ow-muted mt-1 text-sm">{error.includes("删除") ? error : `图片仍保留在本机 · ${error}`}</p>
           {failedFiles.length > 0 && (

@@ -88,7 +88,7 @@ export default function AvatarUploader({
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading || disabled}
-        className="relative aspect-square w-full overflow-hidden rounded-[var(--radius-tile)] border-2 border-[var(--line)] bg-[var(--paper)] transition-colors disabled:opacity-60 hover:border-[var(--orange)]"
+        className="relative aspect-square w-full overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-[var(--line)] bg-[var(--paper)] transition-colors disabled:opacity-60 hover:border-[var(--orange)]"
       >
         {currentUrl ? (
           <img src={currentUrl} alt={label} className="h-full w-full object-cover" />
@@ -97,13 +97,13 @@ export default function AvatarUploader({
         )}
         {uploading && (
           <span className="absolute inset-0 flex items-center justify-center bg-white/70">
-            <span className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--orange)]" />
+            <span className="h-6 w-6 animate-spin rounded-full border-[1.5px] border-[var(--line)] border-t-[var(--orange)]" />
           </span>
         )}
         <span className="absolute inset-x-0 bottom-0 bg-black/85 px-2 py-1 text-left text-xs font-bold text-white">{label}</span>
       </button>
       {error && (
-        <div className="mt-3 rounded-[var(--radius-card)] border-2 border-[var(--orange)] bg-[var(--orange-soft)] p-4" role="alert">
+        <div className="mt-3 rounded-[var(--radius-card)] border-[1.5px] border-[var(--orange)] bg-[var(--orange-soft)] p-4" role="alert">
           <b>上传失败</b>
           <p className="ow-muted mt-1 text-sm">图片仍保留在本机 · {error}</p>
           <button

@@ -16,7 +16,7 @@ export default function BrowseClient({ people, day1Unlocked, day3Unlocked, showN
 
   function PersonRow({ person }: { person: Person }) {
     const displayName = showNames ? (person.chineseName || person.englishName || person.code) : person.code.replace(/[A-Za-z0-9]/g, (char, index) => "#@!&%$?!"[(char.charCodeAt(0) + index) % 8]);
-    return <Link href={`/u/${person.code}?day=${day}`} className="flex min-h-20 items-center rounded-[var(--radius-tile)] border-2 border-[var(--line)] px-4"><span className="mr-4 h-12 w-12 shrink-0 rounded-full bg-black" /><span><b className="text-xl">{displayName}</b><small className="ow-muted mt-1 block">{person.groupName || (person.role === "SENIOR" ? "Senior Group" : "Learner")}</small></span><span className="ow-orange ml-auto text-4xl">→</span></Link>;
+    return <Link href={`/u/${person.code}?day=${day}`} className="flex min-h-20 items-center rounded-[var(--radius-tile)] border-[1.5px] border-[var(--line)] px-4"><span className="mr-4 h-12 w-12 shrink-0 rounded-full bg-black" /><span><b className="text-xl">{displayName}</b><small className="ow-muted mt-1 block">{person.groupName || (person.role === "SENIOR" ? "Senior Group" : "Learner")}</small></span><span className="ow-orange ml-auto text-4xl">→</span></Link>;
   }
 
   return (

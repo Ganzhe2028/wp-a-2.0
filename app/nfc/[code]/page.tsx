@@ -19,8 +19,8 @@ export default async function NfcProfile({ params }: { params: Promise<{ code: s
       <div className="mt-8 grid grid-cols-2 gap-4"><span className="ow-btn">DAY 1</span><span className="ow-btn ow-btn-outline">DAY 3</span></div>
       {profileComplete ? (
         <div className="mt-10 grid grid-cols-2 gap-4">
-          <figure className="row-span-2 overflow-hidden rounded-[var(--radius-tile)] border-2 border-black bg-black">{person.avatarUrl && <img src={person.avatarUrl} alt="头像" className="h-full min-h-64 w-full object-cover" />}<figcaption className="p-3 font-bold text-white">头像</figcaption></figure>
-          {person.images.slice(0, 2).map((image, index) => <figure key={image.id} className="overflow-hidden rounded-[var(--radius-tile)] border-2 border-black bg-black"><img src={image.url} alt={DAY1_PROMPTS[index + 1]} className="aspect-video w-full object-cover" /><figcaption className="p-3 font-bold text-white">{DAY1_PROMPTS[index + 1]}</figcaption></figure>)}
+          <figure className="row-span-2 overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-black bg-black">{person.avatarUrl && <img src={person.avatarUrl} alt="头像" className="h-full min-h-64 w-full object-cover" />}<figcaption className="p-3 font-bold text-white">头像</figcaption></figure>
+          {person.images.slice(0, 2).map((image, index) => <figure key={image.id} className="overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-black bg-black"><img src={image.url} alt={DAY1_PROMPTS[index + 1]} className="aspect-video w-full object-cover" /><figcaption className="p-3 font-bold text-white">{DAY1_PROMPTS[index + 1]}</figcaption></figure>)}
         </div>
       ) : (
         <div className="mt-10 rounded-[var(--radius-card)] bg-[var(--paper)] p-6"><b className="text-xl">详情当前仅显示身份标题</b><p className="ow-muted mt-2">图片与小瓶子明细暂未开放。</p></div>

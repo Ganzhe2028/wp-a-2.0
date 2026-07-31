@@ -10,8 +10,8 @@
   --paper: #f4f3f0;
   --radius-btn: 4px;
   --radius-pill: 14px;
-  --radius-card: 16px;
-  --radius-tile: 12px;
+  --radius-card: 4px;
+  --radius-tile: 4px;
 }
 
 @theme inline {
@@ -56,7 +56,7 @@ img { max-width: 100%; }
   justify-content: center;
   gap: 12px;
   width: 100%;
-  border: 2px solid var(--orange);
+  border: 1.5px solid var(--orange);
   border-radius: var(--radius-btn);
   background: var(--orange);
   color: #0b0b0a;
@@ -69,13 +69,13 @@ img { max-width: 100%; }
 .ow-btn:disabled { cursor: not-allowed; opacity: .36; }
 .ow-btn-outline { background: #fff; color: var(--orange); }
 .ow-btn-outline:hover { background: var(--orange-soft); }
-.ow-card { border: 2px solid #0b0b0a; border-radius: var(--radius-card); background: #fff; }
+.ow-card { border: 1.5px solid #0b0b0a; border-radius: var(--radius-card); background: #fff; }
 .ow-chip {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--orange);
+  border: 1.5px solid var(--orange);
   border-radius: var(--radius-pill);
   padding: 8px 20px;
   font-weight: 900;
@@ -90,7 +90,7 @@ img { max-width: 100%; }
   display: grid;
   grid-template-columns: 48px 1fr auto;
   align-items: center;
-  border-bottom: 2px solid var(--line);
+  border-bottom: 1.5px solid var(--line);
   margin: -4px -4px 30px;
   padding: 0 4px 10px;
   font-weight: 900;
@@ -98,7 +98,7 @@ img { max-width: 100%; }
 .ow-nav a, .ow-nav button { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; }
 .ow-orange { color: var(--orange); }
 .ow-scrim { background: rgb(0 0 0 / .38); backdrop-filter: grayscale(1); }
-.ow-modal { border: 2px solid #0b0b0a; border-radius: var(--radius-card); background: #fff; box-shadow: 0 16px 60px rgb(0 0 0 / .2); }
+.ow-modal { border: 1.5px solid #0b0b0a; border-radius: var(--radius-card); background: #fff; box-shadow: 0 16px 60px rgb(0 0 0 / .2); }
 .ow-enter { animation: ow-enter 220ms ease-out both; }
 @keyframes ow-enter { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) {
@@ -128,7 +128,7 @@ body:has(.ow-home) {
   align-items: center;
   justify-content: space-between;
   min-height: 48px;
-  border-bottom: 2px solid var(--line);
+  border-bottom: 1.5px solid var(--line);
   padding-bottom: clamp(8px, 1.5dvh, 14px);
 }
 .ow-home-nav > strong {
@@ -183,7 +183,7 @@ body:has(.ow-home) {
   min-height: 0;
   grid-template-rows: auto 1fr auto;
   overflow: hidden;
-  border: 2px solid var(--foreground);
+  border: 1.5px solid var(--foreground);
   border-radius: var(--radius-card);
   padding: clamp(11px, 2.5vw, 18px);
   color: var(--foreground);
@@ -200,7 +200,7 @@ body:has(.ow-home) {
   font-weight: 800;
 }
 .ow-home-task-top > span {
-  border: 2px solid var(--orange);
+  border: 1.5px solid var(--orange);
   border-radius: var(--radius-pill);
   padding: .38rem .7rem;
   color: var(--foreground);
@@ -230,7 +230,7 @@ body:has(.ow-home) {
   font-weight: 800;
   line-height: .8;
 }
-.ow-home-task-accent { border-color: var(--orange); border-radius: 0; background: var(--orange); }
+.ow-home-task-accent { border-color: var(--orange); background: var(--orange); }
 .ow-home-task-accent .ow-home-task-top,
 .ow-home-task-accent p,
 .ow-home-task-accent .ow-home-task-arrow { color: var(--foreground); }
