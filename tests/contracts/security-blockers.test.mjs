@@ -27,11 +27,12 @@ test("NFC and Package legacy entries fail closed without special access", () => 
 });
 
 test("artwork entry pages cannot query legacy data stores directly", async () => {
+  // /u/[code] is the student profile page in the restored O—WEEK flow and
+  // intentionally queries Person; only the legacy NFC/Package entries and the
+  // formal artwork entry must stay decoupled from legacy data stores.
   const routeFiles = [
     "../../app/nfc/[code]/page.tsx",
     "../../app/package/[code]/page.tsx",
-    "../../app/u/[code]/page.tsx",
-    "../../app/loc/[code]/page.tsx",
     "../../app/artworks/[publicId]/page.tsx",
   ];
 

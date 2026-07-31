@@ -10,6 +10,16 @@ Read these before writing code:
 
 v1.1 is the Source of Truth. The two 2026-07-30 v1.1 collaboration task books have been reviewed and are summarized in doc 08. The full referenced product document, `O-Week 数字迎新作品展与 Package Hunt 网站 v1.1`, was not present in the repository or supplied attachments. Exact values not transcribed in the task books (including Preset combinations, final slot templates, bottle configuration, and Anonymous ID symbols) are blocked and must not be inferred. Older documents may only inform migration and cannot override v1.1.
 
+## Current UI State (2026-07-31 rollback)
+
+The student-facing UI was rolled back to the `main`-branch O—WEEK mobile redesign after merge `6d9d737` (PR #1, `R_Back-end`) clobbered it with the older teal interface. Consequences that override stale entries elsewhere in this file:
+
+- Flow is again: login → `/home` hub → `/day1` + `/day3` editors → `/browse` → `/u/[code]`. `/me` is just a redirect to `/home`. Day 1 = avatar + 14 gallery images (`/api/me/submissions`, `/api/local-upload` restored).
+- `Person.role`, `groupName`, `day1SubmittedAt`, `day3Answers`, `day3SubmittedAt` are restored in `prisma/schema.prisma`. The v1.1 migration never dropped these columns, so no new migration was needed — but this is a deliberate exception to doc 08 rule 5 (no new Person fields) until the v1.1 Submission backend exists.
+- Removed: `/loc/[code]`, `/me` editor (MeEditForm/FavoritesList/ShareButton), `/u` ImageGallery/ImageLightbox. `/api/favorites` and `/api/me/favorites` still exist but have no UI.
+- Kept from the v1.1 line (do NOT revert): `/nfc/[code]` and `/package/[code]` fail-closed stubs, `/artworks/[publicId]`, `lib/contracts/**`, `lib/domain/**`, admin page and `/api/admin/*` (except `import`, which regained optional `role`/`groupName` CSV columns), disabled public `/api/settings`.
+- `tests/contracts/security-blockers.test.mjs` no longer asserts `/u/[code]` decoupling — intentional, since `/u` is the profile page again.
+
 ## Working Philosophy
 
 You are an engineering collaborator on this project, not a standby assistant. Model your behavior on:

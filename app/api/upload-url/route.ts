@@ -4,6 +4,7 @@ import { createPresignedUploadUrl, getPublicUrl } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { nanoid } from "nanoid";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { settingEnabled } from "@/lib/event-settings";
 
 const UPLOAD_WINDOW_MS = 10 * 60 * 1000;
 const MAX_UPLOAD_URLS_PER_USER = 20;
@@ -13,6 +14,9 @@ export async function POST(request: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const owner = await prisma.person.findUnique({ where: { id: session.personId }, select: { day1SubmittedAt: true } });
+  if (owner?.day1SubmittedAt && !(await settingEnabled("allowEdit", false))) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
 
   if (
     !checkRateLimit(
@@ -28,12 +32,14 @@ export async function POST(request: NextRequest) {
   }
 
   let contentType: string;
+  let purpose: unknown;
   try {
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       throw new Error("Invalid request body");
     }
     contentType = body.contentType;
+    purpose = body.purpose;
   } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
@@ -56,15 +62,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const imageCount = await prisma.image.count({
-    where: { personId: session.personId, hidden: false },
-  });
+  if (purpose !== "avatar") {
+    const imageCount = await prisma.image.count({
+      where: { personId: session.personId, hidden: false },
+    });
 
-  if (imageCount >= 4) {
-    return NextResponse.json(
-      { error: "Maximum 4 images allowed" },
-      { status: 409 }
-    );
+    if (imageCount >= 14) {
+      return NextResponse.json(
+        { error: "Maximum 14 gallery images allowed" },
+        { status: 409 }
+      );
+    }
   }
 
   const ext = contentType.split("/")[1] || "webp";

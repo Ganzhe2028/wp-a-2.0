@@ -56,6 +56,11 @@ model Person {
   grade             String?
   bio               String?
   avatarUrl         String?
+  role              String        @default("LEARNER")
+  groupName         String?
+  day1SubmittedAt   DateTime?
+  day3Answers       Json?
+  day3SubmittedAt   DateTime?
   published         Boolean       @default(false)
   hidden            Boolean       @default(false)
   images            Image[]
@@ -64,6 +69,8 @@ model Person {
   location          LocationCard?
   updatedAt         DateTime      @updatedAt
   createdAt         DateTime      @default(now())
+
+  @@index([role, groupName])
 }
 
 model Image {
