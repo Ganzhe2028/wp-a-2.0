@@ -17,6 +17,7 @@ export async function GET(_request: NextRequest) {
   type QRItem = {
     chineseName: string | null;
     code: string;
+    type: "u" | "loc";
     svg: string;
     url: string;
   };
@@ -24,19 +25,29 @@ export async function GET(_request: NextRequest) {
   const items: QRItem[] = [];
 
   for (const p of persons) {
-    const url = `${baseUrl}/u/${p.code}`;
-    const svg = await generateQRCodeSVG(url, 200);
-    items.push({ chineseName: p.chineseName, code: p.code, svg, url });
+    const urlU = `${baseUrl}/u/${p.code}`;
+    const urlLoc = `${baseUrl}/loc/${p.code}`;
+
+    const [svgU, svgLoc] = await Promise.all([
+      generateQRCodeSVG(urlU, 200),
+      generateQRCodeSVG(urlLoc, 200),
+    ]);
+
+    items.push(
+      { chineseName: p.chineseName, code: p.code, type: "u", svg: svgU, url: urlU },
+      { chineseName: p.chineseName, code: p.code, type: "loc", svg: svgLoc, url: urlLoc },
+    );
   }
 
   const cards = items
     .map(
-      ({ chineseName, code, svg, url }) => `
+      ({ chineseName, code, type, svg, url }) => `
     <div class="card">
       <div class="qr">${svg}</div>
       <div class="label">
         <span class="name">${escapeHtml(chineseName ?? code)}</span>
         <span class="code">${escapeHtml(code)}</span>
+        <span class="type">${type === "u" ? "主页" : "位置页"}</span>
         <span class="url">${escapeHtml(url)}</span>
       </div>
     </div>`,
@@ -102,6 +113,15 @@ export async function GET(_request: NextRequest) {
     display: block;
     font-family: monospace;
     color: #666;
+  }
+  .label .type {
+    display: inline-block;
+    margin-top: 1px;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-size: 10px;
+    background: #f0f0f0;
+    color: #555;
   }
   .label .url {
     display: block;

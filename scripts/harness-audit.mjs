@@ -105,11 +105,44 @@ function findInFiles(files, pattern) {
 function checkPackageBuild() {
   const pkg = JSON.parse(read("package.json"));
   const build = pkg.scripts?.build ?? "";
-  if (/\bprisma\s+generate\b/.test(build)) {
+  const generate = pkg.scripts?.generate ?? "";
+  if (/\bprisma\s+generate\b/.test(build) || (/npm\s+run\s+generate/.test(build) && /\bprisma\s+generate\b/.test(generate))) {
     addPass("package.json build includes prisma generate");
   } else {
     addFail("package.json scripts.build must include `prisma generate` before Next build");
   }
+}
+
+function checkV11Baseline() {
+  const requiredFiles = [
+    ".github/workflows/ci.yml",
+    ".nvmrc",
+    "docs/08_v1.1_工程基线与契约.md",
+    "lib/contracts/errors.ts",
+    "lib/contracts/request-id.ts",
+    "lib/contracts/response.ts",
+    "tests/contracts/contracts.test.mjs",
+  ];
+  const missing = requiredFiles.filter((file) => !existsSync(path.join(ROOT, file)));
+  if (missing.length) {
+    addFail(`v1.1 baseline files are missing: ${missing.join(", ")}`);
+    return;
+  }
+
+  const pkg = JSON.parse(read("package.json"));
+  const requiredScripts = ["lint", "typecheck", "test", "build", "audit:harness", "verify:ci"];
+  const missingScripts = requiredScripts.filter((script) => !pkg.scripts?.[script]);
+  if (missingScripts.length) {
+    addFail(`v1.1 CI scripts are missing: ${missingScripts.join(", ")}`);
+    return;
+  }
+
+  if (pkg.engines?.node !== "22.14.0" || pkg.engines?.npm !== "10.9.2") {
+    addFail("Node and npm versions must remain pinned to 22.14.0 and 10.9.2");
+    return;
+  }
+
+  addPass("v1.1 docs, contracts, toolchain, tests, and CI baseline are present");
 }
 
 function checkOldVercelEngineDocs() {
@@ -270,6 +303,7 @@ function checkDocsSyncWarning() {
 }
 
 checkPackageBuild();
+checkV11Baseline();
 checkOldVercelEngineDocs();
 checkJwtFallback();
 checkR2KeyDerivation();

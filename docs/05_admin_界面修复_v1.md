@@ -1,7 +1,5 @@
 # 05 开发文档 · Admin 界面修复 (account 分支)
 
-> ⚠️ **历史文档（已过期）**：本文描述的 7-tab admin 界面已不存在。admin 后台在 2026-07-30 活动流改版中重写为 Dashboard / Accounts / Audit Log / Event Settings 四视图，并在 2026-07-31 对齐 Figma WP26（六个活动开关 + 预设）。当前 admin 事实以 `docs/03_操作手册.md` 第 6 节和 `AGENTS.md` 为准。
-
 > 执行者:opencode (DeepSeek-v4-pro)。本文已给出精确改动，逐条照做，不要发挥。
 > 
 > **状态：全部任务已完成（2026-06）。** 本文保留为历史记录。P0-1、P0-2、P1-1、P1-2 所有修复均已应用到 `app/admin/page.tsx` 及关联文件。

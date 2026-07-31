@@ -1,126 +1,1240 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { csvCell } from "@/lib/csv";
 
-type View = "dashboard" | "accounts" | "audit" | "settings";
-type Person = { id: string; code: string; username: string; chineseName: string | null; englishName: string | null; role: string; groupName: string | null; day1SubmittedAt: string | null; day3SubmittedAt: string | null; updatedAt: string };
-const ORANGE = "#ff5311";
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
-function Login({ onLogin }: { onLogin: () => void }) {
-  const [password, setPassword] = useState(""); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
-  async function submit(event: React.FormEvent) { event.preventDefault(); setLoading(true); const response = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) }); if (response.ok) onLogin(); else setError("管理口令错误"); setLoading(false); }
-  const localAdminPassword = process.env.NODE_ENV === "development" ? process.env.NEXT_PUBLIC_LOCAL_ADMIN_PASSWORD : undefined;
-  return <main className="flex min-h-svh items-center justify-center bg-[var(--paper)] p-5"><form onSubmit={submit} className="w-full max-w-sm border-[1.5px] border-black bg-white p-8"><h1 className="text-3xl font-black">O—WEEK / ADMIN</h1>{localAdminPassword && <section className="mt-6 border-[1.5px] border-[var(--orange)] bg-[var(--orange-soft)] p-4 text-sm"><p className="font-black text-[var(--orange)]">本地管理员凭据</p><p className="mt-3"><span className="font-bold">账号：</span>无需账号（共享口令登录）</p><p className="mt-1 break-all"><span className="font-bold">密码：</span><code>{localAdminPassword}</code></p><p className="mt-3 text-xs text-neutral-600">仅在开发环境显示，生产环境不会输出。</p></section>}<label className="mt-8 block font-bold">管理口令<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full border-[1.5px] border-black px-3 text-base" /></label>{error && <p className="mt-3 text-red-600">{error}</p>}<button disabled={loading || !password} className="ow-btn mt-6">{loading ? "验证中…" : "登录"}</button></form></main>;
+interface Person {
+  id: string;
+  code: string;
+  englishName: string | null;
+  chineseName: string | null;
+  grade: string | null;
+  hidden: boolean;
+  published: boolean;
+  images: ImageData[];
 }
 
-function Shell({ view, setView, children, logout }: { view: View; setView: (view: View) => void; children: React.ReactNode; logout: () => void }) {
-  return <div className="min-h-svh bg-[var(--paper)] lg:grid lg:grid-cols-[180px_1fr]"><aside className="bg-[#0b0b0a] p-5 text-white lg:min-h-svh"><h1 className="text-2xl font-black">O—WEEK/<br /><span style={{ color: ORANGE }}>2026</span></h1><nav className="mt-10 flex gap-2 overflow-auto lg:flex-col">{([['dashboard','DASHBOARD'],['accounts','ACCOUNTS'],['audit','AUDIT LOG'],['settings','EVENT SETTINGS']] as [View,string][]).map(([id,label]) => <button key={id} onClick={() => setView(id)} className={`min-h-11 whitespace-nowrap text-left text-xs font-black ${view === id ? "text-white" : "text-neutral-400"}`}>{label}</button>)}</nav><button onClick={logout} className="mt-8 text-xs font-bold text-[var(--orange)] lg:fixed lg:bottom-7">退出登录</button></aside><main className="min-w-0"><header className="flex min-h-16 items-center justify-between border-b border-neutral-300 bg-white px-6"><h2 className="text-2xl font-black capitalize">{view === "settings" ? "Dashboard" : view}</h2><div className="flex items-center gap-4"><a href="/home" target="_blank" className="text-xs font-bold text-[var(--orange)]">预览前台</a><span className="text-xs text-neutral-500">最后同步：本次页面加载</span></div></header>{children}</main></div>;
+interface ImageData {
+  id: string;
+  url: string;
+  hidden: boolean;
+  sort: number;
 }
 
-function Dashboard({ people, refresh }: { people: Person[]; refresh: () => void }) {
-  const day1 = people.filter((person) => person.day1SubmittedAt).length; const day3 = people.filter((person) => person.day3SubmittedAt).length;
-  return <div className="p-6"><div className="border border-[var(--orange)] bg-[var(--orange-soft)] p-4 font-black">● 当前阶段：DAY 3 创作</div><div className="mt-6 grid gap-4 md:grid-cols-3">{[["DAY 1 完成",day1],["DAY 3 完成",day3],["已配置账号",people.length]].map(([label,value]) => <div key={String(label)} className="bg-white p-5"><small>{label}</small><b className="mt-3 block text-3xl">{value} / {people.length}</b><div className="mt-4 h-1 bg-neutral-200"><span className="block h-full bg-[var(--orange)]" style={{ width: `${people.length ? Number(value) / people.length * 100 : 0}%` }} /></div></div>)}</div><h3 className="mt-8 font-black">QUICK PRESETS</h3><div className="mt-4 grid gap-4 md:grid-cols-3">{["DAY 1 创作","DAY 3 创作","活动前浏览","游戏进行","找礼包"].map((preset) => <button key={preset} onClick={() => void applyPreset(preset, refresh)} className="flex min-h-20 items-center justify-between border border-neutral-200 bg-white p-4 text-left font-black">{preset}<span className="text-2xl text-[var(--orange)]">→</span></button>)}</div><h3 className="mt-8 font-black">INDEPENDENT SWITCHES</h3><SettingsGrid refresh={refresh} /></div>;
+interface CreatedPerson {
+  chineseName: string;
+  code: string;
+  username: string;
+  password: string;
 }
 
-async function applyPreset(name: string, refresh: () => void) {
-  const values: Record<string, string> =
-    name === "DAY 1 创作" ? { day1Open: "true", day3Open: "false", allowEdit: "false", navEnabled: "false" }
-    : name === "DAY 3 创作" ? { day1Open: "false", day3Open: "true", allowEdit: "false", navEnabled: "false" }
-    : name === "游戏进行" ? { day1Open: "true", day3Open: "true", navEnabled: "true", showNames: "false" }
-    : name === "找礼包" ? { showNames: "true", profileComplete: "false", navEnabled: "false" }
-    : { navEnabled: "true" };
-  await Promise.all(Object.entries(values).map(([key, value]) => fetch("/api/admin/settings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key, value }) })));
-  refresh();
+interface ExportRow {
+  chineseName: string;
+  englishName: string;
+  username: string;
+  code: string;
+  homepage: string;
+  location: string;
 }
 
-function SettingsGrid({ refresh }: { refresh: () => void }) {
-  const [settings, setSettings] = useState<Record<string,string>>({});
-  useEffect(() => { fetch("/api/admin/settings").then((r) => r.json()).then(setSettings).catch(() => {}); }, []);
-  const options = [
-    ["day1Open","Day 1 开放","未提交用户可进入编辑器"],
-    ["day3Open","Day 3 开放","未提交用户可进入编辑器"],
-    ["allowEdit","允许编辑","已提交作品可重新编辑"],
-    ["showNames","显示姓名","关闭后全站使用匿名符号 ID"],
-    ["profileComplete","显示完整资料","关闭后详情页返回身份标题"],
-    ["navEnabled","目录与跨页导航","关闭后隐藏 Browse / 搜索，NFC 直达不受影响"],
-  ];
-  async function toggle(key: string) { const value = settings[key] === "true" ? "false" : "true"; setSettings((current) => ({ ...current, [key]: value })); await fetch("/api/admin/settings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key, value }) }); refresh(); }
-  return <div className="mt-4 grid gap-4 md:grid-cols-2">{options.map(([key,label,description]) => <button key={key} onClick={() => toggle(key)} className="flex min-h-20 items-center justify-between bg-white p-4 text-left"><span><b>{label}</b><small className="mt-2 block text-neutral-500">{description}</small></span><span className={`h-6 w-11 rounded-full p-1 ${settings[key] === "true" ? "bg-[var(--orange)]" : "bg-neutral-300"}`}><i className={`block h-4 w-4 rounded-full bg-white transition-transform ${settings[key] === "true" ? "translate-x-5" : ""}`} /></span></button>)}</div>;
+interface ApiResponse<T> {
+  data: T | null;
+  error: string | null;
 }
 
-function ImportDialog({ close, refresh }: { close: () => void; refresh: () => void }) {
-  const [text, setText] = useState(""); const [loading, setLoading] = useState(false); const [result, setResult] = useState<{ chineseName: string; username: string; password: string }[]>([]); const [error, setError] = useState("");
-  async function submit() { setLoading(true); setError(""); const rows = text.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => { const [chineseName = "", englishName = "", groupName = "", role = "LEARNER", username] = line.split(/[\t,]/).map((value) => value.trim()); return { chineseName, englishName, groupName, role: role.toUpperCase(), username: username || undefined }; }); const response = await fetch("/api/admin/import", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows }) }); const data = await response.json().catch(() => ({})); if (!response.ok) setError(data.error || "导入失败"); else { setResult(data.created || []); refresh(); } setLoading(false); }
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5"><section className="w-full max-w-2xl bg-white p-6"><div className="flex justify-between"><h2 className="text-2xl font-black">导入账号</h2><button onClick={close} className="h-11 w-11 text-3xl text-[var(--orange)]">×</button></div>{result.length === 0 ? <><p className="mt-4 text-sm text-neutral-500">每行：中文名,英文名,组别,角色,可选用户名</p><textarea value={text} onChange={(event) => setText(event.target.value)} rows={10} className="mt-4 w-full border-[1.5px] border-black p-3" placeholder="林若安,Ruoan,Group 02,LEARNER" />{error && <p className="mt-3 text-red-600">{error}</p>}<button onClick={submit} disabled={loading || !text.trim()} className="ow-btn mt-5">{loading ? "导入中…" : "确认导入"}</button></> : <><p className="mt-4 font-bold text-emerald-700">成功导入 {result.length} 个账号。密码仅显示一次。</p><div className="mt-4 max-h-80 overflow-auto border border-neutral-300">{result.map((account) => <div key={account.username} className="grid grid-cols-3 border-b p-3 text-sm"><b>{account.chineseName}</b><span>{account.username}</span><code>{account.password}</code></div>)}</div><button onClick={close} className="ow-btn mt-5">完成</button></>}</section></div>;
+type TabId = "import" | "location" | "takedown" | "export" | "qr" | "settings" | "reset";
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: "import", label: "导入名单" },
+  { id: "location", label: "位置编辑" },
+  { id: "takedown", label: "下架控制" },
+  { id: "export", label: "导出" },
+  { id: "qr", label: "QR 码" },
+  { id: "settings", label: "系统设置" },
+  { id: "reset", label: "重置密码" },
+];
+
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+function parseCsv(text: string) {
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const sep = line.includes("\t") ? "\t" : ",";
+      const parts = line.split(sep).map((s) => s.trim());
+      const looksEnglish = /^[a-zA-Z]/.test(parts[0] ?? "");
+      if (looksEnglish) {
+        return { englishName: parts[0] ?? "", chineseName: parts[1] ?? "", grade: parts[2] ?? "" };
+      }
+      return { englishName: parts[1] ?? "", chineseName: parts[0] ?? "", grade: parts[2] ?? "" };
+    });
 }
 
-function Accounts({ people, refresh }: { people: Person[]; refresh: () => void }) {
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Person | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [passwords, setPasswords] = useState<Record<string, string>>({});
-  const [resettingId, setResettingId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState("");
+function parseExportCsv(text: string) {
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  return lines.slice(1).map((line) => {
+    const parts = line.split(",");
+    return {
+      chineseName: parts[0] ?? "",
+      englishName: parts[1] ?? "",
+      username: parts[2] ?? "",
+      code: parts[3] ?? "",
+      homepage: parts[4] ?? "",
+      location: parts[5] ?? "",
+    };
+  });
+}
 
-  const filtered = useMemo(
-    () => people.filter((person) => `${person.chineseName}${person.englishName}${person.username}${person.groupName}`.toLowerCase().includes(query.toLowerCase())),
-    [people, query]
+async function readApiResponse<T>(res: Response): Promise<ApiResponse<T>> {
+  const text = await res.text();
+  if (!text) return { data: null, error: null };
+
+  try {
+    return { data: JSON.parse(text) as T, error: null };
+  } catch {
+    return {
+      data: null,
+      error: res.ok ? "服务器返回格式错误" : `请求失败（HTTP ${res.status}）`,
+    };
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Copy Button                                                        */
+/* ------------------------------------------------------------------ */
+
+function OpenLink({ href }: { href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center rounded bg-zinc-100 px-1.5 py-1 text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+      title="打开"
+    >
+      <span className="sr-only">打开链接</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <title>打开链接</title>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    </a>
   );
+}
 
-  async function copyPassword(password: string, name: string) {
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(password);
-      setFeedback(`${name} 的新密码已复制。`);
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
     } catch {
-      setFeedback(`无法自动复制 ${name} 的新密码，请手动复制当前显示内容。`);
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
     }
+  }, [value]);
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="rounded bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+    >
+      {copied ? "已复制" : label}
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Login Screen                                                       */
+/* ------------------------------------------------------------------ */
+
+function LoginScreen({
+  password,
+  setPassword,
+  onSubmit,
+  error,
+  loading,
+}: {
+  password: string;
+  setPassword: (v: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  error: string;
+  loading: boolean;
+}) {
+  return (
+    <div className="flex min-h-svh items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      >
+        <h1 className="mb-1 text-xl font-semibold text-zinc-900 dark:text-zinc-100">运营后台</h1>
+        <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">OWeek 个人主页系统</p>
+
+        <label htmlFor="admin-password" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          管理口令
+        </label>
+        <input
+          id="admin-password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="输入口令"
+          className="mb-4 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
+        />
+
+        {error && (
+          <p className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading || !password}
+          className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          {loading ? "验证中\u2026" : "登录"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dashboard                                                          */
+/* ------------------------------------------------------------------ */
+
+function Dashboard({ tab, onTabChange, onLogout }: { tab: TabId; onTabChange: (t: TabId) => void; onLogout: () => void }) {
+  const activeTabRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    activeTabRef.current?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [tab]);
+
+  return (
+    <div className="mx-auto min-h-svh max-w-5xl bg-zinc-50 dark:bg-zinc-950">
+      <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <h1 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">运营后台</h1>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          >
+            登出
+          </button>
+        </div>
+        <div className="relative">
+          <nav
+            role="tablist"
+            className="mx-auto flex max-w-5xl gap-0 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                ref={tab === t.id ? activeTabRef : null}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.id}
+                onClick={() => onTabChange(t.id)}
+                className={
+                  "shrink-0 border-b-2 px-4 py-2 text-sm font-medium transition-colors " +
+                  (tab === t.id
+                    ? "border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
+                    : "border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300")
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-white to-transparent dark:from-zinc-900/80" />
+        </div>
+      </header>
+      <main className="p-4">
+        {tab === "import" && <ImportSection />}
+        {tab === "location" && <LocationSection />}
+        {tab === "takedown" && <TakedownSection />}
+        {tab === "export" && <ExportSection onTabChange={onTabChange} />}
+        {tab === "qr" && <QRSection />}
+        {tab === "settings" && <SettingsSection />}
+        {tab === "reset" && <ResetPasswordSection />}
+      </main>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Import Students                                                    */
+/* ------------------------------------------------------------------ */
+
+function ImportSection() {
+  const [text, setText] = useState("");
+  const [rows, setRows] = useState<{ englishName: string; chineseName: string; grade: string }[]>([]);
+  const [importing, setImporting] = useState(false);
+  const [result, setResult] = useState<CreatedPerson[] | null>(null);
+  const [error, setError] = useState("");
+
+  function handleParse() {
+    setError("");
+    setResult(null);
+    const parsed = parseCsv(text);
+    if (parsed.length === 0) {
+      setError("没有解析到有效数据，每行格式：englishName,chineseName,grade");
+      setRows([]);
+      return;
+    }
+    setRows(parsed);
   }
 
-  async function resetAndCopy(person: Person) {
-    const name = person.chineseName || person.englishName || person.username;
-    if (!window.confirm(`确定重置 ${name} 的密码吗？旧密码将立即失效。`)) return;
-
-    setResettingId(person.id);
-    setFeedback("");
+  async function handleImport() {
+    if (rows.length === 0) return;
+    setImporting(true);
+    setError("");
     try {
-      const response = await fetch("/api/admin/reset-password", {
+      const res = await fetch("/api/admin/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: person.code }),
+        body: JSON.stringify({ rows }),
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || typeof data.password !== "string") {
-        setFeedback(data.error || `无法重置 ${name} 的密码。`);
-        return;
+      const { data, error: parseError } = await readApiResponse<{ created: CreatedPerson[]; error?: string }>(res);
+      if (!res.ok) {
+        setError(data?.error ?? parseError ?? "导入失败");
+      } else if (!data) {
+        setError(parseError ?? "导入失败：服务器没有返回结果");
+      } else {
+        setResult(data.created);
+        setText("");
+        setRows([]);
       }
-
-      setPasswords((current) => ({ ...current, [person.id]: data.password }));
-      await copyPassword(data.password, name);
     } catch {
-      setFeedback(`无法连接服务器，${name} 的密码未被确认重置。`);
+      setError("网络错误");
     } finally {
-      setResettingId(null);
+      setImporting(false);
     }
   }
 
-  return <div className="p-6"><div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-neutral-500">{people.length} 个账号</p><div className="flex flex-wrap gap-2"><a href="/api/admin/export" className="ow-btn ow-btn-outline !min-h-11 !w-auto text-xs">导出 CSV</a><a href="/api/admin/qr/print" target="_blank" className="ow-btn ow-btn-outline !min-h-11 !w-auto text-xs">打印 QR</a><button onClick={() => setImporting(true)} className="ow-btn !min-h-11 !w-auto text-xs">同步 / 导入账号</button></div></div><p aria-live="polite" className="mt-3 min-h-5 text-sm text-neutral-600">{feedback}</p><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索姓名、邮箱、组别或短码" className="mt-1 min-h-11 w-full max-w-md border border-neutral-200 px-4" /><div className="mt-5 overflow-auto"><table className="w-full min-w-[980px] bg-white text-sm"><thead className="border-y border-black text-left"><tr>{["姓名","账号","角色","组别","DAY 1","DAY 3","最近更新","新密码","操作"].map((label) => <th key={label} className="p-4">{label}</th>)}</tr></thead><tbody>{filtered.map((person) => { const password = passwords[person.id]; const name = person.chineseName || person.englishName || person.username; return <tr key={person.id} className="border-b border-neutral-200"><td className="p-4 font-bold">{name}</td><td className="p-4">{person.username}</td><td className="p-4">{person.role}</td><td className="p-4">{person.groupName || "—"}</td><td className="p-4 text-emerald-700">{person.day1SubmittedAt ? "SUBMITTED" : "DRAFT"}</td><td className="p-4 text-[var(--orange)]">{person.day3SubmittedAt ? "SUBMITTED" : "DRAFT"}</td><td className="p-4">{new Date(person.updatedAt).toLocaleDateString("zh-CN")}</td><td className="p-4">{password ? <div className="flex min-w-48 items-center gap-2"><code className="rounded bg-[var(--orange-soft)] px-2 py-1 font-bold">{password}</code><button type="button" onClick={() => void copyPassword(password, name)} className="min-h-9 border border-black px-2 text-xs font-bold">复制</button></div> : <button type="button" onClick={() => void resetAndCopy(person)} disabled={resettingId === person.id} className="min-h-9 border border-black px-3 text-xs font-bold disabled:opacity-50">{resettingId === person.id ? "重置中…" : "重置并复制"}</button>}</td><td className="p-4"><button onClick={() => setSelected(person)} className="min-h-11 px-3 text-xl">•••</button></td></tr>; })}</tbody></table></div>{selected && <AccountDrawer person={selected} close={() => setSelected(null)} refresh={refresh} />}{importing && <ImportDialog close={() => setImporting(false)} refresh={refresh} />}</div>;
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">批量导入学生</h2>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        粘贴 CSV/TSV 数据，每行格式：<code className="rounded bg-zinc-200 px-1 py-0.5 text-xs dark:bg-zinc-800">englishName,chineseName,grade</code>
+      </p>
+
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={"John,张三,9\nAlice,李四,10"}
+        rows={8}
+        className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
+      />
+
+       <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={handleParse}
+          disabled={!text.trim()}
+          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          解析
+        </button>
+        <button
+          type="button"
+          onClick={handleImport}
+          disabled={rows.length === 0 || importing}
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          {importing ? "导入中\u2026" : "导入 " + rows.length + " 条"}
+        </button>
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
+
+      {rows.length > 0 && !result && (
+        <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table className="min-w-[480px] w-full text-left text-sm">
+            <thead className="bg-zinc-100 dark:bg-zinc-800">
+              <tr>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">英文名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">中文名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">年级</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {rows.map((r, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: parsed CSV rows have no stable id
+                <tr key={"row-" + i} className="bg-white dark:bg-zinc-900">
+                  <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">{r.englishName}</td>
+                  <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">{r.chineseName}</td>
+                  <td className="px-2 py-2 text-zinc-500 sm:px-3 dark:text-zinc-400">{r.grade}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {result && result.length > 0 && (
+        <div>
+          <p className="mb-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+            成功导入 {result.length} 人
+          </p>
+          <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+            <table className="min-w-[640px] w-full text-left text-sm">
+              <thead className="bg-zinc-100 dark:bg-zinc-800">
+                <tr>
+                  <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">姓名</th>
+                  <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">短码</th>
+                  <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">用户名</th>
+                  <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">密码</th>
+                  <th className="px-2 py-2 sm:px-3" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {result.map((p) => (
+                  <tr key={p.code} className="bg-white dark:bg-zinc-900">
+                    <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">{p.chineseName}</td>
+                    <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{p.code}</td>
+                    <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{p.username}</td>
+                    <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{p.password}</td>
+                    <td className="px-2 py-2 sm:px-3">
+                      <CopyButton value={p.password} label="复制密码" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                const header = "name,code,username,password";
+                const rows = result.map((p) =>
+                  [csvCell(p.chineseName), csvCell(p.code), csvCell(p.username), csvCell(p.password)].join(",")
+                );
+                const csv = [header, ...rows].join("\n");
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "accounts.csv";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }}
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              下载帐密 CSV
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
-function AccountDrawer({ person, close, refresh }: { person: Person; close: () => void; refresh: () => void }) {
-  const [name, setName] = useState(person.chineseName || ""); const [role, setRole] = useState(person.role); const [groupName, setGroupName] = useState(person.groupName || "");
-  async function save() { await fetch("/api/admin/persons", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: person.id, chineseName: name, role, groupName }) }); refresh(); close(); }
-  async function remove() { if (!confirm("永久删除该账号？")) return; await fetch(`/api/admin/persons?id=${person.id}`, { method: "DELETE" }); refresh(); close(); }
-  async function resetPassword() { const response = await fetch("/api/admin/reset-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: person.code }) }); const data = await response.json(); if (response.ok) prompt("新密码（仅显示一次），请复制：", data.password); }
-  return <div className="fixed inset-0 z-50 bg-black/30" onClick={close}><aside className="ml-auto flex h-full w-full max-w-md flex-col overflow-auto bg-white p-6" onClick={(event) => event.stopPropagation()}><div className="flex justify-between"><h2 className="text-2xl font-black">编辑账号</h2><button onClick={close} className="h-11 w-11 text-3xl text-[var(--orange)]">×</button></div><label className="mt-8 text-sm font-bold">姓名<input value={name} onChange={(e) => setName(e.target.value)} className="mt-2 min-h-11 w-full border border-neutral-300 px-3" /></label><p className="mt-5 text-sm font-bold">角色</p><div className="mt-2 grid grid-cols-3 gap-2">{["LEARNER","SENIOR","ADMIN"].map((value) => <button key={value} onClick={() => setRole(value)} className={`ow-chip px-2 text-xs ${role === value ? "ow-chip-active" : ""}`}>{value}</button>)}</div><label className="mt-5 text-sm font-bold">组别<input value={groupName} onChange={(e) => setGroupName(e.target.value)} className="mt-2 min-h-11 w-full border border-neutral-300 px-3" /></label><div className="mt-8 bg-[var(--paper)] p-5"><b>提交状态</b><p className="mt-3 text-sm">DAY 1　{person.day1SubmittedAt ? "SUBMITTED" : "DRAFT"}</p><p className="mt-2 text-sm">DAY 3　{person.day3SubmittedAt ? "SUBMITTED" : "DRAFT"}</p></div><button onClick={resetPassword} className="mt-5 border border-black p-4 text-left font-bold">重置密码</button><button onClick={remove} className="mt-3 border border-[var(--orange)] bg-[var(--orange-soft)] p-5 text-left font-bold text-[var(--orange)]">删除账号</button><div className="mt-auto grid grid-cols-2 gap-3 pt-8"><button onClick={close} className="ow-btn ow-btn-outline">取消</button><button onClick={save} className="ow-btn">保存账号</button></div></aside></div>;
+/* ------------------------------------------------------------------ */
+/*  Location Editor                                                    */
+/* ------------------------------------------------------------------ */
+
+function LocationSection() {
+  const [form, setForm] = useState({ code: "", name: "", grade: "", room: "", seat: "" });
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.code || !form.name) return;
+    setSaving(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/admin/location", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setFeedback({ ok: false, msg: data.error ?? "保存失败" });
+      } else {
+        setFeedback({ ok: true, msg: "位置页已保存" });
+        setForm({ code: "", name: "", grade: "", room: "", seat: "" });
+      }
+    } catch {
+      setFeedback({ ok: false, msg: "网络错误" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">编辑位置页</h2>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        使用学生短码编辑其位置信息（展位房间和座位号）。
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
+        <div>
+          <label htmlFor="loc-code" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">学生短码 *</label>
+          <input
+            id="loc-code"
+            value={form.code}
+            onChange={(e) => setForm({ ...form, code: e.target.value })}
+            placeholder="例如 abc123"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          />
+        </div>
+        <div>
+          <label htmlFor="loc-name" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">姓名 *</label>
+          <input
+            id="loc-name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="张三"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          />
+        </div>
+        <div>
+          <label htmlFor="loc-grade" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">年级</label>
+          <input
+            id="loc-grade"
+            value={form.grade}
+            onChange={(e) => setForm({ ...form, grade: e.target.value })}
+            placeholder="例如 9"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          />
+        </div>
+        <div>
+          <label htmlFor="loc-room" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">房间 *</label>
+          <input
+            id="loc-room"
+            value={form.room}
+            onChange={(e) => setForm({ ...form, room: e.target.value })}
+            placeholder="例如 A101"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          />
+        </div>
+        <div>
+          <label htmlFor="loc-seat" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">座位 *</label>
+          <input
+            id="loc-seat"
+            value={form.seat}
+            onChange={(e) => setForm({ ...form, seat: e.target.value })}
+            placeholder="例如 12"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          />
+        </div>
+
+        {feedback && (
+          <p className={"text-sm " + (feedback.ok ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>
+            {feedback.msg}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={saving || !form.code || !form.name}
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          {saving ? "保存中\u2026" : "保存位置页"}
+        </button>
+      </form>
+    </div>
+  );
 }
+
+/* ------------------------------------------------------------------ */
+/*  Takedown Controls                                                  */
+/* ------------------------------------------------------------------ */
+
+function TakedownSection() {
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchSaving, setBatchSaving] = useState(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/persons")
+      .then((r) => r.json())
+      .then((data) => setPersons(data.persons ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = persons.filter((p) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (
+      (p.chineseName ?? "").toLowerCase().includes(q) ||
+      (p.englishName ?? "").toLowerCase().includes(q) ||
+      p.code.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredIds = new Set(filtered.map((p) => p.id));
+  const selectedCount = [...selectedIds].filter((id) => filteredIds.has(id)).length;
+  const allFilteredSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
+
+  /* keep the select-all checkbox in sync with selection state */
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = selectedCount > 0 && !allFilteredSelected;
+    }
+  }, [selectedCount, allFilteredSelected]);
+
+  function toggleSelectAll() {
+    if (allFilteredSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const id of filteredIds) next.delete(id);
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const id of filteredIds) next.add(id);
+        return next;
+      });
+    }
+  }
+
+  function toggleSelectOne(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function togglePerson(person: Person) {
+    try {
+      await fetch("/api/admin/takedown", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "person", id: person.id, hidden: !person.hidden }),
+      });
+      setPersons((prev) =>
+        prev.map((p) => (p.id === person.id ? { ...p, hidden: !p.hidden } : p))
+      );
+    } catch {
+      /* empty */
+    }
+  }
+
+  async function batchToggle(hidden: boolean) {
+    setBatchSaving(true);
+    const targets = [...selectedIds]
+      .filter((id) => filteredIds.has(id))
+      .map((id) => persons.find((p) => p.id === id)!)
+      .filter((p) => p && p.hidden !== hidden);
+
+    await Promise.allSettled(
+      targets.map((p) =>
+        fetch("/api/admin/takedown", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "person", id: p.id, hidden }),
+        })
+      )
+    );
+
+    setPersons((prev) =>
+      prev.map((p) =>
+        selectedIds.has(p.id) ? { ...p, hidden } : p
+      )
+    );
+    setSelectedIds(new Set());
+    setBatchSaving(false);
+  }
+
+  async function toggleImage(imageId: string, personId: string, currentHidden: boolean) {
+    try {
+      await fetch("/api/admin/takedown", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "image", id: imageId, hidden: !currentHidden }),
+      });
+      setPersons((prev) =>
+        prev.map((p) =>
+          p.id === personId
+            ? {
+                ...p,
+                images: p.images.map((img) =>
+                  img.id === imageId ? { ...img, hidden: !img.hidden } : img
+                ),
+              }
+            : p
+        )
+      );
+    } catch {
+      /* empty */
+    }
+  }
+
+  if (loading) {
+    return <p className="text-sm text-zinc-500">加载中…</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">下架控制</h2>
+
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="搜索姓名、英文名或短码…"
+        className="block w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+      />
+
+      {filtered.length === 0 && (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          {persons.length === 0 ? "暂无数据" : "未找到匹配的学生"}
+        </p>
+      )}
+
+      {filtered.length > 0 && (
+        <>
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900">
+            <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+              <input
+                ref={selectAllRef}
+                type="checkbox"
+                checked={allFilteredSelected}
+                onChange={toggleSelectAll}
+                className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+              />
+              全选
+            </label>
+            {selectedCount > 0 && (
+              <>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  已选 {selectedCount} 人
+                </span>
+                <button
+                  type="button"
+                  disabled={batchSaving}
+                  onClick={() => batchToggle(false)}
+                  className="rounded-lg bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-200 disabled:opacity-40 dark:bg-emerald-900/40 dark:text-emerald-400 dark:hover:bg-emerald-900/60"
+                >
+                  {batchSaving ? "处理中…" : "显示选中"}
+                </button>
+                <button
+                  type="button"
+                  disabled={batchSaving}
+                  onClick={() => batchToggle(true)}
+                  className="rounded-lg bg-red-100 px-3 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-200 disabled:opacity-40 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/60"
+                >
+                  {batchSaving ? "处理中…" : "隐藏选中"}
+                </button>
+              </>
+            )}
+          </div>
+        </>
+      )}
+
+      <div className="space-y-3">
+        {filtered.map((person) => (
+          <div
+            key={person.id}
+            className="rounded-lg border border-zinc-200 bg-white p-3 sm:p-4 dark:border-zinc-800 dark:bg-zinc-900"
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(person.id)}
+                  onChange={() => toggleSelectOne(person.id)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+                />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                      {person.chineseName ?? "\u2014"}
+                    </span>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {person.englishName ?? ""}
+                    </span>
+                    <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                      {person.code}
+                    </code>
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+                    {"已发布：" + (person.published ? "是" : "否") + " ｜ 图片：" + person.images.length}
+                  </p>
+                </div>
+              </div>
+              <div className="shrink-0 sm:ml-10">
+                <button
+                  type="button"
+                  onClick={() => togglePerson(person)}
+                  className={
+                    "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 " +
+                    (person.hidden
+                      ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400"
+                      : "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/40 dark:text-red-400")
+                  }
+                >
+                  {person.hidden ? "已隐藏 \u00B7 显示" : "显示中 \u00B7 隐藏"}
+                </button>
+              </div>
+            </div>
+
+            {person.images.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {person.images.map((img) => (
+                  <button
+                    type="button"
+                    key={img.id}
+                    onClick={() => toggleImage(img.id, person.id, img.hidden)}
+                    className={
+                      "group relative h-16 w-16 overflow-hidden rounded-lg border transition-opacity " +
+                      (img.hidden
+                        ? "border-red-300 opacity-50 dark:border-red-800"
+                        : "border-zinc-200 dark:border-zinc-700")
+                    }
+                    title={img.hidden ? "点击显示" : "点击隐藏"}
+                  >
+                    <img
+                      src={img.url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                    {img.hidden && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/50 text-[10px] font-medium text-white">
+                        隐藏
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Export                                                             */
+/* ------------------------------------------------------------------ */
+
+function ExportSection({ onTabChange }: { onTabChange: (t: TabId) => void }) {
+  const [rows, setRows] = useState<ExportRow[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/export")
+      .then((r) => r.text())
+      .then((csv) => setRows(parseExportCsv(csv)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  function handleDownload() {
+    window.open("/api/admin/export", "_blank");
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">导出数据</h2>
+        <button
+          type="button"
+          onClick={handleDownload}
+          className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 sm:w-auto dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          下载 CSV
+        </button>
+      </div>
+
+      {loading && <p className="text-sm text-zinc-500">加载中…</p>}
+
+      {rows && rows.length === 0 && (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">暂无数据</p>
+      )}
+
+      {rows && rows.length > 0 && (
+        <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table className="min-w-[800px] w-full text-left text-sm">
+            <thead className="bg-zinc-100 dark:bg-zinc-800">
+              <tr>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">中文名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">英文名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">用户名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">操作</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">主页</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">位置页</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {rows.map((r, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: export CSV rows have no stable id
+                <tr key={"exp-" + i} className="bg-white dark:bg-zinc-900">
+                  <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">{r.chineseName}</td>
+                  <td className="px-2 py-2 text-zinc-500 sm:px-3 dark:text-zinc-400">{r.englishName}</td>
+                  <td className="px-2 py-2 sm:px-3">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{r.username}</span>
+                      <CopyButton value={r.username} label="复制" />
+                    </span>
+                  </td>
+                  <td className="px-2 py-2 sm:px-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sessionStorage.setItem("reset-code", r.code);
+                        onTabChange("reset");
+                      }}
+                      className="rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-400"
+                      title="密码是 scrypt 哈希，无法查看明文。点击跳转重置密码。"
+                    >
+                      重置
+                    </button>
+                  </td>
+                  <td className="px-2 py-2 sm:px-3">
+                    <span className="inline-flex items-center gap-1">
+                      <CopyButton value={r.homepage} label="复制" />
+                      <OpenLink href={r.homepage} />
+                    </span>
+                  </td>
+                  <td className="px-2 py-2 sm:px-3">
+                    <span className="inline-flex items-center gap-1">
+                      <CopyButton value={r.location} label="复制" />
+                      <OpenLink href={r.location} />
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <p className="text-xs text-zinc-400 dark:text-zinc-500">
+        密码采用 scrypt 单向哈希存储，无法导出明文。点击「重置」跳转到重置密码页面。
+      </p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  QR Codes                                                           */
+/* ------------------------------------------------------------------ */
+
+function QRSection() {
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/persons")
+      .then((r) => {
+        if (!r.ok) throw new Error("会话过期，请刷新页面重新登录");
+        return r.json();
+      })
+      .then((data) => setPersons(data.persons ?? []))
+      .catch((err) =>
+        setFetchError(err instanceof Error ? err.message : "加载人员数据失败"),
+      )
+      .finally(() => setLoading(false));
+  }, []);
+
+  const total = persons.length * 2;
+  const printUrl = "/api/admin/qr/print";
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">QR 码生成</h2>
+        <a
+          href={persons.length > 0 ? printUrl : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-disabled={persons.length === 0}
+          onClick={(e) => {
+            if (persons.length === 0) {
+              e.preventDefault();
+            }
+          }}
+          className={
+            "inline-flex justify-center rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors sm:w-auto " +
+            "bg-zinc-900 hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 " +
+            (persons.length === 0
+              ? "pointer-events-none opacity-40"
+              : "")
+          }
+        >
+          打开打印页 ({total} 张)
+        </a>
+      </div>
+
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        每人生成 2 张 QR 码：主页 QR（/u/码）和位置页 QR（/loc/码）。点击按钮在新窗口打开打印页，自动弹出打印对话框。建议用 A4 纸打印后裁剪。
+      </p>
+
+      {loading && <p className="text-sm text-zinc-500">加载中…</p>}
+
+      {fetchError && (
+        <p className="text-sm text-red-600 dark:text-red-400">{fetchError}</p>
+      )}
+
+      {!loading && !fetchError && persons.length === 0 && (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">暂无人员数据，请先在「导入名单」中导入。</p>
+      )}
+
+      {persons.length > 0 && (
+        <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table className="min-w-[480px] w-full text-left text-sm">
+            <thead className="bg-zinc-100 dark:bg-zinc-800">
+              <tr>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">#</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">姓名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">短码</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">已发布</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {persons.map((p, i) => (
+                <tr key={p.id} className="bg-white dark:bg-zinc-900">
+                  <td className="px-2 py-2 text-zinc-400 sm:px-3">{i + 1}</td>
+                  <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">
+                    {p.chineseName ?? "\u2014"}
+                  </td>
+                  <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">
+                    {p.code}
+                  </td>
+                  <td className="px-2 py-2 sm:px-3">
+                    {p.published ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 text-xs">是</span>
+                    ) : (
+                      <span className="text-zinc-400 text-xs">否</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  System Settings                                                    */
+/* ------------------------------------------------------------------ */
+
+function SettingsSection() {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">系统设置</h2>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        暂无可用设置项。
+      </p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reset Password                                                     */
+/* ------------------------------------------------------------------ */
+
+function ResetPasswordSection() {
+  const [code, setCode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const prefill = sessionStorage.getItem("reset-code");
+      if (prefill) {
+        sessionStorage.removeItem("reset-code");
+        return prefill;
+      }
+    }
+    return "";
+  });
+  const [resetting, setResetting] = useState(false);
+  const [newPassword, setNewPassword] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setResetting(true);
+    setError("");
+    setNewPassword(null);
+    try {
+      const res = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "重置失败");
+      } else {
+        setNewPassword(data.password);
+        setCode("");
+      }
+    } catch {
+      setError("网络错误");
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">重置密码</h2>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        输入学生短码，为其重置登录密码。重置后新密码将在此显示一次，请及时保存。
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
+        <div>
+          <label htmlFor="reset-code" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">学生短码</label>
+          <input
+            id="reset-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="例如 abc123"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
+          />
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        )}
+
+        {newPassword && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/50">
+            <p className="mb-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">新密码</p>
+            <p className="mb-3 font-mono text-base text-emerald-800 dark:text-emerald-200">{newPassword}</p>
+            <div className="flex items-center gap-2">
+              <CopyButton value={newPassword} label="复制密码" />
+            </div>
+            <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">⚠ 此密码只显示一次，关闭后无法再次查看。</p>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={resetting || !code.trim()}
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          {resetting ? "重置中\u2026" : "重置密码"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page Root                                                          */
+/* ------------------------------------------------------------------ */
 
 export default function AdminPage() {
-  const [checking, setChecking] = useState(true); const [authed, setAuthed] = useState(false); const [view, setView] = useState<View>("dashboard"); const [people, setPeople] = useState<Person[]>([]); const [version, setVersion] = useState(0);
-  useEffect(() => { fetch("/api/admin/session").then((r) => r.json()).then((data) => setAuthed(Boolean(data.authed))).finally(() => setChecking(false)); }, []);
-  useEffect(() => { if (authed) fetch("/api/admin/persons").then((r) => r.json()).then((data) => setPeople(data.persons || [])).catch(() => {}); }, [authed, version]);
-  if (checking) return <div className="flex min-h-svh items-center justify-center">加载中…</div>;
-  if (!authed) return <Login onLogin={() => setAuthed(true)} />;
-  async function logout() { await fetch("/api/admin/logout", { method: "POST" }); setAuthed(false); }
-  const content = view === "accounts" ? <Accounts people={people} refresh={() => setVersion((value) => value + 1)} /> : view === "audit" ? <div className="p-6"><div className="bg-white p-8"><h3 className="text-xl font-black">AUDIT LOG</h3><p className="mt-4 text-neutral-500">账号与活动开关操作会记录在服务端日志中。</p></div></div> : view === "settings" ? <div className="p-6"><SettingsGrid refresh={() => setVersion((value) => value + 1)} /></div> : <Dashboard people={people} refresh={() => setVersion((value) => value + 1)} />;
-  return <Shell view={view} setView={setView} logout={logout}>{content}</Shell>;
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [tab, setTab] = useState<TabId>("import");
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/session")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.authed) setLoggedIn(true);
+      })
+      .catch(() => {})
+      .finally(() => setChecking(false));
+  }, []);
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      /* empty */
+    }
+    setLoggedIn(false);
+    setPassword("");
+  }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginError("");
+    setLoggingIn(true);
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setLoginError(data.error ?? "登录失败");
+      } else {
+        setLoggedIn(true);
+      }
+    } catch {
+      setLoginError("网络错误");
+    } finally {
+      setLoggingIn(false);
+    }
+  }
+
+  if (checking) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+        <p className="text-sm text-zinc-500">加载中…</p>
+      </div>
+    );
+  }
+
+  if (!loggedIn) {
+    return (
+      <LoginScreen
+        password={password}
+        setPassword={setPassword}
+        onSubmit={handleLogin}
+        error={loginError}
+        loading={loggingIn}
+      />
+    );
+  }
+
+  return <Dashboard tab={tab} onTabChange={setTab} onLogout={handleLogout} />;
 }

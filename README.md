@@ -1,23 +1,23 @@
-# O—WEEK / 26 · 活动主页系统
+# OWeek 个人主页系统 · v2.0
 
-新生凭账号登录后完成两份作品——DAY 1 照片拼贴（头像 + 14 图）和 DAY 3 小瓶子（64 项打分）——提交后解锁浏览其他人的对应分区；现场通过 NFC 碰一碰或二维码直达匿名作品页和礼包交接页。
+新生在线编辑个人主页，OWeek 期间通过 NFC 碰一碰或二维码扫码查看：墙上明信片→位置页，展位展板→主页。
 
 ## 一句话
 
-先留下你的一点点，再去看别人的——互解锁的 O-Week 资料交换。学生凭账号密码登录，一次登录活动期内全程不掉。
+把线下碰一碰变成一场认识人的旅途——先碰明信片找到对方的展位在哪，走过去当面聊，再碰展板看主页。学生凭账号密码登录，一次登录活动期内全程不掉。
 
 ## 技术栈
 
 | 层 | 选型 |
 |---|---|
 | 框架 | Next.js 16 (App Router) + React + TypeScript |
-| 数据库 | PostgreSQL (Neon Serverless)，Prisma ORM v6（`engineType = "client"` + `@prisma/adapter-neon`） |
+| 数据库 | PostgreSQL (Neon Serverless)，Prisma ORM v6 |
 | 图片存储 | Cloudflare R2（S3 兼容，presigned URL 直传） |
 | 图片压缩 | browser-image-compression（浏览器端） |
 | 短码/Token | nanoid |
 | 二维码 | qrcode |
 | 会话 | jose (JWT) |
-| 样式 | Tailwind CSS v4（CSS-first）+ `app/globals.css` 的 ow- 设计系统 |
+| 样式 | Tailwind CSS，手机端优先 |
 | 部署 | Vercel + Cloudflare DNS |
 
 ## 快速开始
@@ -34,9 +34,9 @@ Windows 下推荐用 **Git Bash**（装 Git 时自带）或 **PowerShell**：
 
 ```bash
 # Git Bash / PowerShell 通用
-cp .env.example .env.local  # PowerShell 用 copy .env.example .env.local
+cp .env.example .env        # PowerShell 用 copy .env.example .env
 npm install
-DOTENV_CONFIG_PATH=.env.local npx prisma migrate deploy
+npx prisma migrate dev
 npm run dev
 ```
 
@@ -48,7 +48,7 @@ npm config set registry https://registry.npmmirror.com
 
 ### 环境变量
 
-复制 `.env.example` 为 `.env.local`（或手动创建该文件）：
+复制 `.env.example`（或手动创建 `.env`）：
 
 ```bash
 DATABASE_URL=           # Neon pooled 连接串（查询用）
@@ -68,13 +68,9 @@ APP_BASE_URL=           # 如 https://xxx.top，导出链接拼前缀用
 ```bash
 npm install
 npx prisma generate       # 生成本平台 Prisma 客户端（已提交预生成版本）
-DOTENV_CONFIG_PATH=.env.local npx prisma migrate deploy # 应用已提交迁移
+npx prisma migrate dev    # 建表
 npm run dev               # 启动开发服务器 → http://localhost:3000
 ```
-
-Next.js 会读取 `.env.local`，但 Prisma CLI 默认只读取 `.env`。本项目使用 `.env.local` 时，所有 Prisma 迁移命令都必须带上 `DOTENV_CONFIG_PATH=.env.local`；新增 schema 变更时才用 `npx prisma migrate dev --name <变更名>` 创建迁移。
-
-⚠️ `npm run build` 会执行 `prisma generate`，同样只读 `.env`。本地构建前先 `set -a; source .env.local; set +a; npm run build`。
 
 ### 部署
 
@@ -94,24 +90,23 @@ Next.js 会读取 `.env.local`，但 Prisma CLI 默认只读取 `.env`。本项�
 ## 系统架构
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  NFC 展板     │     │  二维码/链接  │     │  NFC 礼包     │
-│ /nfc/{code}  │     │  /u/{code}   │     │/package/{code}│
-│ 匿名作品页    │     │  作品双tab页  │     │  仅姓名页     │
-└──────┬───────┘     └──────┬───────┘     └──────┬───────┘
-       │                    │                    │
-       └────────┬───────────┴────────────────────┘
+┌──────────────┐     ┌──────────────┐
+│  墙上明信片    │     │  展位展板     │
+│  /loc/{code}  │     │  /u/{code}   │
+│  位置页       │     │  个人主页     │
+└──────┬───────┘     └──────┬───────┘
+       │                    │
+       └────────┬───────────┘
                 │
        ┌────────┴────────┐
        │    Vercel        │
        │  Next.js App     │
        │  ┌─────────────┐ │
-       │  │ /            │ │  登录（账号+密码）
-       │  │ /home        │ │  DAY 1 / DAY 3 / BROWSE 三入口
-       │  │ /day1 /day3  │ │  两个作品编辑器
-       │  │ /browse      │ │  互解锁目录
-       │  │ /admin       │ │  运营后台
-       │  │ /api/*       │ │
+       │  │ /api/*      │ │
+        │  │ /me         │ │
+        │  │ /u/[code]   │ │
+        │  │ /loc/[code]  │ │
+       │  │ /admin       │ │
        │  └─────────────┘ │
        └───┬───────┬──────┘
            │       │
@@ -127,98 +122,101 @@ Next.js 会读取 `.env.local`，但 Prisma CLI 默认只读取 `.env`。本项�
 
 ```
 app/
-  page.tsx                   # 登录页（已登录 redirect /home）
+  page.tsx                   # 首页：登录表单 + 管理员入口
   LoginForm.tsx              # 登录表单（客户端）
-  home/page.tsx              # 学生主控台：DAY 1 / DAY 3 / BROWSE 三卡
-  day1/                      # DAY 1 照片拼贴编辑器（头像 + 14 图）
-  day3/                      # DAY 3 小瓶子编辑器（2 × 32 项，0–5 打分）
-  browse/                    # 互解锁目录（Senior Group / Learners）
-  u/[code]/page.tsx          # 作品页（DAY 1 / DAY 3 双 tab，需登录，互解锁）
-  nfc/[code]/page.tsx        # NFC 直达匿名作品页（公开，无跨用户入口）
-  package/[code]/page.tsx    # 礼包交接页（公开，黑底仅姓名）
-  me/page.tsx                # 仅 redirect → /home（旧个人中心已退役）
-  submitted/day1/page.tsx    # 仅 redirect → /day1
-  admin/page.tsx             # 运营后台（口令登录，Dashboard/Accounts/Audit/Settings）
+  me/
+    page.tsx                 # 个人中心：编辑主页 + 我的收藏
+    MeEditForm.tsx           # 编辑表单（客户端）
+    FavoritesList.tsx        # 我看见了谁列表（客户端）
+  u/[code]/
+    page.tsx                 # 公开主页（SSR，需登录）
+    ImageLightbox.tsx         # 全屏灯箱（客户端）
+    ImageGallery.tsx          # 图片网格 + 灯箱触发（客户端）
+  loc/[code]/
+    page.tsx                 # 位置页（SSR，需登录）
+    FavoriteButton.tsx        # 收藏按钮（客户端，服务端数据）
+  admin/page.tsx             # 运营后台（口令登录）
   api/
     auth/login/route.ts      # POST 学生登录 → session cookie
     auth/logout/route.ts     # POST 清 session cookie
-    me/route.ts              # GET / PATCH 自己数据（session 鉴权，头像 key 归属校验）
-    me/images/route.ts       # POST 保存 / DELETE 删除图片记录（14 上限，Serializable 事务）
-    me/submissions/route.ts  # GET 提交状态 / PATCH saveDay3·submitDay1·submitDay3
+    me/route.ts              # GET / PATCH 自己数据（session 鉴权）
+    me/images/route.ts       # POST 保存 / DELETE 删除图片记录
     upload-url/route.ts      # POST 获取 R2 presigned PUT URL
-    local-upload/route.ts    # 本地开发磁盘存储（LOCAL_UPLOAD_DIR，替代 R2）
-    admin/login|logout|session/route.ts
+    favorites/route.ts       # POST 收藏/取消 toggle
+    me/favorites/route.ts    # GET 我收藏的人列表
+    admin/login/route.ts     # POST 口令登录
     admin/import/route.ts    # POST 批量事务导入（生成账号密码）
-    admin/export/route.ts    # GET 导出 CSV（chineseName,englishName,username,code,homepage）
-    admin/persons/route.ts   # GET 列表 / PATCH 编辑 / DELETE 删除账号
-    admin/settings/route.ts  # GET / PATCH 系统设置（六个活动开关）
+    admin/location/route.ts  # POST 编辑位置页
+    admin/takedown/route.ts  # POST 下架开关
+    admin/export/route.ts    # GET 导出 CSV（含用户名、短码、主页、展位链接）
+    admin/session/route.ts   # GET 校验当前 admin 会话
+    admin/logout/route.ts    # POST 清除 admin cookie 登出
+    admin/persons/route.ts   # GET 所有人列表
+    admin/settings/route.ts  # GET/PATCH 系统设置
     admin/reset-password/route.ts  # POST 重置学生密码
-    admin/qr/print/route.ts  # GET 批量打印 QR 码（每人一张 /u 码）
+    admin/qr/print/route.ts  # GET 批量打印 QR 码
     settings/route.ts        # GET 公开读单个设置
 components/
-  OweekHeader.tsx            # 三栏导航头（返回 / 标题 / action）
-  AvatarUploader.tsx         # 头像 tile 上传（压缩 + presigned 直传 + 失败重试卡）
-  ImageGrid.tsx              # 图片网格（占位格 + 删除 + 失败重试卡）
-  SessionExpired.tsx         # 401 会话过期卡
+  AvatarUploader.tsx          # 头像上传（压缩 + presigned 直传）
+  ImageGrid.tsx               # 多图上传网格（最多 4 张，含删除）
 lib/
   prisma.ts                  # Prisma client 单例
   r2.ts                      # R2 S3 client + presigned URL
   auth.ts                    # 学生 session / admin session / 密码哈希
-  flow.ts                    # DAY1_PROMPTS / DAY3_SECTIONS / parseDay3Answers
-  event-settings.ts          # SystemSetting 读取（settingEnabled）
-  code.ts / csv.ts / rate-limit.ts / qr.ts
+  code.ts                    # nanoid 短码 + 密码生成
+  csv.ts                     # CSV RFC 4180 转义 helper
+  rate-limit.ts              # 登录限流（内存滑动窗口）
+  qr.ts                      # 二维码生成
 prisma/
-  schema.prisma              # Person / Image / LocationCard(遗留) / Favorite(遗留) / SystemSetting
+  schema.prisma              # Person / Image / LocationCard / Favorite / SystemSetting
   migrations/
 app/generated/prisma/        # Prisma 生成客户端（已提交 git）
 ```
 
 ## 核心设计决策
 
-- **活动流双作品**：DAY 1 = 照片拼贴（头像 + 14 图，满 15/15 才能提交）；DAY 3 = 小瓶子（64 项 0–5 打分，可部分提交）
-- **互解锁浏览**：自己提交了 Day N 才能看别人的 Day N；权限由 viewer 提交状态决定，不由对方是否填写决定
-- **提交即只读**：提交后默认只读；admin 打开 `allowEdit` 开关后才可继续编辑（重复提交仍 409）
-- **匿名优先**：`showNames` 关闭时全站姓名渲染为 `#@!&%$?!` 符号 ID；`/nfc/{code}` 永远匿名
-- **六个活动开关**（SystemSetting，admin Dashboard 控制）：`day1Open` `day3Open` `allowEdit` `showNames` `profileComplete` `navEnabled`，另有五个一键预设（DAY 1 创作 / DAY 3 创作 / 活动前浏览 / 游戏进行 / 找礼包）
-- **NFC 永远可达**：`/nfc/{code}` 和 `/package/{code}` 公开且无登录门槛，不受 `navEnabled` 影响
-- **账号体系**：学生凭用户名+密码登录，session cookie（httpOnly JWT，14 天，服务端 Set-Cookie，Safari ITP 免疫）
+- **账号体系**：学生凭用户名+密码登录，session cookie（httpOnly JWT，14 天）。编辑和收藏基于登录身份
 - **两套 cookie 独立**：`owk_session`（学生）和 `owk_admin`（运营）互不干扰
-- **图片直传 R2**：前端压缩后通过 presigned URL 直传，不经过服务端；`key` 首段即 personId，`/api/me` 和 `/api/me/images` 均校验 key 归属与 URL 相等
+- **收藏单向静默**：A 收藏 B，只有 A 能看到；B 不通知、不显示次数、不显示是谁
+- **图片直传 R2**：前端压缩后通过 presigned URL 直传，不经过服务端
+- **图片 key 由服务端生成**：前端必须保存 `/api/upload-url` 返回的真实 `key`，删除时才会正确清理 R2 对象
+- **短码复用**：同一 `code` 同时服务于 `/u/{code}`（主页）和 `/loc/{code}`（位置页）
+- **位置页是兜底**：即使某人没布置主页，位置页依然在，保证平等曝光
+- **bio 按 code point 计数**：上限 80，不是 byte 也不是 char
 - **密码不可逆**：存库的是 scrypt hash，明文只在生成/重置那一刻出现一次
 - **Auth fail closed**：`ADMIN_PASSWORD` 和 `SESSION_SECRET` 缺失时直接报错，不使用默认 JWT 密钥
 - **批量导入事务化**：导入账号时任一行失败会整批回滚，不返回半成功账号
+- **主页自动发布**：学生上传头像并保存资料后，主页自动变为可见；管理员仍可通过下架开关隐藏特定页面
 - **微信 UA 引导**：登录页检测微信内置浏览器，提示学生在 Safari/系统默认浏览器中打开，避免微信与 Safari cookie jar 不一致导致「登过却显示未登录」
 
 ## 验证 Check
 
 | 检查项 | 命令/方法 |
 |---|---|
-| 数据库连通 | `DOTENV_CONFIG_PATH=.env.local npx prisma migrate status` |
+| 数据库连通 | `npx prisma db push --dry-run` |
 | Prisma 客户端 | `npx prisma generate`（新 clone 后必须跑一次） |
 | 类型检查 | `npx tsc --noEmit` |
-| Lint | `npm run lint` |
-| 构建 | `set -a; source .env.local; set +a; npm run build` |
-| Harness 审计 | `npm run audit:harness` |
-| 一键全量 | `npm run verify:local` |
+| 构建 | `npm run build` |
 | 生产启动 | `npm start` |
 
 ## 版本演进
 
-- **v1.0**：个人主页 + 位置页 + localStorage 收藏
-- **v2.0**（2026-06）：账号体系（session cookie）、服务端收藏、`/me` 个人中心
-- **v3.0**（2026-07-30，commit 3673cf8）：活动流改版——DAY 1 / DAY 3 双作品、互解锁浏览、匿名化、`/nfc` `/package` 落地页、admin 后台重写、图片上限 4→14；`/me` 退役为 redirect
-- **v3.1**（2026-07-31）：对齐 Figma WP26 设计稿——设计 token（#FF5311、4/14/16/12 圆角、Inter）、六开关语义（新增 `allowEdit`/`profileComplete`/`navEnabled`，移除 `browseOpen`/`nfcEnabled`）、上传失败/会话过期状态卡；`/loc` 位置页与收藏功能整体下线（详见 `docs/08`）
+v2.0 在 v1.0 基础上新增：
+- **账号体系**：学生凭用户名+密码登录，session cookie 保持 14 天
+- **服务端收藏**：替换 v1.0 的 localStorage 收藏，挂在账号上，单向静默
+- **个人中心 `/me`**：编辑主页 + 收藏列表同页展示
 
-## 不做
+## v2.0 不做
 
-评论、点赞、社交链接、配对算法、消息通知、学生自助找回密码、收藏（v3.1 起移除）
+评论、点赞、社交链接、配对算法、消息通知、学生自助找回密码
 
 ## 文档
 
+- [PRD – 产品需求文档](docs/01_PRD_OWeek个人主页系统_v1.0.md)
+- [开发文档 v1.0 – 接口契约与构建顺序](docs/02_开发文档_OWeek个人主页系统_v1.0.md)
+- [开发文档 v2.0 – 账号系统迁移](docs/04_开发文档_v2.0_账号系统迁移.md)
 - [操作手册 – 新人接手指南](docs/03_操作手册.md)
-- [UI 差距分析 + 执行结果 – Figma WP26 对齐](docs/08_UI差距分析_WP26设计稿对齐.md)
 - [AGENTS.md](AGENTS.md) – coding agent 工作规范
-- 历史文档（已被活动流改版取代，仅供溯源）：[PRD v1.0](docs/01_PRD_OWeek个人主页系统_v1.0.md) · [开发文档 v1.0](docs/02_开发文档_OWeek个人主页系统_v1.0.md) · [开发文档 v2.0](docs/04_开发文档_v2.0_账号系统迁移.md) · [admin 界面修复](docs/05_admin_界面修复_v1.md) · [beta 交接](docs/06_交接文档_beta阶段.md)
 
 ## 线上
 
