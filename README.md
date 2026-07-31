@@ -216,6 +216,7 @@ app/generated/prisma/        # Prisma 生成客户端（已提交 git）
 ## 文档
 
 - [操作手册 – 新人接手指南](docs/03_操作手册.md)
+- [数据库与后端交接文档](docs/09_数据库与后端交接文档.md)
 - [UI 差距分析 + 执行结果 – Figma WP26 对齐](docs/08_UI差距分析_WP26设计稿对齐.md)
 - [AGENTS.md](AGENTS.md) – coding agent 工作规范
 - 历史文档（已被活动流改版取代，仅供溯源）：[PRD v1.0](docs/01_PRD_OWeek个人主页系统_v1.0.md) · [开发文档 v1.0](docs/02_开发文档_OWeek个人主页系统_v1.0.md) · [开发文档 v2.0](docs/04_开发文档_v2.0_账号系统迁移.md) · [admin 界面修复](docs/05_admin_界面修复_v1.md) · [beta 交接](docs/06_交接文档_beta阶段.md)
