@@ -9,7 +9,10 @@ export default async function Day3Page() {
   const session = await verifyStudentSession();
   if (!session) redirect("/?next=/day3");
   if (!(await settingEnabled("day3Open"))) redirect("/home");
-  const person = await prisma.person.findUnique({ where: { id: session.personId }, select: { day3Answers: true, day3SubmittedAt: true } });
+  const [person, allowEdit] = await Promise.all([
+    prisma.person.findUnique({ where: { id: session.personId }, select: { day3Answers: true, day3SubmittedAt: true } }),
+    settingEnabled("allowEdit", false),
+  ]);
   if (!person) redirect("/");
-  return <Day3Editor initialAnswers={parseDay3Answers(person.day3Answers)} submitted={Boolean(person.day3SubmittedAt)} />;
+  return <Day3Editor initialAnswers={parseDay3Answers(person.day3Answers)} submitted={Boolean(person.day3SubmittedAt)} allowEdit={allowEdit} />;
 }

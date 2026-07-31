@@ -1,20 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff;
-  --foreground: #050505;
-  --orange: #ff4f12;
+  --background: #ffffff;
+  --foreground: #0b0b0a;
+  --orange: #ff5311;
   --orange-soft: #fff0e9;
-  --muted: #696965;
-  --line: #e6e2dc;
-  --paper: #f7f6f3;
+  --muted: #61615c;
+  --line: #e0e0db;
+  --paper: #f4f3f0;
+  --radius-btn: 4px;
+  --radius-pill: 14px;
+  --radius-card: 16px;
+  --radius-tile: 12px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
 }
 
 * { box-sizing: border-box; }
@@ -22,7 +25,7 @@ html { background: var(--background); color: var(--foreground); }
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: var(--font-inter), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
   margin: 0;
   min-width: 320px;
 }
@@ -39,11 +42,11 @@ img { max-width: 100%; }
   min-height: 100svh;
   width: min(100%, 768px);
   margin-inline: auto;
-  padding: max(20px, env(safe-area-inset-top)) 22px max(26px, env(safe-area-inset-bottom));
+  padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
 }
 .ow-kicker { color: var(--muted); font-size: .86rem; font-weight: 800; letter-spacing: .02em; }
-.ow-title { font-size: clamp(2.35rem, 11vw, 4.25rem); font-weight: 950; letter-spacing: -.055em; line-height: .95; }
-.ow-heading { font-size: clamp(2rem, 8vw, 3.25rem); font-weight: 950; letter-spacing: -.045em; line-height: 1.03; }
+.ow-title { font-size: clamp(2.35rem, 11vw, 4.25rem); font-weight: 900; letter-spacing: -.055em; line-height: .95; }
+.ow-heading { font-size: clamp(2rem, 8vw, 3.25rem); font-weight: 900; letter-spacing: -.045em; line-height: 1.03; }
 .ow-muted { color: var(--muted); }
 .ow-rule { border-color: var(--line); }
 .ow-btn {
@@ -54,8 +57,9 @@ img { max-width: 100%; }
   gap: 12px;
   width: 100%;
   border: 2px solid var(--orange);
+  border-radius: var(--radius-btn);
   background: var(--orange);
-  color: #050505;
+  color: #0b0b0a;
   font-weight: 900;
   padding: 12px 18px;
   transition: opacity 180ms ease, background-color 180ms ease, color 180ms ease;
@@ -65,21 +69,21 @@ img { max-width: 100%; }
 .ow-btn:disabled { cursor: not-allowed; opacity: .36; }
 .ow-btn-outline { background: #fff; color: var(--orange); }
 .ow-btn-outline:hover { background: var(--orange-soft); }
-.ow-card { border: 2px solid #111; background: #fff; }
+.ow-card { border: 2px solid #0b0b0a; border-radius: var(--radius-card); background: #fff; }
 .ow-chip {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--orange);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 8px 20px;
   font-weight: 900;
   line-height: 1;
   white-space: nowrap;
 }
-.ow-chip-active { background: var(--orange); color: #050505; }
-.ow-chip-white { border-color: #fff; background: transparent; color: #050505; }
+.ow-chip-active { background: var(--orange); color: #0b0b0a; }
+.ow-chip-white { border-color: #fff; background: transparent; color: #0b0b0a; }
 .ow-arrow { font-family: var(--font-inter), Arial, sans-serif; font-weight: 700; line-height: 1; }
 .ow-nav {
   min-height: 64px;
@@ -89,17 +93,17 @@ img { max-width: 100%; }
   border-bottom: 2px solid var(--line);
   margin: -4px -4px 30px;
   padding: 0 4px 10px;
-  font-weight: 950;
+  font-weight: 900;
 }
 .ow-nav a, .ow-nav button { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; }
 .ow-orange { color: var(--orange); }
 .ow-scrim { background: rgb(0 0 0 / .38); backdrop-filter: grayscale(1); }
-.ow-modal { border: 2px solid #111; background: #fff; box-shadow: 0 16px 60px rgb(0 0 0 / .2); }
+.ow-modal { border: 2px solid #0b0b0a; border-radius: var(--radius-card); background: #fff; box-shadow: 0 16px 60px rgb(0 0 0 / .2); }
 .ow-enter { animation: ow-enter 220ms ease-out both; }
 @keyframes ow-enter { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 @media (min-width: 769px) {
-  .ow-phone { border-inline: 1px solid var(--line); padding-inline: 42px; }
+  .ow-phone { border-inline: 1px solid var(--line); padding-inline: 40px; }
 }

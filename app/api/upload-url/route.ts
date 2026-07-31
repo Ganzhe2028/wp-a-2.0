@@ -4,6 +4,7 @@ import { createPresignedUploadUrl, getPublicUrl } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { nanoid } from "nanoid";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { settingEnabled } from "@/lib/event-settings";
 
 const UPLOAD_WINDOW_MS = 10 * 60 * 1000;
 const MAX_UPLOAD_URLS_PER_USER = 20;
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
   }
 
   const owner = await prisma.person.findUnique({ where: { id: session.personId }, select: { day1SubmittedAt: true } });
-  if (owner?.day1SubmittedAt) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
+  if (owner?.day1SubmittedAt && !(await settingEnabled("allowEdit", false))) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
 
   if (
     !checkRateLimit(

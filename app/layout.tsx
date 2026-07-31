@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,8 +9,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s - OWeek 个人主页",
-    default: "OWeek 个人主页",
+    template: "%s - O—WEEK / 26",
+    default: "O—WEEK / 26",
   },
   description: "O-Week · Meet / Share / Find",
   icons: {
@@ -36,7 +26,8 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full">{children}</body>
     </html>

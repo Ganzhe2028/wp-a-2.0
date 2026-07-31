@@ -4,9 +4,17 @@ import { deleteFromR2, getKeyFromPublicUrl, getPublicUrl } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/app/generated/prisma/client";
 
+import { settingEnabled } from "@/lib/event-settings";
+
 const MAX_SAVE_ATTEMPTS = 3;
 
 class ImageLimitError extends Error {}
+
+async function day1ReadOnly(personId: string) {
+  const owner = await prisma.person.findUnique({ where: { id: personId }, select: { day1SubmittedAt: true } });
+  if (!owner?.day1SubmittedAt) return false;
+  return !(await settingEnabled("allowEdit", false));
+}
 
 export async function POST(request: NextRequest) {
   const session = await verifyStudentSession();
@@ -14,8 +22,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const owner = await prisma.person.findUnique({ where: { id: session.personId }, select: { day1SubmittedAt: true } });
-  if (owner?.day1SubmittedAt) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
+  if (await day1ReadOnly(session.personId)) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
 
   let body: Record<string, unknown>;
   try {
@@ -115,8 +122,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const owner = await prisma.person.findUnique({ where: { id: session.personId }, select: { day1SubmittedAt: true } });
-  if (owner?.day1SubmittedAt) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
+  if (await day1ReadOnly(session.personId)) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
 
   const id = request.nextUrl.searchParams.get("id");
   if (!id) {

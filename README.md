@@ -34,9 +34,9 @@ Windows 下推荐用 **Git Bash**（装 Git 时自带）或 **PowerShell**：
 
 ```bash
 # Git Bash / PowerShell 通用
-cp .env.example .env        # PowerShell 用 copy .env.example .env
+cp .env.example .env.local  # PowerShell 用 copy .env.example .env.local
 npm install
-npx prisma migrate dev
+DOTENV_CONFIG_PATH=.env.local npx prisma migrate deploy
 npm run dev
 ```
 
@@ -48,7 +48,7 @@ npm config set registry https://registry.npmmirror.com
 
 ### 环境变量
 
-复制 `.env.example`（或手动创建 `.env`）：
+复制 `.env.example` 为 `.env.local`（或手动创建该文件）：
 
 ```bash
 DATABASE_URL=           # Neon pooled 连接串（查询用）
@@ -68,9 +68,11 @@ APP_BASE_URL=           # 如 https://xxx.top，导出链接拼前缀用
 ```bash
 npm install
 npx prisma generate       # 生成本平台 Prisma 客户端（已提交预生成版本）
-npx prisma migrate dev    # 建表
+DOTENV_CONFIG_PATH=.env.local npx prisma migrate deploy # 应用已提交迁移
 npm run dev               # 启动开发服务器 → http://localhost:3000
 ```
+
+Next.js 会读取 `.env.local`，但 Prisma CLI 默认只读取 `.env`。本项目使用 `.env.local` 时，所有 Prisma 迁移命令都必须带上 `DOTENV_CONFIG_PATH=.env.local`；新增 schema 变更时才用 `npx prisma migrate dev --name <变更名>` 创建迁移。
 
 ### 部署
 

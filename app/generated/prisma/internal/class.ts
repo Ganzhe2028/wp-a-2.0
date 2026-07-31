@@ -23,7 +23,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "/Users/zhanghao/Downloads/WPDesign/wp-a/app/generated/prisma",
+      "value": "/Users/mac/Desktop/baolecheng/MSA/26WP/wp-a-2.0/wp-a/app/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -37,7 +37,7 @@ const config: runtime.GetPrismaClientConfig = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/zhanghao/Downloads/WPDesign/wp-a/prisma/schema.prisma",
+    "sourceFilePath": "/Users/mac/Desktop/baolecheng/MSA/26WP/wp-a-2.0/wp-a/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativePath": "../../../prisma",
@@ -48,6 +48,7 @@ const config: runtime.GetPrismaClientConfig = {
   ],
   "activeProvider": "postgresql",
   "postinstall": false,
+  "ciName": "Vercel",
   "inlineDatasources": {
     "db": {
       "url": {

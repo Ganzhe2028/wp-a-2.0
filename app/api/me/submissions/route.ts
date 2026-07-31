@@ -29,7 +29,10 @@ export async function PATCH(request: NextRequest) {
 
   if (body.action === "saveDay3" || body.action === "submitDay3") {
     if (!(await settingEnabled("day3Open"))) return NextResponse.json({ error: "DAY 3 is closed" }, { status: 403 });
-    if (person.day3SubmittedAt) return NextResponse.json({ error: "DAY 3 is already submitted" }, { status: 409 });
+    if (person.day3SubmittedAt) {
+      const allowEdit = await settingEnabled("allowEdit", false);
+      if (!allowEdit || body.action === "submitDay3") return NextResponse.json({ error: "DAY 3 is already submitted" }, { status: 409 });
+    }
     const answers = parseDay3Answers(body.answers);
     const updated = await prisma.person.update({ where: { id: session.personId }, data: { day3Answers: answers, ...(body.action === "submitDay3" && { day3SubmittedAt: new Date() }) }, select: { day3Answers: true, day3SubmittedAt: true } });
     return NextResponse.json({ ok: true, ...updated });
