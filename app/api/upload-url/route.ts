@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const owner = await prisma.person.findUnique({ where: { id: session.personId }, select: { day1SubmittedAt: true } });
+  if (owner?.day1SubmittedAt) return NextResponse.json({ error: "DAY 1 is read-only after submission" }, { status: 409 });
+
   if (
     !checkRateLimit(
       `upload-url:user:${session.personId}`,
@@ -60,9 +63,9 @@ export async function POST(request: NextRequest) {
     where: { personId: session.personId, hidden: false },
   });
 
-  if (imageCount >= 4) {
+  if (imageCount >= 14) {
     return NextResponse.json(
-      { error: "Maximum 4 images allowed" },
+      { error: "Maximum 14 gallery images allowed" },
       { status: 409 }
     );
   }

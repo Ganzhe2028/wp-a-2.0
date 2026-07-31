@@ -1,160 +1,35 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import { verifyStudentSession } from '@/lib/auth'
-import ImageGallery from './ImageGallery'
-import FavoriteButton from '@/app/loc/[code]/FavoriteButton'
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { verifyStudentSession } from "@/lib/auth";
+import { DAY1_PROMPTS, DAY3_SECTIONS, parseDay3Answers } from "@/lib/flow";
+import OweekHeader from "@/components/OweekHeader";
 
-interface PageProps {
-  params: Promise<{ code: string }>
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { code } = await params
-  const person = await prisma.person.findUnique({
-    where: { code },
-    select: { chineseName: true, hidden: true },
-  })
-  if (!person || person.hidden) return { title: '页面不存在' }
-  return { title: `${person.chineseName || code}的主页` }
-}
-
-export default async function ProfilePage({ params }: PageProps) {
-  const { code } = await params
-
+export default async function ProfilePage({ params, searchParams }: { params: Promise<{ code: string }>; searchParams: Promise<{ day?: string }> }) {
+  const { code } = await params;
   const session = await verifyStudentSession();
-  if (!session) {
-    redirect('/?next=' + encodeURIComponent('/u/' + code));
-  }
-
-  const person = await prisma.person.findUnique({
-    where: { code },
-    include: {
-      images: {
-        where: { hidden: false },
-        orderBy: { sort: 'asc' },
-      },
-      location: true,
-    },
-  })
-
-  if (!person || person.hidden) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-6">
-        <div className="text-center max-w-xs">
-          <div className="text-5xl mb-5">🙈</div>
-          <h1 className="text-lg font-semibold text-zinc-900 mb-1.5">
-            该页面已隐藏
-          </h1>
-          <p className="text-sm text-zinc-500 leading-relaxed">
-            这位同学暂时关闭了个人主页
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!person.published) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-6">
-        <div className="text-center max-w-xs">
-          <div className="text-5xl mb-5">📝</div>
-          <h1 className="text-lg font-semibold text-zinc-900 mb-1.5">
-            这位同学还没布置主页
-          </h1>
-          <p className="text-sm text-zinc-500 leading-relaxed">
-            等他准备好了再来看看吧
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  const displayImages = person.images.filter((img) => !img.hidden);
-
-  let initialFavorited = false;
-  if (session) {
-    const existing = await prisma.favorite.findUnique({
-      where: {
-        favoriterId_favoriteeId: {
-          favoriterId: session.personId,
-          favoriteeId: person.id,
-        },
-      },
-    });
-    initialFavorited = !!existing;
-  }
-
-  const showFavoriteButton =
-    session && person && !person.hidden && person.published &&
-    session.personId !== person.id;
+  if (!session) redirect(`/?next=${encodeURIComponent(`/u/${code}`)}`);
+  const [{ day }, viewer, person, showNamesSetting] = await Promise.all([
+    searchParams,
+    prisma.person.findUnique({ where: { id: session.personId }, select: { day1SubmittedAt: true, day3SubmittedAt: true } }),
+    prisma.person.findUnique({ where: { code }, include: { images: { where: { hidden: false }, orderBy: { sort: "asc" } } } }),
+    prisma.systemSetting.findUnique({ where: { key: "showNames" }, select: { value: true } }),
+  ]);
+  if (!person || person.hidden) return <main className="ow-phone"><OweekHeader title="PROFILE" backHref="/browse" /><h1 className="ow-heading mt-20">该页面已隐藏</h1><Link href="/browse" className="ow-btn ow-btn-outline mt-16">返回浏览</Link></main>;
+  const selectedDay = day === "3" ? 3 : 1;
+  const canView = selectedDay === 1 ? Boolean(viewer?.day1SubmittedAt) : Boolean(viewer?.day3SubmittedAt);
+  const hasContent = selectedDay === 1 ? Boolean(person.day1SubmittedAt) : Boolean(person.day3SubmittedAt);
+  const showNames = showNamesSetting?.value === "true";
+  const displayName = showNames ? (person.chineseName || person.englishName || code) : code.replace(/[A-Za-z0-9]/g, "#");
+  const answers = parseDay3Answers(person.day3Answers);
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="max-w-md mx-auto px-5 py-12">
-        <div className="flex justify-end mb-2">
-          <Link
-            href={`/loc/${code}`}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm text-zinc-400 transition-colors hover:bg-amber-50 hover:text-amber-600"
-            aria-label="View position"
-            title="查看展位"
-          >
-            <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <title>View position</title>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-            </svg>
-          </Link>
-        </div>
-        <div className="flex justify-center mb-5">
-          {person.avatarUrl ? (
-            <img
-              src={person.avatarUrl}
-              alt=""
-              className="w-24 h-24 rounded-full object-cover ring-2 ring-white shadow-md"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-zinc-200 flex items-center justify-center ring-2 ring-white shadow-md">
-              <span className="text-2xl text-zinc-400 font-medium">?</span>
-            </div>
-          )}
-        </div>
-
-        <h1 className="text-center text-xl font-semibold text-zinc-900 mb-1">
-          {person.englishName && <span>{person.englishName}</span>}
-          {person.englishName && person.chineseName && (
-            <span> · </span>
-          )}
-          {person.chineseName && <span>{person.chineseName}</span>}
-        </h1>
-
-        {person.grade && (
-          <p className="text-center text-sm text-zinc-500 mb-4">
-            {person.grade}
-          </p>
-        )}
-
-        {person.bio && (
-          <p className="text-center text-sm text-zinc-700 leading-relaxed mb-8 whitespace-pre-line">
-            {person.bio}
-          </p>
-        )}
-
-        {showFavoriteButton && (
-          <div className="flex justify-center mb-8">
-            <FavoriteButton
-              code={person.code}
-              name={person.chineseName || person.englishName || code}
-              initialFavorited={initialFavorited}
-            />
-          </div>
-        )}
-
-        {displayImages.length > 0 && (
-          <ImageGallery images={displayImages.map((img) => ({ id: img.id, url: img.url }))} />
-        )}
-      </div>
-    </div>
-  )
+    <main className="ow-phone ow-enter">
+      <OweekHeader title="PROFILE" backHref="/browse" />
+      <h1 className="ow-title break-all">{displayName}</h1><p className="ow-kicker mt-2">{person.role === "SENIOR" ? "SENIOR GROUP" : "LEARNER"} · {person.groupName || "O-WEEK"}</p>
+      <div className="mt-8 grid grid-cols-2 gap-4"><Link href={`/u/${code}?day=1`} className={`ow-btn ${selectedDay !== 1 ? "ow-btn-outline" : ""}`}>DAY 1</Link><Link href={`/u/${code}?day=3`} className={`ow-btn ${selectedDay !== 3 ? "ow-btn-outline" : ""}`}>DAY 3</Link></div>
+      {!canView ? <div className="mt-28 text-center"><div className="mx-auto h-14 w-14 border-4 border-[var(--orange)] p-3"><span className="block h-full bg-[var(--orange)]" /></div><h2 className="ow-heading mt-8">DAY {selectedDay} 尚未解锁</h2><p className="ow-muted mt-5 text-lg leading-8">先提交你自己的 Day {selectedDay}，再查看其他人的这一部分。</p><div className="mt-12 border-2 border-[var(--orange)] bg-[var(--orange-soft)] p-5 font-bold">权限由你的提交状态决定，不由对方是否填写决定。</div><Link href={`/day${selectedDay}`} className="ow-btn mt-20">去完成 DAY {selectedDay}</Link></div> : !hasContent ? <div className="mt-28 text-center"><span className="mx-auto block h-14 w-14 rounded-full border-[10px] border-[var(--orange)]" /><h2 className="ow-heading mt-8">对方暂未发布此作品</h2><p className="ow-muted mt-5 text-lg">你已经拥有浏览权限。这里不是锁定状态。</p><div className="mt-12 bg-[var(--paper)] p-6 font-bold ow-muted">200 · ownerStatus=NO_CONTENT</div><Link href="/browse" className="ow-btn ow-btn-outline mt-24">返回浏览</Link></div> : selectedDay === 1 ? <div className="mt-8 grid grid-cols-2 gap-4"><div className="row-span-2 overflow-hidden border-2 border-black">{person.avatarUrl && <img src={person.avatarUrl} alt={DAY1_PROMPTS[0]} className="h-full min-h-72 w-full object-cover" />}</div>{person.images.map((image, index) => <figure key={image.id} className={`${index === 2 ? "col-span-2" : ""} overflow-hidden border-2 border-black bg-black`}><img src={image.url} alt={DAY1_PROMPTS[index + 1] || "资料图片"} className="aspect-video w-full object-cover" loading={index > 3 ? "lazy" : "eager"} /><figcaption className="p-3 font-bold text-white">{DAY1_PROMPTS[index + 1]}</figcaption></figure>)}</div> : <div className="mt-10 space-y-8">{DAY3_SECTIONS.map((section, s) => <section key={section.title}><h2 className="text-2xl font-black">{section.title}</h2><div className="mt-5 grid grid-cols-4 gap-3">{section.prompts.map((prompt, index) => <div key={prompt} className="text-center"><div className="relative mx-auto h-14 w-10 rounded-xl border-2 border-black"><span className="absolute inset-x-1 bottom-1 rounded-lg bg-[var(--orange)]" style={{ height: `${answers[s][index] * 17}%` }} /></div><small>{prompt}</small></div>)}</div></section>)}</div>}
+      {canView && hasContent && <Link href="/browse" className="ow-btn ow-btn-outline mt-14">返回浏览</Link>}
+    </main>
+  );
 }

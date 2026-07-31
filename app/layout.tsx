@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: "%s - OWeek 个人主页",
     default: "OWeek 个人主页",
   },
-  description: "新生在线编辑个人主页，通过 NFC 碰一碰或二维码扫码查看",
+  description: "O-Week · Meet / Share / Find",
   icons: {
     icon: "/icon.svg",
   },
@@ -30,10 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="zh-CN"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

@@ -13,17 +13,21 @@ interface ImageGridProps {
   images: DisplayImage[];
   onImagesChange: (images: DisplayImage[]) => void;
   disabled?: boolean;
+  maxImages?: number;
+  labels?: readonly string[];
 }
 
 export default function ImageGrid({
   images,
   onImagesChange,
   disabled = false,
+  maxImages = 4,
+  labels = [],
 }: ImageGridProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeImages = [...images];
-  const remaining = Math.max(0, 4 - activeImages.length);
+  const remaining = Math.max(0, maxImages - activeImages.length);
 
   async function handleFilesSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -34,7 +38,7 @@ export default function ImageGrid({
       const newImages: DisplayImage[] = [...activeImages];
 
       for (const file of files) {
-        if (newImages.length >= 4) break;
+        if (newImages.length >= maxImages) break;
 
         const compressed = await imageCompression(file, {
           maxSizeMB: 0.5,
@@ -100,7 +104,7 @@ export default function ImageGrid({
     <div>
       <div className="mb-2 flex items-center justify-between">
         <p className="text-sm font-medium text-stone-700">
-          Photos <span className="text-stone-400">({activeImages.length}/4)</span>
+          Photos <span className="text-stone-400">({activeImages.length}/{maxImages})</span>
         </p>
         {remaining > 0 && !disabled && (
           <button
@@ -116,20 +120,22 @@ export default function ImageGrid({
 
       {activeImages.length > 0 ? (
         <div className="grid grid-cols-2 gap-2">
-          {activeImages.map((img) => (
-            <div key={img.id} className="group relative aspect-square overflow-hidden rounded-lg bg-stone-100">
+          {activeImages.map((img, index) => (
+            <div key={img.id} className="group relative aspect-square overflow-hidden border-2 border-black bg-stone-100">
               <img
                 src={img.url}
                 alt=""
                 className="h-full w-full object-cover"
               />
+              {labels[index] && <span className="absolute inset-x-0 bottom-0 bg-black/85 px-2 py-1 text-xs font-bold text-white">{labels[index]}</span>}
               {!disabled && (
                 <button
                   type="button"
                   onClick={() => handleDelete(img.id)}
-                  className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label={`删除${labels[index] || "图片"}`}
+                  className="absolute top-1 right-1 flex h-11 w-11 items-center justify-center bg-black/70 text-white transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                 >
-                  ✕
+                  ×
                 </button>
               )}
             </div>

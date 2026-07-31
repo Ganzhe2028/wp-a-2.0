@@ -15,6 +15,8 @@ interface ImportRow {
   chineseName: string;
   grade?: string;
   username?: string;
+  role?: string;
+  groupName?: string;
 }
 
 interface NormalizedImportRow {
@@ -22,6 +24,8 @@ interface NormalizedImportRow {
   chineseName: string;
   grade: string | null;
   username: string | null;
+  role: string;
+  groupName: string | null;
 }
 
 function textOrNull(value: unknown): string | null {
@@ -37,6 +41,8 @@ function normalizeRows(rows: ImportRow[]): NormalizedImportRow[] {
       chineseName: textOrNull(row.chineseName) ?? "",
       grade: textOrNull(row.grade),
       username: textOrNull(row.username),
+      role: row.role === "SENIOR" || row.role === "ADMIN" ? row.role : "LEARNER",
+      groupName: textOrNull(row.groupName),
     }))
     .filter((row) => row.chineseName);
 }
@@ -183,6 +189,8 @@ export async function POST(request: NextRequest) {
         englishName: row.englishName,
         chineseName: row.chineseName,
         grade: row.grade,
+        role: row.role,
+        groupName: row.groupName,
       };
     });
 
@@ -213,6 +221,8 @@ export async function POST(request: NextRequest) {
           englishName: account.englishName,
           chineseName: account.chineseName,
           grade: account.grade,
+          role: account.role,
+          groupName: account.groupName,
           updatedAt: now,
         })),
       }),
