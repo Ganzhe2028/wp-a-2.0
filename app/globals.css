@@ -107,3 +107,150 @@ img { max-width: 100%; }
 @media (min-width: 769px) {
   .ow-phone { border-inline: 1px solid var(--line); padding-inline: 40px; }
 }
+
+/* /home is a fixed-height action panel, not a vertically browsed page. */
+html:has(.ow-home),
+body:has(.ow-home) {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.ow-home {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: clamp(10px, 1.8dvh, 18px);
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.ow-home-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: clamp(8px, 1.5dvh, 14px);
+}
+.ow-home-nav > strong {
+  font-size: clamp(1.2rem, 5vw, 1.55rem);
+  font-weight: 900;
+  letter-spacing: -.055em;
+}
+.ow-home-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: .55rem .85rem;
+  background: #fff;
+  color: var(--muted);
+  font-size: .85rem;
+  font-weight: 700;
+}
+.ow-home-greeting p {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(.75rem, 3.4vw, 1rem);
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+.ow-home-greeting h1,
+.ow-home-greeting h2 {
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: -.075em;
+  line-height: .94;
+}
+.ow-home-greeting h1 {
+  margin-top: .35rem;
+  font-size: clamp(2.5rem, 12vw, 4.35rem);
+}
+.ow-home-greeting h2 {
+  margin-top: clamp(.9rem, 3.4dvh, 1.75rem);
+  font-size: clamp(1.7rem, 8.1vw, 3rem);
+}
+.ow-home-tasks {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 1.45dvh, 14px);
+}
+.ow-home-task {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  border: 2px solid var(--foreground);
+  border-radius: var(--radius-card);
+  padding: clamp(11px, 2.5vw, 18px);
+  color: var(--foreground);
+  text-decoration: none;
+}
+.ow-home-task:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+.ow-home-task-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  color: var(--muted);
+  font-size: clamp(.7rem, 3.1vw, .9rem);
+  font-weight: 800;
+}
+.ow-home-task-top > span {
+  border: 2px solid var(--orange);
+  border-radius: var(--radius-pill);
+  padding: .38rem .7rem;
+  color: var(--foreground);
+  line-height: 1;
+  white-space: nowrap;
+}
+.ow-home-task > strong {
+  align-self: center;
+  font-size: clamp(2rem, 10.2vw, 3.6rem);
+  font-weight: 900;
+  letter-spacing: -.065em;
+  line-height: .85;
+}
+.ow-home-task p {
+  margin: 0;
+  padding-right: 2.2rem;
+  color: var(--muted);
+  font-size: clamp(.72rem, 3.35vw, 1rem);
+  line-height: 1.2;
+}
+.ow-home-task-arrow {
+  position: absolute;
+  right: clamp(12px, 3vw, 20px);
+  bottom: clamp(10px, 2.2vw, 16px);
+  color: var(--orange);
+  font-size: clamp(1.65rem, 7.6vw, 2.5rem);
+  font-weight: 800;
+  line-height: .8;
+}
+.ow-home-task-accent { border-color: var(--orange); border-radius: 0; background: var(--orange); }
+.ow-home-task-accent .ow-home-task-top,
+.ow-home-task-accent p,
+.ow-home-task-accent .ow-home-task-arrow { color: var(--foreground); }
+.ow-home-task-accent .ow-home-task-top > span { border-color: #fff; }
+.ow-home-task-disabled { opacity: .4; }
+.ow-home-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: clamp(.68rem, 3.05vw, .9rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+.ow-home-footer a { flex: none; color: var(--orange); text-decoration: none; }
+@media (max-height: 44rem) {
+  .ow-home { gap: 10px; padding-top: max(14px, env(safe-area-inset-top)); }
+  .ow-home-nav { min-height: 42px; padding-bottom: 8px; }
+  .ow-home-logout { min-height: 34px; padding: .4rem .65rem; font-size: .72rem; }
+  .ow-home-greeting h2 { margin-top: .7rem; }
+  .ow-home-task { padding: 9px 11px; }
+  .ow-home-task-top > span { padding: .28rem .5rem; }
+}
