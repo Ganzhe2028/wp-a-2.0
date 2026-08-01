@@ -68,6 +68,31 @@ test("Day 1 display uses processed thumbnails and recovers transient mobile imag
   assert.match(resilientImage, /图片暂时无法显示，请刷新重试/);
 });
 
+test("submitted Day 1 and Day 3 can generate complete saveable share posters", async () => {
+  const [share, day1, day3] = await Promise.all([
+    source("../../components/student/ArtworkShareButton.tsx"),
+    source("../../app/me/day-1/Day1Client.tsx"),
+    source("../../app/me/day-3/Day3Client.tsx"),
+  ]);
+  assert.match(day1, /<ArtworkShareButton section="DAY1" slots=\{slots\}/);
+  assert.match(day3, /<ArtworkShareButton section="DAY3" bottles=\{bottles\}/);
+  assert.match(day1, /grid grid-cols-2/);
+  assert.match(day3, /grid grid-cols-2/);
+  assert.match(share, /drawDay1Poster/);
+  assert.match(share, /DAY1_TEMPLATE\.slots/);
+  assert.match(share, /drawDay3Poster/);
+  assert.match(share, /DAY3_TEMPLATE\.bottles/);
+  assert.match(share, /studentApi<HomeIdentityResponse>\("\/api\/v1\/home"\)/);
+  assert.match(share, /canvas\.toBlob/);
+  assert.match(share, /navigator\.canShare/);
+  assert.match(share, /navigator\.share/);
+  assert.match(share, /长图已生成/);
+  assert.match(share, /系统分享/);
+  assert.match(share, /download=\{preview\.filename\}/);
+  assert.match(share, /长按下方图片/);
+  assert.doesNotMatch(share, /html2canvas|dom-to-image/);
+});
+
 test("student dialogs render through a body portal and remain viewport-centered", async () => {
   const [dialog, day1, day3] = await Promise.all([
     source("../../components/student/ViewportDialog.tsx"),

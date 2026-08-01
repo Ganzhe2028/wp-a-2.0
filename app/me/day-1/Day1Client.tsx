@@ -7,6 +7,7 @@ import StudentHeader from "@/components/student/StudentHeader";
 import { PageError, PageLoading, SaveStatus } from "@/components/student/AsyncState";
 import ViewportDialog from "@/components/student/ViewportDialog";
 import ResilientImage from "@/components/student/ResilientImage";
+import ArtworkShareButton from "@/components/student/ArtworkShareButton";
 import { describeApiError, isReadOnlyError, loginUrl, newIdempotencyKey, studentApi, StudentApiError, type SubmissionStatus } from "@/components/student/api";
 import { compressForUpload, ImageCompressionTooLargeError, LARGE_SOURCE_IMAGE_BYTES, MAX_SOURCE_IMAGE_BYTES, putPresignedImage, retryUploadRequest, withUploadPermit, type CompressionMode } from "@/components/student/image-upload";
 
@@ -281,7 +282,7 @@ export default function Day1Client() {
       <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={selectedFile} className="sr-only" />
       <SaveStatus state={saveState} error={error} />
       {!readOnly && <button type="button" disabled={uploadingSlots.size > 0} onClick={() => setConfirming(true)} className="ow-btn mt-8">{uploadingSlots.size > 0 ? `正在处理 ${uploadingSlots.size} 张图片…` : "提交 DAY 1 →"}</button>}
-      {readOnly && data.publicId && <button type="button" onClick={() => router.push(`/artworks/${encodeURIComponent(data.publicId)}?section=day1`)} className="ow-btn mt-8">查看作品 →</button>}
+      {readOnly && data.publicId && <div className="mt-8 grid grid-cols-2 gap-3"><button type="button" onClick={() => router.push(`/artworks/${encodeURIComponent(data.publicId)}?section=day1`)} className="ow-btn">查看作品 →</button><ArtworkShareButton section="DAY1" slots={slots} /></div>}
       {confirming && <Confirm completed={completed} total={data.template.slots.length} cancel={() => setConfirming(false)} submit={() => void submit()} />}
       {largeImagePrompt && <LargeImagePrompt file={largeImagePrompt.file!} cancel={() => { URL.revokeObjectURL(largeImagePrompt.preview); setLargeImagePrompt(null); }} compress={() => { setActiveCrop({ ...largeImagePrompt, compressionMode: "strong" }); setLargeImagePrompt(null); }} />}
       {activeCrop && <CropDialog source={activeCrop.preview} aspectRatio={activeCrop.config.aspectRatio} initial={activeCrop.pendingCrop || activeCrop.value?.crop || EMPTY_CROP} cancel={() => discardCrop(activeCrop)} replace={() => replaceCrop(activeCrop)} accept={(crop) => void acceptCrop(crop)} />}
