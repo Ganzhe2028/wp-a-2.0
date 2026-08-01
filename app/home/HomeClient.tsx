@@ -40,7 +40,7 @@ export default function HomeClient() {
   const firstSection = data.browse.unlockedSections[0]?.toLowerCase() || "day1";
   return (
     <main className="ow-phone student-home ow-enter" aria-label="今日任务">
-      <StudentHeader title="HOME" backHref="/home" showLogout />
+      <StudentHeader title="HOME" backHref={null} showLogout />
       <section className="ow-home-greeting" aria-labelledby="home-greeting">
         <p>{data.identity.isAnonymous ? "ANONYMOUS ID" : "HELLO,"}</p>
         <h1 id="home-greeting" className="break-all">{data.identity.displayTitle}</h1>
