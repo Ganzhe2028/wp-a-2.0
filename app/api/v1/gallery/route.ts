@@ -6,7 +6,7 @@ import { parseFormalSection } from "@/lib/domain/submission-templates";
 import { createGallerySeed, decodeGalleryCursor, encodeGalleryCursor, galleryShuffleKey } from "@/lib/server/gallery-cursor";
 import { resolveGalleryBrowseScope } from "@/lib/domain/gallery-access";
 import { digestSensitive } from "@/lib/server/request-security";
-import { getPublicUrl } from "@/lib/r2";
+import { getThumbnailUrl } from "@/lib/r2";
 import { createHash } from "node:crypto";
 
 interface GalleryUserRow {
@@ -104,7 +104,7 @@ export async function GET(request: Request) {
       publicId: user.artworkPublicIds[0].publicId,
       displayTitle: settings.showName && user.displayName ? user.displayName : user.anonymousIds[0]?.anonymousId ?? "匿名作品",
       ...(galleryDivision === "SENIOR" && { roleLabel: "Senior Group" }),
-      thumbnail: settings.fullProfileVisible && section === "DAY1" && storageKey ? { url: getPublicUrl(storageKey) } : null,
+      thumbnail: settings.fullProfileVisible && section === "DAY1" && storageKey ? { url: getThumbnailUrl(storageKey) } : null,
       sectionStates: { [section]: hasContent ? "AVAILABLE" : "NO_CONTENT" },
     };
   });

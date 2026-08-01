@@ -48,6 +48,26 @@ test("Day 1 compression and direct upload remain responsive on mobile and weak n
   assert.match(packageJson, /sync-browser-assets\.mjs/);
 });
 
+test("Day 1 display uses processed thumbnails and recovers transient mobile image failures", async () => {
+  const [r2, submissionRoute, artworkRoute, editor, artwork, resilientImage] = await Promise.all([
+    source("../../lib/r2.ts"),
+    source("../../app/api/v1/submissions/[section]/route.ts"),
+    source("../../app/api/v1/artworks/[publicId]/route.ts"),
+    source("../../app/me/day-1/Day1Client.tsx"),
+    source("../../app/artworks/[publicId]/ArtworkClient.tsx"),
+    source("../../components/student/ResilientImage.tsx"),
+  ]);
+  assert.match(r2, /_derived\/\$\{key\}\.thumb\.webp/);
+  assert.match(submissionRoute, /getThumbnailUrl/);
+  assert.match(artworkRoute, /getThumbnailUrl/);
+  assert.match(editor, /<ResilientImage/);
+  assert.match(artwork, /<ResilientImage/);
+  assert.match(resilientImage, /MAX_AUTOMATIC_RETRIES = 2/);
+  assert.match(resilientImage, /ow_image_retry/);
+  assert.match(resilientImage, /loading=\{eager \? "eager" : "lazy"\}/);
+  assert.match(resilientImage, /图片暂时无法显示，请刷新重试/);
+});
+
 test("student dialogs render through a body portal and remain viewport-centered", async () => {
   const [dialog, day1, day3] = await Promise.all([
     source("../../components/student/ViewportDialog.tsx"),

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { failure, success } from "@/lib/contracts";
 import { prisma } from "@/lib/prisma";
 import { requireFormalViewer } from "@/lib/server/student-request";
-import { getPublicUrl } from "@/lib/r2";
+import { getThumbnailUrl } from "@/lib/r2";
 import { clientRateLimitIdentity, consumePersistentRateLimit } from "@/lib/server/persistent-rate-limit";
 import { canViewerAccessArtworkOwner } from "@/lib/domain/gallery-access";
 import { DAY3_TEMPLATE } from "@/lib/domain/submission-templates";
@@ -108,7 +108,7 @@ export async function GET(request: Request, routeContext: RouteContext) {
             templateVersion: submission.templateVersion,
             slots: submission.day1Slots.map((slot) => ({
               slotKey: slot.slotKey,
-              imageUrl: slot.asset ? getPublicUrl(slot.asset.storageKey) : undefined,
+              imageUrl: slot.asset ? getThumbnailUrl(slot.asset.storageKey) : undefined,
               crop: { x: slot.cropX ?? 0.5, y: slot.cropY ?? 0.5, scale: slot.cropScale ?? 1 },
             })),
           },

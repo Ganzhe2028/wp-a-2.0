@@ -65,6 +65,11 @@ export function getPublicUrl(key: string): string {
   return `${base}/${key}`;
 }
 
+export function getThumbnailUrl(key: string): string {
+  if (process.env.LOCAL_UPLOAD_DIR || !key.startsWith("processed/")) return getPublicUrl(key);
+  return getPublicUrl(`_derived/${key}.thumb.webp`);
+}
+
 export function getKeyFromPublicUrl(url: string): string | null {
   const base = process.env.R2_PUBLIC_BASE_URL?.replace(/\/$/, "");
   if (!base || !url.startsWith(`${base}/`)) return null;
