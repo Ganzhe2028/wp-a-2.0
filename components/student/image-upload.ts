@@ -53,32 +53,46 @@ export class ImageCompressionTooLargeError extends Error {
 
 export async function compressForUpload(file: File, onProgress: (progress: number) => void, mode: CompressionMode = "standard"): Promise<File> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(new Error("图片压缩时间过长，请重试")), mode === "strong" ? 90_000 : 45_000);
+  const timeout = window.setTimeout(() => controller.abort(new Error("图片压缩时间过长，请重试")), mode === "strong" ? 120_000 : 90_000);
   try {
     const profiles = mode === "strong"
-      ? [{ maxSizeMB: .28, maxWidthOrHeight: 1280, initialQuality: .68 }]
+      ? [
+          { maxSizeMB: .28, maxWidthOrHeight: 1280, initialQuality: .68, fileType: "image/webp" },
+          { maxSizeMB: .3, maxWidthOrHeight: 1200, initialQuality: .7, fileType: "image/jpeg" },
+          { maxSizeMB: .22, maxWidthOrHeight: 960, initialQuality: .6, fileType: "image/jpeg" },
+        ]
       : [
-          { maxSizeMB: .38, maxWidthOrHeight: 1600, initialQuality: .8 },
-          { maxSizeMB: .28, maxWidthOrHeight: 1280, initialQuality: .68 },
+          { maxSizeMB: .38, maxWidthOrHeight: 1600, initialQuality: .8, fileType: "image/webp" },
+          { maxSizeMB: .28, maxWidthOrHeight: 1280, initialQuality: .68, fileType: "image/webp" },
+          { maxSizeMB: .3, maxWidthOrHeight: 1200, initialQuality: .7, fileType: "image/jpeg" },
+          { maxSizeMB: .22, maxWidthOrHeight: 960, initialQuality: .6, fileType: "image/jpeg" },
         ];
+    let encodedAtLeastOnce = false;
+    let lastEncodingError: unknown;
     for (const profile of profiles) {
-      const compressed = await imageCompression(file, {
-        ...profile,
-        useWebWorker: true,
-        libURL: new URL(WORKER_LIBRARY_PATH, window.location.origin).toString(),
-        fileType: "image/webp",
-        signal: controller.signal,
-        onProgress: (value) => onProgress(Math.max(0, Math.min(100, Math.round(value)))),
-      });
-      const bytes = new Uint8Array(await compressed.arrayBuffer());
-      const mimeType = detectMime(bytes);
-      if (!mimeType) throw new Error("当前图片格式无法识别，请换一张图片");
-      if (bytes.byteLength <= MAX_UPLOAD_BYTES) {
-        const extension = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
-        const baseName = file.name.replace(/\.[^.]+$/, "") || "image";
-        return new File([bytes], `${baseName}.${extension}`, { type: mimeType, lastModified: file.lastModified });
+      try {
+        const compressed = await imageCompression(file, {
+          ...profile,
+          useWebWorker: true,
+          libURL: new URL(WORKER_LIBRARY_PATH, window.location.origin).toString(),
+          signal: controller.signal,
+          onProgress: (value) => onProgress(Math.max(0, Math.min(100, Math.round(value)))),
+        });
+        const bytes = new Uint8Array(await compressed.arrayBuffer());
+        const mimeType = detectMime(bytes);
+        if (!mimeType) throw new Error("当前图片格式无法识别");
+        encodedAtLeastOnce = true;
+        if (bytes.byteLength <= MAX_UPLOAD_BYTES) {
+          const extension = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
+          const baseName = file.name.replace(/\.[^.]+$/, "") || "image";
+          return new File([bytes], `${baseName}.${extension}`, { type: mimeType, lastModified: file.lastModified });
+        }
+      } catch (error) {
+        if (controller.signal.aborted) throw error;
+        lastEncodingError = error;
       }
     }
+    if (!encodedAtLeastOnce && lastEncodingError instanceof Error) throw new Error(`当前浏览器无法处理这张图片：${lastEncodingError.message}`);
     throw new ImageCompressionTooLargeError();
   } finally {
     window.clearTimeout(timeout);

@@ -32,7 +32,9 @@ test("Day 1 compression and direct upload remain responsive on mobile and weak n
   assert.match(upload, /ImageCompressionTooLargeError/);
   assert.match(upload, /maxSizeMB: \.28/);
   assert.match(upload, /maxWidthOrHeight: 1280/);
-  assert.match(upload, /mode === "strong" \? 90_000 : 45_000/);
+  assert.match(upload, /mode === "strong" \? 120_000 : 90_000/);
+  assert.match(upload, /fileType: "image\/jpeg"/);
+  assert.match(upload, /maxWidthOrHeight: 960/);
   assert.match(upload, /for \(let attempt = 1; attempt <= 3/);
   assert.match(upload, /AbortController/);
   assert.match(editor, /压缩中 \$\{progress\}%/);
@@ -41,6 +43,8 @@ test("Day 1 compression and direct upload remain responsive on mobile and weak n
   assert.match(editor, /MAX_SOURCE_IMAGE_BYTES/);
   assert.match(editor, /原图不会发送给第三方压缩网站/);
   assert.match(editor, /压缩后继续/);
+  assert.match(editor, /failureKind: "too-large"/);
+  assert.match(editor, /请换一张/);
   assert.match(packageJson, /sync-browser-assets\.mjs/);
 });
 

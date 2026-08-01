@@ -13,7 +13,7 @@ interface Crop { x: number; y: number; scale: number }
 interface SlotConfig { slotKey: string; label: string; required: boolean; aspectRatio: number }
 interface SlotValue { slotKey: string; assetId: string; imageUrl?: string; crop: Crop }
 interface PendingPreview { preview: string; crop: Crop }
-interface CropSelection { config: SlotConfig; value?: SlotValue; file?: File; preview: string; pendingCrop?: Crop; compressionMode?: CompressionMode }
+interface CropSelection { config: SlotConfig; value?: SlotValue; file?: File; preview: string; pendingCrop?: Crop; compressionMode?: CompressionMode; failureKind?: "too-large" }
 interface Day1Data { status: SubmissionStatus; version: number; canAuthor: boolean; readOnlyReason?: string; template: { templateVersion: string; slots: SlotConfig[] }; slots: SlotValue[]; publicId: string }
 
 const EMPTY_CROP: Crop = { x: .5, y: .5, scale: 1 };
@@ -215,8 +215,8 @@ export default function Day1Client() {
       if (isReadOnlyError(caught)) setReadOnly(true);
       setPendingPreviews((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
       if (caught instanceof ImageCompressionTooLargeError) {
-        setError(caught.message);
-        URL.revokeObjectURL(preview);
+        setError(`${caught.message}；点按保留的图片并选择“重新选择图片”。`);
+        setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview, pendingCrop: crop, compressionMode: "strong", failureKind: "too-large" } }));
       } else {
         setError(`${caught instanceof Error && !(caught instanceof StudentApiError) ? caught.message : describeApiError(caught)}；点按对应格子可直接重试。`);
         setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview, pendingCrop: crop, compressionMode: activeCrop.compressionMode } }));
@@ -274,7 +274,7 @@ export default function Day1Client() {
           const imageUrl = pending?.preview || failed?.preview || value?.imageUrl;
           const crop = pending?.crop || failed?.pendingCrop || value?.crop || EMPTY_CROP;
           const uploading = uploadingSlots.has(config.slotKey);
-          return <button id={`slot-${config.slotKey}`} key={config.slotKey} type="button" disabled={readOnly || uploading} onClick={() => failed ? setActiveCrop(failed) : value?.imageUrl ? setActiveCrop({ config, value, preview: value.imageUrl }) : choose(config)} className={`student-slot student-slot-${index % 6} ${missing.includes(config.slotKey) ? "student-slot-missing" : ""}`} style={{ aspectRatio: config.aspectRatio }}><span className="student-slot-media">{imageUrl ? <img src={imageUrl} alt="" style={{ transform: `translate(${(crop.x - .5) * 36}%, ${(crop.y - .5) * 36}%) scale(${crop.scale})` }} /> : <span className="student-slot-add" aria-hidden="true">＋</span>}</span>{uploading && <span className="absolute top-2 right-2 z-10 max-w-[85%] rounded-full bg-white/95 px-2 py-1 text-[11px] font-black text-[var(--orange)]">{uploadStages[config.slotKey] || "处理中…"}</span>}{failed && <span className="absolute top-2 right-2 z-10 rounded-full bg-red-700 px-2 py-1 text-[11px] font-black text-white">点按重试</span>}<span className="student-slot-label">{config.label}{config.required ? " *" : ""}</span></button>;
+          return <button id={`slot-${config.slotKey}`} key={config.slotKey} type="button" disabled={readOnly || uploading} onClick={() => failed ? setActiveCrop(failed) : value?.imageUrl ? setActiveCrop({ config, value, preview: value.imageUrl }) : choose(config)} className={`student-slot student-slot-${index % 6} ${missing.includes(config.slotKey) ? "student-slot-missing" : ""}`} style={{ aspectRatio: config.aspectRatio }}><span className="student-slot-media">{imageUrl ? <img src={imageUrl} alt="" style={{ transform: `translate(${(crop.x - .5) * 36}%, ${(crop.y - .5) * 36}%) scale(${crop.scale})` }} /> : <span className="student-slot-add" aria-hidden="true">＋</span>}</span>{uploading && <span className="absolute top-2 right-2 z-10 max-w-[85%] rounded-full bg-white/95 px-2 py-1 text-[11px] font-black text-[var(--orange)]">{uploadStages[config.slotKey] || "处理中…"}</span>}{failed && <span className="absolute top-2 right-2 z-10 rounded-full bg-red-700 px-2 py-1 text-[11px] font-black text-white">{failed.failureKind === "too-large" ? "请换一张" : "点按重试"}</span>}<span className="student-slot-label">{config.label}{config.required ? " *" : ""}</span></button>;
         })}
       </div>
       <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={selectedFile} className="sr-only" />
