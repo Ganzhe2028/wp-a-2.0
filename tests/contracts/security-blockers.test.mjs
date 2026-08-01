@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { decideAccountDeletion } from "../../lib/domain/account-lifecycle.ts";
@@ -98,17 +98,11 @@ test("missing, malformed, and failed settings do not expand access", async () =>
   }
 });
 
-test("normal account deletion is disabled and route has no physical delete", async () => {
+test("formal accounts cannot be physically deleted", async () => {
   assert.deepEqual(decideAccountDeletion(), {
     allowed: false,
     code: "FORBIDDEN",
   });
-
-  const routeSource = await readFile(
-    new URL("../../app/api/admin/persons/route.ts", import.meta.url),
-    "utf8",
-  );
-  assert.doesNotMatch(routeSource, /prisma\.person\.(?:delete|deleteMany)\s*\(/);
 
   const formalRoutes = await Promise.all([
     "../../app/api/v1/admin/accounts/[id]/route.ts",
@@ -117,6 +111,28 @@ test("normal account deletion is disabled and route has no physical delete", asy
   for (const source of formalRoutes) {
     assert.doesNotMatch(source, /(?:prisma|tx)\.user\.(?:delete|deleteMany)\s*\(/);
   }
+});
+
+test("legacy runtime APIs and migration tooling are absent", async () => {
+  const retiredFiles = [
+    "../../app/api/admin/persons/route.ts",
+    "../../app/api/auth/login/route.ts",
+    "../../app/api/me/route.ts",
+    "../../app/api/upload-url/route.ts",
+    "../../scripts/migrate-legacy-persons.ts",
+  ];
+  for (const path of retiredFiles) {
+    await assert.rejects(access(new URL(path, import.meta.url)));
+  }
+});
+
+test("local upload uses the formal student session", async () => {
+  const source = await readFile(
+    new URL("../../app/api/local-upload/route.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /requireFormalViewer/);
+  assert.doesNotMatch(source, /@\/lib\/auth/);
 });
 
 test("admin account list puts archived accounts last and can hide them", async () => {

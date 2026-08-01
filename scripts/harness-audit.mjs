@@ -184,24 +184,19 @@ function checkR2KeyDerivation() {
   }
 }
 
-function checkApiMeSelect() {
-  const file = "app/api/me/route.ts";
-  const full = path.join(ROOT, file);
-  if (!existsSync(full)) {
-    addWarn(`${file} not found; skipped /api/me select check`);
-    return;
-  }
-  const text = read(file);
-  const unsafeInclude =
-    /prisma\.person\.(findUnique|update)\s*\([\s\S]*?\binclude\s*:/.test(text) &&
-    /NextResponse\.json\(\{\s*(ok:\s*true,\s*)?person/.test(text);
-  const sensitiveSelect = /(passwordHash|editToken)\s*:\s*true/.test(text);
-  const hasExplicitSelect = /prisma\.person\.(findUnique|update)\s*\([\s\S]*?\bselect\s*:/.test(text);
-
-  if (unsafeInclude || sensitiveSelect || !hasExplicitSelect) {
-    addFail(`${file} must return Person through explicit safe select without passwordHash/editToken`);
+function checkLegacyRuntimeRetirement() {
+  const retiredFiles = [
+    "app/api/admin/persons/route.ts",
+    "app/api/auth/login/route.ts",
+    "app/api/me/route.ts",
+    "app/api/upload-url/route.ts",
+    "scripts/migrate-legacy-persons.ts",
+  ];
+  const remaining = retiredFiles.filter((file) => existsSync(path.join(ROOT, file)));
+  if (remaining.length) {
+    addFail(`Legacy runtime files must remain retired: ${remaining.join(", ")}`);
   } else {
-    addPass("/api/me uses explicit safe select");
+    addPass("legacy Person runtime and migration tooling are retired");
   }
 }
 
@@ -307,7 +302,7 @@ checkV11Baseline();
 checkOldVercelEngineDocs();
 checkJwtFallback();
 checkR2KeyDerivation();
-checkApiMeSelect();
+checkLegacyRuntimeRetirement();
 checkOpenRedirect();
 checkFindingsLedger();
 checkDocsSyncWarning();

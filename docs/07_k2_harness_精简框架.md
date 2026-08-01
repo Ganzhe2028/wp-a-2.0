@@ -1,5 +1,7 @@
 # k2.7-code Harness 精简框架
 
+> **历史流程记录。** 当前发布与验证规则以 `AGENTS.md` 和 `docs/08_v1.1_工程基线与契约.md` 为准。
+
 本文定义当前 OWeek repo 内的最小 agentic coding harness。目标不是替代工程判断，而是把 review、修复、验证、沉淀变成可执行闭环。
 
 ## 最小闭环
