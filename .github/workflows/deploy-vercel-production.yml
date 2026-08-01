@@ -1,0 +1,62 @@
+name: Deploy Vercel Production
+
+on:
+  push:
+    branches: [XuChen]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-production-XuChen
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+      DIRECT_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+      SESSION_SECRET: ci-only-session-secret-with-at-least-32-bytes
+      ANON_HMAC_SECRET: ci-only-anonymous-secret-with-at-least-32-bytes
+      AUTH_MODE: LOCAL_ONLY
+      APP_BASE_URL: http://127.0.0.1:3000
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: npm
+      - run: npm ci
+      - run: npm run generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run check:generated
+      - run: npm run check:openapi
+      - run: npm run build
+      - run: npm run audit:harness
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: npm
+      - run: npm ci
+      - run: npm install --global vercel@51.2.1
+      - run: vercel pull --yes --environment=production --scope xuchen050324-8425s-projects
+      - run: vercel build --prod --standalone --scope xuchen050324-8425s-projects
+      - run: vercel deploy --prebuilt --prod --scope xuchen050324-8425s-projects
