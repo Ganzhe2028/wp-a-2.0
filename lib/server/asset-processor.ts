@@ -1,4 +1,11 @@
 import { createHmac } from "node:crypto";
+import { prisma } from "@/lib/prisma";
+
+const DISPATCH_RETRY_DELAYS_MS = [400, 1_200];
+
+function delay(milliseconds: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+}
 
 export async function requestAssetProcessing(assetId: string, storageKey: string): Promise<void> {
   const endpoint = process.env.ASSET_PROCESSOR_URL?.trim().replace(/\/$/, "") || "";
@@ -20,4 +27,19 @@ export async function requestAssetProcessing(assetId: string, storageKey: string
     signal: AbortSignal.timeout(30_000),
   });
   if (!response.ok) throw new Error(`ASSET_PROCESSOR_${response.status}`);
+}
+
+export async function processAssetAfterResponse(assetId: string, storageKey: string): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await requestAssetProcessing(assetId, storageKey);
+      return;
+    } catch {
+      if (attempt < DISPATCH_RETRY_DELAYS_MS.length) await delay(DISPATCH_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+  const current = await prisma.asset.findUnique({ where: { id: assetId }, select: { processingStatus: true } });
+  if (current?.processingStatus !== "READY") {
+    await prisma.asset.update({ where: { id: assetId }, data: { scanStatus: "FAILED", processingStatus: "FAILED" } });
+  }
 }

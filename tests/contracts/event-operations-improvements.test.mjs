@@ -7,14 +7,31 @@ async function source(path) {
 }
 
 test("Day 1 returns before image processing and presents an optimistic local preview", async () => {
-  const [completeRoute, editor] = await Promise.all([
+  const [completeRoute, editor, upload] = await Promise.all([
     source("../../app/api/v1/assets/[assetId]/complete/route.ts"),
     source("../../app/me/day-1/Day1Client.tsx"),
+    source("../../components/student/image-upload.ts"),
   ]);
   assert.match(completeRoute, /after\(\(\) => processAssetAfterResponse/);
   assert.match(editor, /pendingPreviews/);
-  assert.match(editor, /maxWidthOrHeight: 1600/);
+  assert.match(upload, /maxWidthOrHeight: 1600/);
   assert.match(editor, /后台正在处理/);
+});
+
+test("Day 1 compression and direct upload remain responsive on mobile and weak networks", async () => {
+  const [editor, upload, packageJson] = await Promise.all([
+    source("../../app/me/day-1/Day1Client.tsx"),
+    source("../../components/student/image-upload.ts"),
+    source("../../package.json"),
+  ]);
+  assert.match(upload, /WORKER_LIBRARY_PATH = "\/vendor\/browser-image-compression\.js"/);
+  assert.match(upload, /MAX_ACTIVE_UPLOADS = 2/);
+  assert.match(upload, /putPresignedImage/);
+  assert.match(upload, /for \(let attempt = 1; attempt <= 3/);
+  assert.match(upload, /AbortController/);
+  assert.match(editor, /压缩中 \$\{progress\}%/);
+  assert.match(editor, /重新上传 \$\{attempt\}\/3/);
+  assert.match(packageJson, /sync-browser-assets\.mjs/);
 });
 
 test("student dialogs render through a body portal and remain viewport-centered", async () => {

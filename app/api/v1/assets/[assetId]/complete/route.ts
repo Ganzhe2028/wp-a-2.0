@@ -6,7 +6,7 @@ import { requireFormalViewer } from "@/lib/server/student-request";
 import { decideAuthoring } from "@/lib/domain/authoring";
 import { getPublicUrl, headR2Object, readR2Object } from "@/lib/r2";
 import { createIdempotencyContext, runIdempotentTransaction } from "@/lib/server/idempotency";
-import { requestAssetProcessing } from "@/lib/server/asset-processor";
+import { processAssetAfterResponse } from "@/lib/server/asset-processor";
 
 interface RouteContext { params: Promise<{ assetId: string }> }
 
@@ -17,17 +17,6 @@ function detectImageMime(bytes: Buffer): string | null {
   if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image/png";
   if (bytes.length >= 12 && bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP") return "image/webp";
   return null;
-}
-
-async function processAssetAfterResponse(assetId: string, storageKey: string) {
-  try {
-    await requestAssetProcessing(assetId, storageKey);
-  } catch {
-    const current = await prisma.asset.findUnique({ where: { id: assetId }, select: { processingStatus: true } });
-    if (current?.processingStatus !== "READY") {
-      await prisma.asset.update({ where: { id: assetId }, data: { scanStatus: "FAILED", processingStatus: "FAILED" } });
-    }
-  }
 }
 
 export async function POST(request: Request, routeContext: RouteContext) {

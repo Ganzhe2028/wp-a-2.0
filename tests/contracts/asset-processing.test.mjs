@@ -41,6 +41,9 @@ test("production image worker is signed, sanitizes bytes, and reports an authent
   assert.match(worker, /x-oweek-signature/);
   assert.match(worker, /validSignedRequest/);
   assert.match(worker, /url\.pathname === "\/process"/);
+  assert.match(worker, /context\.waitUntil\(processAssetWithRetry/);
+  assert.match(worker, /status: "ACCEPTED"/);
+  assert.match(worker, /PROCESS_RETRY_DELAYS_MS/);
   assert.doesNotMatch(worker, /async queue\(/);
   assert.match(workerConfig, /"images"/);
   assert.doesNotMatch(workerConfig, /"queues"/);
@@ -49,4 +52,17 @@ test("production image worker is signed, sanitizes bytes, and reports an authent
   assert.match(cors, /"PUT"/);
   assert.match(cors, /"Content-Type"/);
   assert.doesNotMatch(cors, /"\*"/);
+});
+
+test("processing dispatch retries and stale processing assets self-heal while being polled", async () => {
+  const [processor, statusRoute, presignRoute] = await Promise.all([
+    readFile(new URL("../../lib/server/asset-processor.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../app/api/v1/assets/[assetId]/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../app/api/v1/assets/presign/route.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(processor, /for \(let attempt = 0; attempt < 3/);
+  assert.match(statusRoute, /updatedAt:\s*\{ lte:/);
+  assert.match(statusRoute, /after\(\(\) => processAssetAfterResponse/);
+  assert.match(presignRoute, /asset presign rejected/);
+  assert.match(presignRoute, /"TOO_LARGE"/);
 });

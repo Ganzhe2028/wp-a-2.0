@@ -9,8 +9,8 @@
     "npm": "10.9.2"
   },
   "scripts": {
-    "dev": "next dev",
-    "generate": "prisma generate && node scripts/normalize-prisma-client.mjs",
+    "dev": "node scripts/sync-browser-assets.mjs && next dev",
+    "generate": "node scripts/sync-browser-assets.mjs && prisma generate && node scripts/normalize-prisma-client.mjs",
     "build": "npm run generate && next build --webpack",
     "start": "next start",
     "lint": "eslint",

@@ -5,12 +5,17 @@ const CANONICAL_WIDTH = 1_600;
 const THUMBNAIL_WIDTH = 480;
 const MAX_CANONICAL_BYTES = 1024 * 1024;
 const MAX_THUMBNAIL_BYTES = 256 * 1024;
+const PROCESS_RETRY_DELAYS_MS = [500, 1_500];
 
 function json(value, status = 200) {
   return new Response(JSON.stringify(value), {
     status,
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
+}
+
+function delay(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 function toHex(bytes) {
@@ -247,6 +252,20 @@ async function processAsset(assetId, key, env) {
   return "READY";
 }
 
+async function processAssetWithRetry(assetId, key, env) {
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await processAsset(assetId, key, env);
+    } catch (error) {
+      lastError = error;
+      if (attempt < PROCESS_RETRY_DELAYS_MS.length) await delay(PROCESS_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+  console.error("image processing failed", { error: lastError instanceof Error ? lastError.message : "unknown" });
+  return "PROCESSING";
+}
+
 function publicObjectKey(pathname) {
   if (!pathname.startsWith("/assets/")) return null;
   try {
@@ -297,13 +316,8 @@ const worker = {
         return json({ error: "Invalid payload" }, 400);
       }
       if (!payload || typeof payload !== "object" || typeof payload.assetId !== "string" || typeof payload.storageKey !== "string") return json({ error: "Invalid payload" }, 400);
-      try {
-        const status = await processAsset(payload.assetId, payload.storageKey, env);
-        return json({ ok: true, status });
-      } catch (error) {
-        console.error("image processing failed", { error: error instanceof Error ? error.message : "unknown" });
-        return json({ error: "Processing failed" }, 500);
-      }
+      context.waitUntil(processAssetWithRetry(payload.assetId, payload.storageKey, env));
+      return json({ ok: true, status: "ACCEPTED" }, 202);
     }
     const assetResponse = await serveAsset(request, env, context, url);
     if (assetResponse) return assetResponse;

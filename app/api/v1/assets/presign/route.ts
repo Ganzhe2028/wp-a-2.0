@@ -12,6 +12,11 @@ const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_UPLOAD_BYTES = 512 * 1024;
 const MAX_TOTAL_ASSETS = 2_250;
 
+function validationFailure(requestId: string, reason: string, message: string) {
+  console.warn("asset presign rejected", { requestId, reason });
+  return NextResponse.json(failure("VALIDATION_ERROR", message, requestId), { status: 400 });
+}
+
 export async function POST(request: Request) {
   const context = await requireFormalViewer(request, { write: true });
   if (!context.ok) return context.response;
@@ -23,9 +28,11 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(failure("VALIDATION_ERROR", "请求格式无效", context.requestId), { status: 400 });
   }
-  if (body.section !== "DAY1" || typeof body.mimeType !== "string" || !ALLOWED_MIME.has(body.mimeType) || !Number.isSafeInteger(body.byteSize) || (body.byteSize as number) <= 0 || (body.byteSize as number) > MAX_UPLOAD_BYTES || typeof body.checksum !== "string" || !/^[0-9a-f]{64}$/i.test(body.checksum)) {
-    return NextResponse.json(failure("VALIDATION_ERROR", "图片参数无效", context.requestId), { status: 400 });
-  }
+  if (body.section !== "DAY1") return validationFailure(context.requestId, "SECTION", "图片上传分区无效");
+  if (typeof body.mimeType !== "string" || !ALLOWED_MIME.has(body.mimeType)) return validationFailure(context.requestId, "MIME", "当前浏览器生成的图片格式不受支持，请重试");
+  if (!Number.isSafeInteger(body.byteSize) || (body.byteSize as number) <= 0) return validationFailure(context.requestId, "BYTE_SIZE", "压缩后的图片大小无效，请重试");
+  if ((body.byteSize as number) > MAX_UPLOAD_BYTES) return validationFailure(context.requestId, "TOO_LARGE", "图片压缩后仍然过大，请换一张图片");
+  if (typeof body.checksum !== "string" || !/^[0-9a-f]{64}$/i.test(body.checksum)) return validationFailure(context.requestId, "CHECKSUM", "图片校验失败，请重试");
   const [settings, submission] = await Promise.all([
     prisma.eventSettings.findUnique({ where: { eventId: context.viewer.eventId } }),
     prisma.submission.findUnique({ where: { eventId_userId_section: { eventId: context.viewer.eventId, userId: context.viewer.userId, section: "DAY1" } }, select: { status: true } }),
