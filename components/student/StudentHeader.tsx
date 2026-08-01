@@ -15,7 +15,7 @@ export default function StudentHeader({ title, backHref = "/home", showLogout = 
 
   return (
     <header className="ow-nav">
-      {backHref && <Link href={backHref} aria-label="返回" className="ow-orange text-4xl leading-none">←</Link>}
+      {backHref && <Link href={backHref} aria-label="返回" className="ow-nav-back ow-orange text-4xl leading-none">←</Link>}
       <strong className={`${backHref ? "" : "col-span-2"} text-lg tracking-tight`}>{title}</strong>
       {showLogout ? <button type="button" onClick={logout} className="ow-nav-action">退出</button> : <span />}
     </header>

@@ -10,6 +10,7 @@ test("Home has no circular back link and keeps logout as its session exit", asyn
 
   assert.match(header, /backHref\?: string \| null/);
   assert.match(header, /\{backHref && <Link/);
+  assert.match(header, /className="ow-nav-back ow-orange text-4xl leading-none"/);
   assert.match(header, /backHref \? "" : "col-span-2"/);
   assert.match(home, /<StudentHeader title="HOME" backHref=\{null\} showLogout \/>/);
   assert.doesNotMatch(home, /<StudentHeader title="HOME" backHref="\/home"/);
