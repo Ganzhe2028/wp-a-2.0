@@ -27,20 +27,32 @@ test("NFC and Package legacy entries fail closed without special access", () => 
 });
 
 test("artwork entry pages cannot query legacy data stores directly", async () => {
-  // /u/[code] is the student profile page in the restored O—WEEK flow and
-  // intentionally queries Person; only the legacy NFC/Package entries and the
-  // formal artwork entry must stay decoupled from legacy data stores.
-  const routeFiles = [
+  const failClosedLegacyEntries = [
     "../../app/nfc/[code]/page.tsx",
     "../../app/package/[code]/page.tsx",
-    "../../app/artworks/[publicId]/page.tsx",
   ];
 
-  for (const routeFile of routeFiles) {
+  for (const routeFile of failClosedLegacyEntries) {
     const source = await readFile(new URL(routeFile, import.meta.url), "utf8");
     assert.match(source, /decideArtworkVisibility/);
     assert.doesNotMatch(source, /prisma\.(?:person|locationCard|image)/);
   }
+
+  const formalFiles = [
+    "../../app/artworks/[publicId]/page.tsx",
+    "../../app/artworks/[publicId]/ArtworkClient.tsx",
+    "../../app/api/v1/artworks/[publicId]/route.ts",
+  ];
+  for (const routeFile of formalFiles) {
+    const source = await readFile(new URL(routeFile, import.meta.url), "utf8");
+    assert.doesNotMatch(source, /prisma\.(?:person|locationCard|image)/);
+  }
+
+  const client = await readFile(
+    new URL("../../app/artworks/[publicId]/ArtworkClient.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(client, /\/api\/v1\/artworks\//);
 });
 
 test("Gallery and direct Artwork URLs use the same visibility decision", () => {
@@ -97,6 +109,25 @@ test("normal account deletion is disabled and route has no physical delete", asy
     "utf8",
   );
   assert.doesNotMatch(routeSource, /prisma\.person\.(?:delete|deleteMany)\s*\(/);
+
+  const formalRoutes = await Promise.all([
+    "../../app/api/v1/admin/accounts/[id]/route.ts",
+    "../../app/api/v1/admin/accounts/bulk/route.ts",
+  ].map((path) => readFile(new URL(path, import.meta.url), "utf8")));
+  for (const source of formalRoutes) {
+    assert.doesNotMatch(source, /(?:prisma|tx)\.user\.(?:delete|deleteMany)\s*\(/);
+  }
+});
+
+test("admin account list puts archived accounts last and can hide them", async () => {
+  const [routeSource, uiSource] = await Promise.all([
+    readFile(new URL("../../app/api/v1/admin/accounts/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../components/admin/AdminAccounts.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(routeSource, /\{ status: "asc" \}/);
+  assert.match(uiSource, /params\.set\("status", "ACTIVE"\)/);
+  assert.match(uiSource, /隐藏已归档账号/);
 });
 
 test("Day 3 rejects structurally empty submissions", () => {

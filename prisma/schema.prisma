@@ -125,6 +125,8 @@ model Event {
   anonymousIds     EventAnonymousId[]
   artworkPublicIds ArtworkPublicId[]
   auditLogs        AdminAuditLog[]
+  idempotencyRecords IdempotencyRecord[]
+  legacyPersonLinks LegacyPersonLink[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 }
@@ -138,6 +140,7 @@ model EventSettings {
   allowEditing       Boolean  @default(false)
   showName           Boolean  @default(false)
   fullProfileVisible Boolean  @default(false)
+  seniorCanBrowseAll Boolean  @default(false)
   version            Int      @default(1)
   updatedBy          String?
   updater            User?    @relation("EventSettingsUpdater", fields: [updatedBy, eventId], references: [id, eventId], onDelete: Restrict)
@@ -150,15 +153,17 @@ model User {
   id                 String             @id @default(cuid())
   eventId            String
   event              Event              @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  issuer             String
-  externalSubject    String
-  email              String
+  accountCode        String             @unique @db.VarChar(32)
+  issuer             String?
+  externalSubject    String?
+  email              String?            @unique
   displayName        String
   displayNameSortKey String
   role               UserRole           @default(LEARNER)
   groupId            String?
   group              Group?             @relation(fields: [groupId, eventId], references: [id, eventId], onDelete: Restrict)
   status             UserStatus         @default(ACTIVE)
+  protectedSystemAdmin Boolean           @default(false)
   lastLoginAt        DateTime?
   version            Int                @default(1)
   archivedAt         DateTime?
@@ -169,6 +174,11 @@ model User {
   artworkPublicIds   ArtworkPublicId[]
   auditLogs          AdminAuditLog[]    @relation("AuditActor")
   settingsUpdates    EventSettings[]    @relation("EventSettingsUpdater")
+  localCredential    LocalCredential?
+  oidcIdentities     OidcIdentity[]
+  sessions           Session[]
+  idempotencyRecords IdempotencyRecord[] @relation("IdempotencyActor")
+  legacyPersonLink   LegacyPersonLink?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
@@ -177,6 +187,86 @@ model User {
   @@index([eventId, status, role])
   @@index([eventId, displayNameSortKey])
   @@index([groupId])
+}
+
+model LocalCredential {
+  userId            String   @id
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash      String
+  passwordChangedAt DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model OidcIdentity {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issuer    String
+  subject   String
+  boundAt   DateTime @default(now())
+
+  @@unique([issuer, subject])
+  @@unique([userId, issuer])
+  @@index([userId])
+}
+
+model Session {
+  id            String    @id @default(cuid())
+  tokenHash     String    @unique @db.Char(64)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  lastSeenAt    DateTime  @default(now())
+  ipHash        String?   @db.Char(64)
+  userAgentHash String?   @db.Char(64)
+  createdAt     DateTime  @default(now())
+
+  @@index([userId, revokedAt, expiresAt])
+  @@index([expiresAt])
+}
+
+model IdempotencyRecord {
+  id                 String   @id @default(cuid())
+  eventId            String
+  event              Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  actorUserId        String
+  actor              User     @relation("IdempotencyActor", fields: [actorUserId, eventId], references: [id, eventId], onDelete: Restrict)
+  scope              String   @db.VarChar(120)
+  keyHash            String   @db.Char(64)
+  requestHash        String   @db.Char(64)
+  responseCiphertext String
+  expiresAt          DateTime
+  createdAt          DateTime @default(now())
+
+  @@unique([eventId, actorUserId, scope, keyHash])
+  @@index([expiresAt])
+  @@index([eventId, actorUserId, createdAt])
+}
+
+model LegacyPersonLink {
+  id             String   @id @default(cuid())
+  eventId        String
+  event          Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  legacyPersonId String   @unique
+  userId         String   @unique
+  user           User     @relation(fields: [userId, eventId], references: [id, eventId], onDelete: Restrict)
+  mappingDigest  String   @db.Char(64)
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, eventId])
+  @@index([eventId, createdAt])
+}
+
+model RateLimitBucket {
+  keyHash         String   @id @db.Char(64)
+  scope           String   @db.VarChar(64)
+  count           Int
+  windowStartedAt DateTime
+  expiresAt       DateTime
+
+  @@index([expiresAt])
 }
 
 model Group {
@@ -207,6 +297,9 @@ model Submission {
   templateVersion String
   version         Int               @default(1)
   submittedAt     DateTime?
+  submitIdempotencyKeyHash String?  @db.Char(64)
+  submitRequestHash        String?  @db.Char(64)
+  submitResult             Json?
   day1Slots       Day1Slot[]
   day3Bottles     Day3Bottle[]
   createdAt       DateTime          @default(now())
@@ -226,8 +319,8 @@ model Asset {
   owner            User                  @relation(fields: [ownerUserId, eventId], references: [id, eventId], onDelete: Restrict)
   storageKey       String                @unique
   mimeType         String
-  width            Int
-  height           Int
+  width            Int?
+  height           Int?
   byteSize         BigInt
   checksum         String
   scanStatus       AssetScanStatus       @default(PENDING)
@@ -281,6 +374,7 @@ model EventAnonymousId {
   userId      String
   user        User     @relation(fields: [userId, eventId], references: [id, eventId], onDelete: Restrict)
   anonymousId String   @db.VarChar(8)
+  secretVersion Int    @default(1)
   createdAt   DateTime @default(now())
 
   @@unique([eventId, userId])
@@ -314,6 +408,8 @@ model AdminAuditLog {
   after       Json?
   requestId   String
   summary     String
+  ipHash      String?  @db.Char(64)
+  userAgentHash String? @db.Char(64)
   createdAt   DateTime @default(now())
 
   @@index([requestId])

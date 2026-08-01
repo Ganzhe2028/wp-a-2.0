@@ -37,6 +37,7 @@ export type UserSumAggregateOutputType = {
 export type UserMinAggregateOutputType = {
   id: string | null
   eventId: string | null
+  accountCode: string | null
   issuer: string | null
   externalSubject: string | null
   email: string | null
@@ -45,6 +46,7 @@ export type UserMinAggregateOutputType = {
   role: $Enums.UserRole | null
   groupId: string | null
   status: $Enums.UserStatus | null
+  protectedSystemAdmin: boolean | null
   lastLoginAt: Date | null
   version: number | null
   archivedAt: Date | null
@@ -56,6 +58,7 @@ export type UserMinAggregateOutputType = {
 export type UserMaxAggregateOutputType = {
   id: string | null
   eventId: string | null
+  accountCode: string | null
   issuer: string | null
   externalSubject: string | null
   email: string | null
@@ -64,6 +67,7 @@ export type UserMaxAggregateOutputType = {
   role: $Enums.UserRole | null
   groupId: string | null
   status: $Enums.UserStatus | null
+  protectedSystemAdmin: boolean | null
   lastLoginAt: Date | null
   version: number | null
   archivedAt: Date | null
@@ -75,6 +79,7 @@ export type UserMaxAggregateOutputType = {
 export type UserCountAggregateOutputType = {
   id: number
   eventId: number
+  accountCode: number
   issuer: number
   externalSubject: number
   email: number
@@ -83,6 +88,7 @@ export type UserCountAggregateOutputType = {
   role: number
   groupId: number
   status: number
+  protectedSystemAdmin: number
   lastLoginAt: number
   version: number
   archivedAt: number
@@ -104,6 +110,7 @@ export type UserSumAggregateInputType = {
 export type UserMinAggregateInputType = {
   id?: true
   eventId?: true
+  accountCode?: true
   issuer?: true
   externalSubject?: true
   email?: true
@@ -112,6 +119,7 @@ export type UserMinAggregateInputType = {
   role?: true
   groupId?: true
   status?: true
+  protectedSystemAdmin?: true
   lastLoginAt?: true
   version?: true
   archivedAt?: true
@@ -123,6 +131,7 @@ export type UserMinAggregateInputType = {
 export type UserMaxAggregateInputType = {
   id?: true
   eventId?: true
+  accountCode?: true
   issuer?: true
   externalSubject?: true
   email?: true
@@ -131,6 +140,7 @@ export type UserMaxAggregateInputType = {
   role?: true
   groupId?: true
   status?: true
+  protectedSystemAdmin?: true
   lastLoginAt?: true
   version?: true
   archivedAt?: true
@@ -142,6 +152,7 @@ export type UserMaxAggregateInputType = {
 export type UserCountAggregateInputType = {
   id?: true
   eventId?: true
+  accountCode?: true
   issuer?: true
   externalSubject?: true
   email?: true
@@ -150,6 +161,7 @@ export type UserCountAggregateInputType = {
   role?: true
   groupId?: true
   status?: true
+  protectedSystemAdmin?: true
   lastLoginAt?: true
   version?: true
   archivedAt?: true
@@ -248,14 +260,16 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type UserGroupByOutputType = {
   id: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer: string | null
+  externalSubject: string | null
+  email: string | null
   displayName: string
   displayNameSortKey: string
   role: $Enums.UserRole
   groupId: string | null
   status: $Enums.UserStatus
+  protectedSystemAdmin: boolean
   lastLoginAt: Date | null
   version: number
   archivedAt: Date | null
@@ -290,14 +304,16 @@ export type UserWhereInput = {
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
   eventId?: Prisma.StringFilter<"User"> | string
-  issuer?: Prisma.StringFilter<"User"> | string
-  externalSubject?: Prisma.StringFilter<"User"> | string
-  email?: Prisma.StringFilter<"User"> | string
+  accountCode?: Prisma.StringFilter<"User"> | string
+  issuer?: Prisma.StringNullableFilter<"User"> | string | null
+  externalSubject?: Prisma.StringNullableFilter<"User"> | string | null
+  email?: Prisma.StringNullableFilter<"User"> | string | null
   displayName?: Prisma.StringFilter<"User"> | string
   displayNameSortKey?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   groupId?: Prisma.StringNullableFilter<"User"> | string | null
   status?: Prisma.EnumUserStatusFilter<"User"> | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   version?: Prisma.IntFilter<"User"> | number
   archivedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -312,19 +328,26 @@ export type UserWhereInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdListRelationFilter
   auditLogs?: Prisma.AdminAuditLogListRelationFilter
   settingsUpdates?: Prisma.EventSettingsListRelationFilter
+  localCredential?: Prisma.XOR<Prisma.LocalCredentialNullableScalarRelationFilter, Prisma.LocalCredentialWhereInput> | null
+  oidcIdentities?: Prisma.OidcIdentityListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
+  idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
+  legacyPersonLink?: Prisma.XOR<Prisma.LegacyPersonLinkNullableScalarRelationFilter, Prisma.LegacyPersonLinkWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
-  issuer?: Prisma.SortOrder
-  externalSubject?: Prisma.SortOrder
-  email?: Prisma.SortOrder
+  accountCode?: Prisma.SortOrder
+  issuer?: Prisma.SortOrderInput | Prisma.SortOrder
+  externalSubject?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   displayName?: Prisma.SortOrder
   displayNameSortKey?: Prisma.SortOrder
   role?: Prisma.SortOrder
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  protectedSystemAdmin?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -339,24 +362,31 @@ export type UserOrderByWithRelationInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdOrderByRelationAggregateInput
   auditLogs?: Prisma.AdminAuditLogOrderByRelationAggregateInput
   settingsUpdates?: Prisma.EventSettingsOrderByRelationAggregateInput
+  localCredential?: Prisma.LocalCredentialOrderByWithRelationInput
+  oidcIdentities?: Prisma.OidcIdentityOrderByRelationAggregateInput
+  sessions?: Prisma.SessionOrderByRelationAggregateInput
+  idempotencyRecords?: Prisma.IdempotencyRecordOrderByRelationAggregateInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  accountCode?: string
+  email?: string
   eventId_issuer_externalSubject?: Prisma.UserEventIdIssuerExternalSubjectCompoundUniqueInput
   id_eventId?: Prisma.UserIdEventIdCompoundUniqueInput
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   eventId?: Prisma.StringFilter<"User"> | string
-  issuer?: Prisma.StringFilter<"User"> | string
-  externalSubject?: Prisma.StringFilter<"User"> | string
-  email?: Prisma.StringFilter<"User"> | string
+  issuer?: Prisma.StringNullableFilter<"User"> | string | null
+  externalSubject?: Prisma.StringNullableFilter<"User"> | string | null
   displayName?: Prisma.StringFilter<"User"> | string
   displayNameSortKey?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   groupId?: Prisma.StringNullableFilter<"User"> | string | null
   status?: Prisma.EnumUserStatusFilter<"User"> | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   version?: Prisma.IntFilter<"User"> | number
   archivedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -371,19 +401,26 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   artworkPublicIds?: Prisma.ArtworkPublicIdListRelationFilter
   auditLogs?: Prisma.AdminAuditLogListRelationFilter
   settingsUpdates?: Prisma.EventSettingsListRelationFilter
-}, "id" | "eventId_issuer_externalSubject" | "id_eventId">
+  localCredential?: Prisma.XOR<Prisma.LocalCredentialNullableScalarRelationFilter, Prisma.LocalCredentialWhereInput> | null
+  oidcIdentities?: Prisma.OidcIdentityListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
+  idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
+  legacyPersonLink?: Prisma.XOR<Prisma.LegacyPersonLinkNullableScalarRelationFilter, Prisma.LegacyPersonLinkWhereInput> | null
+}, "id" | "accountCode" | "email" | "eventId_issuer_externalSubject" | "id_eventId">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
-  issuer?: Prisma.SortOrder
-  externalSubject?: Prisma.SortOrder
-  email?: Prisma.SortOrder
+  accountCode?: Prisma.SortOrder
+  issuer?: Prisma.SortOrderInput | Prisma.SortOrder
+  externalSubject?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   displayName?: Prisma.SortOrder
   displayNameSortKey?: Prisma.SortOrder
   role?: Prisma.SortOrder
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  protectedSystemAdmin?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -403,14 +440,16 @@ export type UserScalarWhereWithAggregatesInput = {
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
   eventId?: Prisma.StringWithAggregatesFilter<"User"> | string
-  issuer?: Prisma.StringWithAggregatesFilter<"User"> | string
-  externalSubject?: Prisma.StringWithAggregatesFilter<"User"> | string
-  email?: Prisma.StringWithAggregatesFilter<"User"> | string
+  accountCode?: Prisma.StringWithAggregatesFilter<"User"> | string
+  issuer?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  externalSubject?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  email?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   displayName?: Prisma.StringWithAggregatesFilter<"User"> | string
   displayNameSortKey?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   groupId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   status?: Prisma.EnumUserStatusWithAggregatesFilter<"User"> | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   version?: Prisma.IntWithAggregatesFilter<"User"> | number
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -421,13 +460,15 @@ export type UserScalarWhereWithAggregatesInput = {
 
 export type UserCreateInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -442,19 +483,26 @@ export type UserCreateInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -467,17 +515,24 @@ export type UserUncheckedCreateInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -492,19 +547,26 @@ export type UserUpdateInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -517,19 +579,26 @@ export type UserUncheckedUpdateInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -540,13 +609,15 @@ export type UserCreateManyInput = {
 
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -558,14 +629,16 @@ export type UserUpdateManyMutationInput = {
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -603,6 +676,7 @@ export type UserIdEventIdCompoundUniqueInput = {
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
+  accountCode?: Prisma.SortOrder
   issuer?: Prisma.SortOrder
   externalSubject?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -611,6 +685,7 @@ export type UserCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  protectedSystemAdmin?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   version?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
@@ -626,6 +701,7 @@ export type UserAvgOrderByAggregateInput = {
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
+  accountCode?: Prisma.SortOrder
   issuer?: Prisma.SortOrder
   externalSubject?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -634,6 +710,7 @@ export type UserMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  protectedSystemAdmin?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   version?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
@@ -645,6 +722,7 @@ export type UserMaxOrderByAggregateInput = {
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
+  accountCode?: Prisma.SortOrder
   issuer?: Prisma.SortOrder
   externalSubject?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -653,6 +731,7 @@ export type UserMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  protectedSystemAdmin?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   version?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
@@ -734,6 +813,76 @@ export type EnumUserRoleFieldUpdateOperationsInput = {
 
 export type EnumUserStatusFieldUpdateOperationsInput = {
   set?: $Enums.UserStatus
+}
+
+export type UserCreateNestedOneWithoutLocalCredentialInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLocalCredentialInput, Prisma.UserUncheckedCreateWithoutLocalCredentialInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLocalCredentialInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLocalCredentialNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLocalCredentialInput, Prisma.UserUncheckedCreateWithoutLocalCredentialInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLocalCredentialInput
+  upsert?: Prisma.UserUpsertWithoutLocalCredentialInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLocalCredentialInput, Prisma.UserUpdateWithoutLocalCredentialInput>, Prisma.UserUncheckedUpdateWithoutLocalCredentialInput>
+}
+
+export type UserCreateNestedOneWithoutOidcIdentitiesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOidcIdentitiesInput, Prisma.UserUncheckedCreateWithoutOidcIdentitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOidcIdentitiesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutOidcIdentitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOidcIdentitiesInput, Prisma.UserUncheckedCreateWithoutOidcIdentitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOidcIdentitiesInput
+  upsert?: Prisma.UserUpsertWithoutOidcIdentitiesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOidcIdentitiesInput, Prisma.UserUpdateWithoutOidcIdentitiesInput>, Prisma.UserUncheckedUpdateWithoutOidcIdentitiesInput>
+}
+
+export type UserCreateNestedOneWithoutSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  upsert?: Prisma.UserUpsertWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
+export type UserCreateNestedOneWithoutIdempotencyRecordsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyRecordsInput, Prisma.UserUncheckedCreateWithoutIdempotencyRecordsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutIdempotencyRecordsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutIdempotencyRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyRecordsInput, Prisma.UserUncheckedCreateWithoutIdempotencyRecordsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutIdempotencyRecordsInput
+  upsert?: Prisma.UserUpsertWithoutIdempotencyRecordsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutIdempotencyRecordsInput, Prisma.UserUpdateWithoutIdempotencyRecordsInput>, Prisma.UserUncheckedUpdateWithoutIdempotencyRecordsInput>
+}
+
+export type UserCreateNestedOneWithoutLegacyPersonLinkInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLegacyPersonLinkInput, Prisma.UserUncheckedCreateWithoutLegacyPersonLinkInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLegacyPersonLinkInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLegacyPersonLinkNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLegacyPersonLinkInput, Prisma.UserUncheckedCreateWithoutLegacyPersonLinkInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLegacyPersonLinkInput
+  upsert?: Prisma.UserUpsertWithoutLegacyPersonLinkInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLegacyPersonLinkInput, Prisma.UserUpdateWithoutLegacyPersonLinkInput>, Prisma.UserUncheckedUpdateWithoutLegacyPersonLinkInput>
 }
 
 export type UserCreateNestedManyWithoutGroupInput = {
@@ -852,13 +1001,15 @@ export type UserUpdateOneWithoutAuditLogsNestedInput = {
 
 export type UserCreateWithoutEventInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -872,18 +1023,25 @@ export type UserCreateWithoutEventInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEventInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -896,6 +1054,11 @@ export type UserUncheckedCreateWithoutEventInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEventInput = {
@@ -930,14 +1093,16 @@ export type UserScalarWhereInput = {
   NOT?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
   eventId?: Prisma.StringFilter<"User"> | string
-  issuer?: Prisma.StringFilter<"User"> | string
-  externalSubject?: Prisma.StringFilter<"User"> | string
-  email?: Prisma.StringFilter<"User"> | string
+  accountCode?: Prisma.StringFilter<"User"> | string
+  issuer?: Prisma.StringNullableFilter<"User"> | string | null
+  externalSubject?: Prisma.StringNullableFilter<"User"> | string | null
+  email?: Prisma.StringNullableFilter<"User"> | string | null
   displayName?: Prisma.StringFilter<"User"> | string
   displayNameSortKey?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   groupId?: Prisma.StringNullableFilter<"User"> | string | null
   status?: Prisma.EnumUserStatusFilter<"User"> | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   version?: Prisma.IntFilter<"User"> | number
   archivedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -948,13 +1113,15 @@ export type UserScalarWhereInput = {
 
 export type UserCreateWithoutSettingsUpdatesInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -968,19 +1135,26 @@ export type UserCreateWithoutSettingsUpdatesInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSettingsUpdatesInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -992,6 +1166,11 @@ export type UserUncheckedCreateWithoutSettingsUpdatesInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSettingsUpdatesInput = {
@@ -1012,13 +1191,15 @@ export type UserUpdateToOneWithWhereWithoutSettingsUpdatesInput = {
 
 export type UserUpdateWithoutSettingsUpdatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1032,19 +1213,26 @@ export type UserUpdateWithoutSettingsUpdatesInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSettingsUpdatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1056,17 +1244,724 @@ export type UserUncheckedUpdateWithoutSettingsUpdatesInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
-export type UserCreateWithoutGroupInput = {
+export type UserCreateWithoutLocalCredentialInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  event: Prisma.EventCreateNestedOneWithoutUsersInput
+  group?: Prisma.GroupCreateNestedOneWithoutUsersInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutLocalCredentialInput = {
+  id?: string
+  eventId: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  groupId?: string | null
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutLocalCredentialInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLocalCredentialInput, Prisma.UserUncheckedCreateWithoutLocalCredentialInput>
+}
+
+export type UserUpsertWithoutLocalCredentialInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLocalCredentialInput, Prisma.UserUncheckedUpdateWithoutLocalCredentialInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLocalCredentialInput, Prisma.UserUncheckedCreateWithoutLocalCredentialInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLocalCredentialInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLocalCredentialInput, Prisma.UserUncheckedUpdateWithoutLocalCredentialInput>
+}
+
+export type UserUpdateWithoutLocalCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event?: Prisma.EventUpdateOneRequiredWithoutUsersNestedInput
+  group?: Prisma.GroupUpdateOneWithoutUsersNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLocalCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutOidcIdentitiesInput = {
+  id?: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  event: Prisma.EventCreateNestedOneWithoutUsersInput
+  group?: Prisma.GroupCreateNestedOneWithoutUsersInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutOidcIdentitiesInput = {
+  id?: string
+  eventId: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  groupId?: string | null
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutOidcIdentitiesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOidcIdentitiesInput, Prisma.UserUncheckedCreateWithoutOidcIdentitiesInput>
+}
+
+export type UserUpsertWithoutOidcIdentitiesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOidcIdentitiesInput, Prisma.UserUncheckedUpdateWithoutOidcIdentitiesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOidcIdentitiesInput, Prisma.UserUncheckedCreateWithoutOidcIdentitiesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOidcIdentitiesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOidcIdentitiesInput, Prisma.UserUncheckedUpdateWithoutOidcIdentitiesInput>
+}
+
+export type UserUpdateWithoutOidcIdentitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event?: Prisma.EventUpdateOneRequiredWithoutUsersNestedInput
+  group?: Prisma.GroupUpdateOneWithoutUsersNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOidcIdentitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSessionsInput = {
+  id?: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  event: Prisma.EventCreateNestedOneWithoutUsersInput
+  group?: Prisma.GroupCreateNestedOneWithoutUsersInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSessionsInput = {
+  id?: string
+  eventId: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  groupId?: string | null
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+}
+
+export type UserUpsertWithoutSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
+export type UserUpdateWithoutSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event?: Prisma.EventUpdateOneRequiredWithoutUsersNestedInput
+  group?: Prisma.GroupUpdateOneWithoutUsersNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutIdempotencyRecordsInput = {
+  id?: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  event: Prisma.EventCreateNestedOneWithoutUsersInput
+  group?: Prisma.GroupCreateNestedOneWithoutUsersInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutIdempotencyRecordsInput = {
+  id?: string
+  eventId: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  groupId?: string | null
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutIdempotencyRecordsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyRecordsInput, Prisma.UserUncheckedCreateWithoutIdempotencyRecordsInput>
+}
+
+export type UserUpsertWithoutIdempotencyRecordsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutIdempotencyRecordsInput, Prisma.UserUncheckedUpdateWithoutIdempotencyRecordsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyRecordsInput, Prisma.UserUncheckedCreateWithoutIdempotencyRecordsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutIdempotencyRecordsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutIdempotencyRecordsInput, Prisma.UserUncheckedUpdateWithoutIdempotencyRecordsInput>
+}
+
+export type UserUpdateWithoutIdempotencyRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event?: Prisma.EventUpdateOneRequiredWithoutUsersNestedInput
+  group?: Prisma.GroupUpdateOneWithoutUsersNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutIdempotencyRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLegacyPersonLinkInput = {
+  id?: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  event: Prisma.EventCreateNestedOneWithoutUsersInput
+  group?: Prisma.GroupCreateNestedOneWithoutUsersInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutLegacyPersonLinkInput = {
+  id?: string
+  eventId: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  groupId?: string | null
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
+  lastLoginAt?: Date | string | null
+  version?: number
+  archivedAt?: Date | string | null
+  archivedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOwnerInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutLegacyPersonLinkInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLegacyPersonLinkInput, Prisma.UserUncheckedCreateWithoutLegacyPersonLinkInput>
+}
+
+export type UserUpsertWithoutLegacyPersonLinkInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLegacyPersonLinkInput, Prisma.UserUncheckedUpdateWithoutLegacyPersonLinkInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLegacyPersonLinkInput, Prisma.UserUncheckedCreateWithoutLegacyPersonLinkInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLegacyPersonLinkInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLegacyPersonLinkInput, Prisma.UserUncheckedUpdateWithoutLegacyPersonLinkInput>
+}
+
+export type UserUpdateWithoutLegacyPersonLinkInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event?: Prisma.EventUpdateOneRequiredWithoutUsersNestedInput
+  group?: Prisma.GroupUpdateOneWithoutUsersNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLegacyPersonLinkInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOwnerNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserCreateWithoutGroupInput = {
+  id?: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
+  displayName: string
+  displayNameSortKey: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1080,17 +1975,24 @@ export type UserCreateWithoutGroupInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGroupInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1103,6 +2005,11 @@ export type UserUncheckedCreateWithoutGroupInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGroupInput = {
@@ -1133,13 +2040,15 @@ export type UserUpdateManyWithWhereWithoutGroupInput = {
 
 export type UserCreateWithoutSubmissionsInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1153,19 +2062,26 @@ export type UserCreateWithoutSubmissionsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubmissionsInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1177,6 +2093,11 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubmissionsInput = {
@@ -1197,13 +2118,15 @@ export type UserUpdateToOneWithWhereWithoutSubmissionsInput = {
 
 export type UserUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1217,19 +2140,26 @@ export type UserUpdateWithoutSubmissionsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1241,17 +2171,24 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAssetsInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1265,19 +2202,26 @@ export type UserCreateWithoutAssetsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAssetsInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1289,6 +2233,11 @@ export type UserUncheckedCreateWithoutAssetsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAssetsInput = {
@@ -1309,13 +2258,15 @@ export type UserUpdateToOneWithWhereWithoutAssetsInput = {
 
 export type UserUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1329,19 +2280,26 @@ export type UserUpdateWithoutAssetsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1353,17 +2311,24 @@ export type UserUncheckedUpdateWithoutAssetsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAnonymousIdsInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1377,19 +2342,26 @@ export type UserCreateWithoutAnonymousIdsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAnonymousIdsInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1401,6 +2373,11 @@ export type UserUncheckedCreateWithoutAnonymousIdsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAnonymousIdsInput = {
@@ -1421,13 +2398,15 @@ export type UserUpdateToOneWithWhereWithoutAnonymousIdsInput = {
 
 export type UserUpdateWithoutAnonymousIdsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1441,19 +2420,26 @@ export type UserUpdateWithoutAnonymousIdsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnonymousIdsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1465,17 +2451,24 @@ export type UserUncheckedUpdateWithoutAnonymousIdsInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutArtworkPublicIdsInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1489,19 +2482,26 @@ export type UserCreateWithoutArtworkPublicIdsInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutArtworkPublicIdsInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1513,6 +2513,11 @@ export type UserUncheckedCreateWithoutArtworkPublicIdsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutArtworkPublicIdsInput = {
@@ -1533,13 +2538,15 @@ export type UserUpdateToOneWithWhereWithoutArtworkPublicIdsInput = {
 
 export type UserUpdateWithoutArtworkPublicIdsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1553,19 +2560,26 @@ export type UserUpdateWithoutArtworkPublicIdsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutArtworkPublicIdsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1577,17 +2591,24 @@ export type UserUncheckedUpdateWithoutArtworkPublicIdsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1601,19 +2622,26 @@ export type UserCreateWithoutAuditLogsInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutUserInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutUserInput
   settingsUpdates?: Prisma.EventSettingsCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
   id?: string
   eventId: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1625,6 +2653,11 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutUserInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutUserInput
   settingsUpdates?: Prisma.EventSettingsUncheckedCreateNestedManyWithoutUpdaterInput
+  localCredential?: Prisma.LocalCredentialUncheckedCreateNestedOneWithoutUserInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutActorInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -1645,13 +2678,15 @@ export type UserUpdateToOneWithWhereWithoutAuditLogsInput = {
 
 export type UserUpdateWithoutAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1665,19 +2700,26 @@ export type UserUpdateWithoutAuditLogsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutUserNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1689,18 +2731,25 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyEventInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   groupId?: string | null
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1711,13 +2760,15 @@ export type UserCreateManyEventInput = {
 
 export type UserUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1731,18 +2782,25 @@ export type UserUpdateWithoutEventInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1755,18 +2813,25 @@ export type UserUncheckedUpdateWithoutEventInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1777,13 +2842,15 @@ export type UserUncheckedUpdateManyWithoutEventInput = {
 
 export type UserCreateManyGroupInput = {
   id?: string
-  issuer: string
-  externalSubject: string
-  email: string
+  accountCode: string
+  issuer?: string | null
+  externalSubject?: string | null
+  email?: string | null
   displayName: string
   displayNameSortKey: string
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
+  protectedSystemAdmin?: boolean
   lastLoginAt?: Date | string | null
   version?: number
   archivedAt?: Date | string | null
@@ -1794,13 +2861,15 @@ export type UserCreateManyGroupInput = {
 
 export type UserUpdateWithoutGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1814,17 +2883,24 @@ export type UserUpdateWithoutGroupInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1837,17 +2913,24 @@ export type UserUncheckedUpdateWithoutGroupInput = {
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
   settingsUpdates?: Prisma.EventSettingsUncheckedUpdateManyWithoutUpdaterNestedInput
+  localCredential?: Prisma.LocalCredentialUncheckedUpdateOneWithoutUserNestedInput
+  oidcIdentities?: Prisma.OidcIdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutActorNestedInput
+  legacyPersonLink?: Prisma.LegacyPersonLinkUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  issuer?: Prisma.StringFieldUpdateOperationsInput | string
-  externalSubject?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  issuer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayNameSortKey?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  protectedSystemAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1868,6 +2951,9 @@ export type UserCountOutputType = {
   artworkPublicIds: number
   auditLogs: number
   settingsUpdates: number
+  oidcIdentities: number
+  sessions: number
+  idempotencyRecords: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1877,6 +2963,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   artworkPublicIds?: boolean | UserCountOutputTypeCountArtworkPublicIdsArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
   settingsUpdates?: boolean | UserCountOutputTypeCountSettingsUpdatesArgs
+  oidcIdentities?: boolean | UserCountOutputTypeCountOidcIdentitiesArgs
+  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  idempotencyRecords?: boolean | UserCountOutputTypeCountIdempotencyRecordsArgs
 }
 
 /**
@@ -1931,10 +3020,32 @@ export type UserCountOutputTypeCountSettingsUpdatesArgs<ExtArgs extends runtime.
   where?: Prisma.EventSettingsWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOidcIdentitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OidcIdentityWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountIdempotencyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.IdempotencyRecordWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   eventId?: boolean
+  accountCode?: boolean
   issuer?: boolean
   externalSubject?: boolean
   email?: boolean
@@ -1943,6 +3054,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   groupId?: boolean
   status?: boolean
+  protectedSystemAdmin?: boolean
   lastLoginAt?: boolean
   version?: boolean
   archivedAt?: boolean
@@ -1957,12 +3069,18 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   artworkPublicIds?: boolean | Prisma.User$artworkPublicIdsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   settingsUpdates?: boolean | Prisma.User$settingsUpdatesArgs<ExtArgs>
+  localCredential?: boolean | Prisma.User$localCredentialArgs<ExtArgs>
+  oidcIdentities?: boolean | Prisma.User$oidcIdentitiesArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  idempotencyRecords?: boolean | Prisma.User$idempotencyRecordsArgs<ExtArgs>
+  legacyPersonLink?: boolean | Prisma.User$legacyPersonLinkArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   eventId?: boolean
+  accountCode?: boolean
   issuer?: boolean
   externalSubject?: boolean
   email?: boolean
@@ -1971,6 +3089,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   groupId?: boolean
   status?: boolean
+  protectedSystemAdmin?: boolean
   lastLoginAt?: boolean
   version?: boolean
   archivedAt?: boolean
@@ -1984,6 +3103,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   eventId?: boolean
+  accountCode?: boolean
   issuer?: boolean
   externalSubject?: boolean
   email?: boolean
@@ -1992,6 +3112,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   groupId?: boolean
   status?: boolean
+  protectedSystemAdmin?: boolean
   lastLoginAt?: boolean
   version?: boolean
   archivedAt?: boolean
@@ -2005,6 +3126,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type UserSelectScalar = {
   id?: boolean
   eventId?: boolean
+  accountCode?: boolean
   issuer?: boolean
   externalSubject?: boolean
   email?: boolean
@@ -2013,6 +3135,7 @@ export type UserSelectScalar = {
   role?: boolean
   groupId?: boolean
   status?: boolean
+  protectedSystemAdmin?: boolean
   lastLoginAt?: boolean
   version?: boolean
   archivedAt?: boolean
@@ -2021,7 +3144,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "issuer" | "externalSubject" | "email" | "displayName" | "displayNameSortKey" | "role" | "groupId" | "status" | "lastLoginAt" | "version" | "archivedAt" | "archivedBy" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "accountCode" | "issuer" | "externalSubject" | "email" | "displayName" | "displayNameSortKey" | "role" | "groupId" | "status" | "protectedSystemAdmin" | "lastLoginAt" | "version" | "archivedAt" | "archivedBy" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   group?: boolean | Prisma.User$groupArgs<ExtArgs>
@@ -2031,6 +3154,11 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   artworkPublicIds?: boolean | Prisma.User$artworkPublicIdsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   settingsUpdates?: boolean | Prisma.User$settingsUpdatesArgs<ExtArgs>
+  localCredential?: boolean | Prisma.User$localCredentialArgs<ExtArgs>
+  oidcIdentities?: boolean | Prisma.User$oidcIdentitiesArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  idempotencyRecords?: boolean | Prisma.User$idempotencyRecordsArgs<ExtArgs>
+  legacyPersonLink?: boolean | Prisma.User$legacyPersonLinkArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2053,18 +3181,25 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     artworkPublicIds: Prisma.$ArtworkPublicIdPayload<ExtArgs>[]
     auditLogs: Prisma.$AdminAuditLogPayload<ExtArgs>[]
     settingsUpdates: Prisma.$EventSettingsPayload<ExtArgs>[]
+    localCredential: Prisma.$LocalCredentialPayload<ExtArgs> | null
+    oidcIdentities: Prisma.$OidcIdentityPayload<ExtArgs>[]
+    sessions: Prisma.$SessionPayload<ExtArgs>[]
+    idempotencyRecords: Prisma.$IdempotencyRecordPayload<ExtArgs>[]
+    legacyPersonLink: Prisma.$LegacyPersonLinkPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     eventId: string
-    issuer: string
-    externalSubject: string
-    email: string
+    accountCode: string
+    issuer: string | null
+    externalSubject: string | null
+    email: string | null
     displayName: string
     displayNameSortKey: string
     role: $Enums.UserRole
     groupId: string | null
     status: $Enums.UserStatus
+    protectedSystemAdmin: boolean
     lastLoginAt: Date | null
     version: number
     archivedAt: Date | null
@@ -2473,6 +3608,11 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   artworkPublicIds<T extends Prisma.User$artworkPublicIdsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$artworkPublicIdsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ArtworkPublicIdPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   settingsUpdates<T extends Prisma.User$settingsUpdatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$settingsUpdatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventSettingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  localCredential<T extends Prisma.User$localCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$localCredentialArgs<ExtArgs>>): Prisma.Prisma__LocalCredentialClient<runtime.Types.Result.GetResult<Prisma.$LocalCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  oidcIdentities<T extends Prisma.User$oidcIdentitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oidcIdentitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OidcIdentityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  idempotencyRecords<T extends Prisma.User$idempotencyRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$idempotencyRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  legacyPersonLink<T extends Prisma.User$legacyPersonLinkArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$legacyPersonLinkArgs<ExtArgs>>): Prisma.Prisma__LegacyPersonLinkClient<runtime.Types.Result.GetResult<Prisma.$LegacyPersonLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2504,6 +3644,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
   readonly eventId: Prisma.FieldRef<"User", 'String'>
+  readonly accountCode: Prisma.FieldRef<"User", 'String'>
   readonly issuer: Prisma.FieldRef<"User", 'String'>
   readonly externalSubject: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
@@ -2512,6 +3653,7 @@ export interface UserFieldRefs {
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly groupId: Prisma.FieldRef<"User", 'String'>
   readonly status: Prisma.FieldRef<"User", 'UserStatus'>
+  readonly protectedSystemAdmin: Prisma.FieldRef<"User", 'Boolean'>
   readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly version: Prisma.FieldRef<"User", 'Int'>
   readonly archivedAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -3074,6 +4216,116 @@ export type User$settingsUpdatesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.EventSettingsScalarFieldEnum | Prisma.EventSettingsScalarFieldEnum[]
+}
+
+/**
+ * User.localCredential
+ */
+export type User$localCredentialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LocalCredential
+   */
+  select?: Prisma.LocalCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LocalCredential
+   */
+  omit?: Prisma.LocalCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LocalCredentialInclude<ExtArgs> | null
+  where?: Prisma.LocalCredentialWhereInput
+}
+
+/**
+ * User.oidcIdentities
+ */
+export type User$oidcIdentitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OidcIdentity
+   */
+  select?: Prisma.OidcIdentitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OidcIdentity
+   */
+  omit?: Prisma.OidcIdentityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OidcIdentityInclude<ExtArgs> | null
+  where?: Prisma.OidcIdentityWhereInput
+  orderBy?: Prisma.OidcIdentityOrderByWithRelationInput | Prisma.OidcIdentityOrderByWithRelationInput[]
+  cursor?: Prisma.OidcIdentityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OidcIdentityScalarFieldEnum | Prisma.OidcIdentityScalarFieldEnum[]
+}
+
+/**
+ * User.sessions
+ */
+export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Session
+   */
+  select?: Prisma.SessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Session
+   */
+  omit?: Prisma.SessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SessionInclude<ExtArgs> | null
+  where?: Prisma.SessionWhereInput
+  orderBy?: Prisma.SessionOrderByWithRelationInput | Prisma.SessionOrderByWithRelationInput[]
+  cursor?: Prisma.SessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.idempotencyRecords
+ */
+export type User$idempotencyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the IdempotencyRecord
+   */
+  select?: Prisma.IdempotencyRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the IdempotencyRecord
+   */
+  omit?: Prisma.IdempotencyRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.IdempotencyRecordInclude<ExtArgs> | null
+  where?: Prisma.IdempotencyRecordWhereInput
+  orderBy?: Prisma.IdempotencyRecordOrderByWithRelationInput | Prisma.IdempotencyRecordOrderByWithRelationInput[]
+  cursor?: Prisma.IdempotencyRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.IdempotencyRecordScalarFieldEnum | Prisma.IdempotencyRecordScalarFieldEnum[]
+}
+
+/**
+ * User.legacyPersonLink
+ */
+export type User$legacyPersonLinkArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegacyPersonLink
+   */
+  select?: Prisma.LegacyPersonLinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegacyPersonLink
+   */
+  omit?: Prisma.LegacyPersonLinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegacyPersonLinkInclude<ExtArgs> | null
+  where?: Prisma.LegacyPersonLinkWhereInput
 }
 
 /**

@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { verifyStudentSession } from "@/lib/auth";
+import { hasTrustedWriteOrigin } from "@/lib/server/request-security";
 
-const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
-const KEY_PATTERN = /^[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\.(?:jpeg|jpg|png|webp)$/;
+const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES) || 512 * 1024;
+const KEY_PATTERN = /^(?:[A-Za-z0-9_-]+\/){1,3}[A-Za-z0-9_-]+\.(?:jpeg|jpg|png|webp)$/;
 
 function localPath(key: string): string | null {
   const directory = process.env.LOCAL_UPLOAD_DIR;
@@ -13,12 +14,17 @@ function localPath(key: string): string | null {
 }
 
 export async function PUT(request: NextRequest) {
+  if (!hasTrustedWriteOrigin(request)) {
+    return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+  }
   const session = await verifyStudentSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const key = request.nextUrl.searchParams.get("key") ?? "";
   const destination = localPath(key);
-  if (!destination || !key.startsWith(`${session.personId}/`)) {
+  const segments = key.split("/");
+  const owned = segments[0] === session.personId || segments.at(-2) === session.personId;
+  if (!destination || !owned) {
     return NextResponse.json({ error: "Invalid upload key" }, { status: 400 });
   }
 
@@ -29,7 +35,7 @@ export async function PUT(request: NextRequest) {
 
   const bytes = Buffer.from(await request.arrayBuffer());
   if (!bytes.length || bytes.length > MAX_UPLOAD_BYTES) {
-    return NextResponse.json({ error: "Image must be smaller than 2 MB" }, { status: 413 });
+    return NextResponse.json({ error: "Image must be 512 KB or smaller" }, { status: 413 });
   }
 
   await mkdir(path.dirname(destination), { recursive: true });

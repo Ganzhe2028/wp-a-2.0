@@ -82,6 +82,36 @@ export type EventSettings = Prisma.EventSettingsModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model LocalCredential
+ *
+ */
+export type LocalCredential = Prisma.LocalCredentialModel
+/**
+ * Model OidcIdentity
+ *
+ */
+export type OidcIdentity = Prisma.OidcIdentityModel
+/**
+ * Model Session
+ *
+ */
+export type Session = Prisma.SessionModel
+/**
+ * Model IdempotencyRecord
+ *
+ */
+export type IdempotencyRecord = Prisma.IdempotencyRecordModel
+/**
+ * Model LegacyPersonLink
+ *
+ */
+export type LegacyPersonLink = Prisma.LegacyPersonLinkModel
+/**
+ * Model RateLimitBucket
+ *
+ */
+export type RateLimitBucket = Prisma.RateLimitBucketModel
+/**
  * Model Group
  *
  */

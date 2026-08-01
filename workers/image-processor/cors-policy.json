@@ -1,0 +1,19 @@
+[
+  {
+    "AllowedOrigins": [
+      "https://oweek-wp-a-2.vercel.app"
+    ],
+    "AllowedMethods": [
+      "GET",
+      "HEAD",
+      "PUT"
+    ],
+    "AllowedHeaders": [
+      "Content-Type"
+    ],
+    "ExposeHeaders": [
+      "ETag"
+    ],
+    "MaxAgeSeconds": 3600
+  }
+]

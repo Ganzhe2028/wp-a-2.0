@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import imageCompression from "browser-image-compression";
 
 interface DisplayImage {
@@ -53,7 +54,7 @@ export default function ImageGrid({
         const presignRes = await fetch("/api/upload-url", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contentType: `image/${ext}` }),
+          body: JSON.stringify({ contentType: `image/${ext}`, byteSize: compressed.size }),
         });
 
         if (!presignRes.ok) {
@@ -119,10 +120,13 @@ export default function ImageGrid({
       <div className="grid grid-cols-2 gap-2">
         {activeImages.map((img, index) => (
           <div key={img.id} className="group relative aspect-square overflow-hidden rounded-[var(--radius-tile)] bg-[var(--paper)]">
-            <img
+            <Image
               src={img.url}
               alt={labels[index] || ""}
-              className="h-full w-full object-cover"
+              fill
+              sizes="50vw"
+              unoptimized
+              className="object-cover"
             />
             {labels[index] && <span className="absolute inset-x-0 bottom-0 bg-black/85 px-2 py-1 text-xs font-bold text-white">{labels[index]}</span>}
             {!disabled && (

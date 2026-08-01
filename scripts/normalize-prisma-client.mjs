@@ -24,6 +24,8 @@ const generatedFiles = [
   "models/EventAnonymousId.ts",
   "models/EventSettings.ts",
   "models/Group.ts",
+  "models/LegacyPersonLink.ts",
+  "models/RateLimitBucket.ts",
   "models/Submission.ts",
   "models/User.ts",
 ];

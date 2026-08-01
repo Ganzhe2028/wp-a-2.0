@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateQRCodeSVG } from "@/lib/qr";
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

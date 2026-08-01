@@ -8,6 +8,7 @@ import { settingEnabled } from "@/lib/event-settings";
 
 const UPLOAD_WINDOW_MS = 10 * 60 * 1000;
 const MAX_UPLOAD_URLS_PER_USER = 20;
+const MAX_UPLOAD_BYTES = 512 * 1024;
 
 export async function POST(request: NextRequest) {
   const session = await verifyStudentSession();
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   let contentType: string;
+  let byteSize: unknown;
   let purpose: unknown;
   try {
     const body = await request.json();
@@ -39,6 +41,7 @@ export async function POST(request: NextRequest) {
       throw new Error("Invalid request body");
     }
     contentType = body.contentType;
+    byteSize = body.byteSize;
     purpose = body.purpose;
   } catch {
     return NextResponse.json(
@@ -52,6 +55,10 @@ export async function POST(request: NextRequest) {
       { error: "contentType required" },
       { status: 400 }
     );
+  }
+
+  if (!Number.isSafeInteger(byteSize) || (byteSize as number) <= 0 || (byteSize as number) > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: "Image must be 512 KB or smaller" }, { status: 400 });
   }
 
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -78,7 +85,7 @@ export async function POST(request: NextRequest) {
   const ext = contentType.split("/")[1] || "webp";
   const key = `${session.personId}/${nanoid()}.${ext}`;
 
-  const putUrl = await createPresignedUploadUrl(key, contentType);
+  const putUrl = await createPresignedUploadUrl(key, contentType, byteSize as number);
   const publicUrl = getPublicUrl(key);
 
   return NextResponse.json({ putUrl, publicUrl, key });

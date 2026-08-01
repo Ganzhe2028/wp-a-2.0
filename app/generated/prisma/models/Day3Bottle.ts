@@ -475,14 +475,6 @@ export type Day3BottleUncheckedUpdateManyWithoutSubmissionNestedInput = {
   deleteMany?: Prisma.Day3BottleScalarWhereInput | Prisma.Day3BottleScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type Day3BottleCreateWithoutSubmissionInput = {
   id?: string
   bottleKey: string

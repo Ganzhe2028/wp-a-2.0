@@ -20,8 +20,18 @@ export type EventAnonymousIdModel = runtime.Types.Result.DefaultSelection<Prisma
 
 export type AggregateEventAnonymousId = {
   _count: EventAnonymousIdCountAggregateOutputType | null
+  _avg: EventAnonymousIdAvgAggregateOutputType | null
+  _sum: EventAnonymousIdSumAggregateOutputType | null
   _min: EventAnonymousIdMinAggregateOutputType | null
   _max: EventAnonymousIdMaxAggregateOutputType | null
+}
+
+export type EventAnonymousIdAvgAggregateOutputType = {
+  secretVersion: number | null
+}
+
+export type EventAnonymousIdSumAggregateOutputType = {
+  secretVersion: number | null
 }
 
 export type EventAnonymousIdMinAggregateOutputType = {
@@ -29,6 +39,7 @@ export type EventAnonymousIdMinAggregateOutputType = {
   eventId: string | null
   userId: string | null
   anonymousId: string | null
+  secretVersion: number | null
   createdAt: Date | null
 }
 
@@ -37,6 +48,7 @@ export type EventAnonymousIdMaxAggregateOutputType = {
   eventId: string | null
   userId: string | null
   anonymousId: string | null
+  secretVersion: number | null
   createdAt: Date | null
 }
 
@@ -45,16 +57,26 @@ export type EventAnonymousIdCountAggregateOutputType = {
   eventId: number
   userId: number
   anonymousId: number
+  secretVersion: number
   createdAt: number
   _all: number
 }
 
+
+export type EventAnonymousIdAvgAggregateInputType = {
+  secretVersion?: true
+}
+
+export type EventAnonymousIdSumAggregateInputType = {
+  secretVersion?: true
+}
 
 export type EventAnonymousIdMinAggregateInputType = {
   id?: true
   eventId?: true
   userId?: true
   anonymousId?: true
+  secretVersion?: true
   createdAt?: true
 }
 
@@ -63,6 +85,7 @@ export type EventAnonymousIdMaxAggregateInputType = {
   eventId?: true
   userId?: true
   anonymousId?: true
+  secretVersion?: true
   createdAt?: true
 }
 
@@ -71,6 +94,7 @@ export type EventAnonymousIdCountAggregateInputType = {
   eventId?: true
   userId?: true
   anonymousId?: true
+  secretVersion?: true
   createdAt?: true
   _all?: true
 }
@@ -113,6 +137,18 @@ export type EventAnonymousIdAggregateArgs<ExtArgs extends runtime.Types.Extensio
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    *
+   * Select which fields to average
+  **/
+  _avg?: EventAnonymousIdAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
+   * Select which fields to sum
+  **/
+  _sum?: EventAnonymousIdSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
    * Select which fields to find the minimum value
   **/
   _min?: EventAnonymousIdMinAggregateInputType
@@ -143,6 +179,8 @@ export type EventAnonymousIdGroupByArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   _count?: EventAnonymousIdCountAggregateInputType | true
+  _avg?: EventAnonymousIdAvgAggregateInputType
+  _sum?: EventAnonymousIdSumAggregateInputType
   _min?: EventAnonymousIdMinAggregateInputType
   _max?: EventAnonymousIdMaxAggregateInputType
 }
@@ -152,8 +190,11 @@ export type EventAnonymousIdGroupByOutputType = {
   eventId: string
   userId: string
   anonymousId: string
+  secretVersion: number
   createdAt: Date
   _count: EventAnonymousIdCountAggregateOutputType | null
+  _avg: EventAnonymousIdAvgAggregateOutputType | null
+  _sum: EventAnonymousIdSumAggregateOutputType | null
   _min: EventAnonymousIdMinAggregateOutputType | null
   _max: EventAnonymousIdMaxAggregateOutputType | null
 }
@@ -181,6 +222,7 @@ export type EventAnonymousIdWhereInput = {
   eventId?: Prisma.StringFilter<"EventAnonymousId"> | string
   userId?: Prisma.StringFilter<"EventAnonymousId"> | string
   anonymousId?: Prisma.StringFilter<"EventAnonymousId"> | string
+  secretVersion?: Prisma.IntFilter<"EventAnonymousId"> | number
   createdAt?: Prisma.DateTimeFilter<"EventAnonymousId"> | Date | string
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -191,6 +233,7 @@ export type EventAnonymousIdOrderByWithRelationInput = {
   eventId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   anonymousId?: Prisma.SortOrder
+  secretVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   event?: Prisma.EventOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
@@ -206,6 +249,7 @@ export type EventAnonymousIdWhereUniqueInput = Prisma.AtLeast<{
   eventId?: Prisma.StringFilter<"EventAnonymousId"> | string
   userId?: Prisma.StringFilter<"EventAnonymousId"> | string
   anonymousId?: Prisma.StringFilter<"EventAnonymousId"> | string
+  secretVersion?: Prisma.IntFilter<"EventAnonymousId"> | number
   createdAt?: Prisma.DateTimeFilter<"EventAnonymousId"> | Date | string
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -216,10 +260,13 @@ export type EventAnonymousIdOrderByWithAggregationInput = {
   eventId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   anonymousId?: Prisma.SortOrder
+  secretVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.EventAnonymousIdCountOrderByAggregateInput
+  _avg?: Prisma.EventAnonymousIdAvgOrderByAggregateInput
   _max?: Prisma.EventAnonymousIdMaxOrderByAggregateInput
   _min?: Prisma.EventAnonymousIdMinOrderByAggregateInput
+  _sum?: Prisma.EventAnonymousIdSumOrderByAggregateInput
 }
 
 export type EventAnonymousIdScalarWhereWithAggregatesInput = {
@@ -230,12 +277,14 @@ export type EventAnonymousIdScalarWhereWithAggregatesInput = {
   eventId?: Prisma.StringWithAggregatesFilter<"EventAnonymousId"> | string
   userId?: Prisma.StringWithAggregatesFilter<"EventAnonymousId"> | string
   anonymousId?: Prisma.StringWithAggregatesFilter<"EventAnonymousId"> | string
+  secretVersion?: Prisma.IntWithAggregatesFilter<"EventAnonymousId"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"EventAnonymousId"> | Date | string
 }
 
 export type EventAnonymousIdCreateInput = {
   id?: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutAnonymousIdsInput
   user: Prisma.UserCreateNestedOneWithoutAnonymousIdsInput
@@ -246,12 +295,14 @@ export type EventAnonymousIdUncheckedCreateInput = {
   eventId: string
   userId: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
 }
 
 export type EventAnonymousIdUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutAnonymousIdsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutAnonymousIdsNestedInput
@@ -262,6 +313,7 @@ export type EventAnonymousIdUncheckedUpdateInput = {
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -270,12 +322,14 @@ export type EventAnonymousIdCreateManyInput = {
   eventId: string
   userId: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
 }
 
 export type EventAnonymousIdUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -284,6 +338,7 @@ export type EventAnonymousIdUncheckedUpdateManyInput = {
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -312,7 +367,12 @@ export type EventAnonymousIdCountOrderByAggregateInput = {
   eventId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   anonymousId?: Prisma.SortOrder
+  secretVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type EventAnonymousIdAvgOrderByAggregateInput = {
+  secretVersion?: Prisma.SortOrder
 }
 
 export type EventAnonymousIdMaxOrderByAggregateInput = {
@@ -320,6 +380,7 @@ export type EventAnonymousIdMaxOrderByAggregateInput = {
   eventId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   anonymousId?: Prisma.SortOrder
+  secretVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -328,7 +389,12 @@ export type EventAnonymousIdMinOrderByAggregateInput = {
   eventId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   anonymousId?: Prisma.SortOrder
+  secretVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type EventAnonymousIdSumOrderByAggregateInput = {
+  secretVersion?: Prisma.SortOrder
 }
 
 export type EventAnonymousIdCreateNestedManyWithoutEventInput = {
@@ -418,6 +484,7 @@ export type EventAnonymousIdUncheckedUpdateManyWithoutUserNestedInput = {
 export type EventAnonymousIdCreateWithoutEventInput = {
   id?: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAnonymousIdsInput
 }
@@ -426,6 +493,7 @@ export type EventAnonymousIdUncheckedCreateWithoutEventInput = {
   id?: string
   userId: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
 }
 
@@ -463,12 +531,14 @@ export type EventAnonymousIdScalarWhereInput = {
   eventId?: Prisma.StringFilter<"EventAnonymousId"> | string
   userId?: Prisma.StringFilter<"EventAnonymousId"> | string
   anonymousId?: Prisma.StringFilter<"EventAnonymousId"> | string
+  secretVersion?: Prisma.IntFilter<"EventAnonymousId"> | number
   createdAt?: Prisma.DateTimeFilter<"EventAnonymousId"> | Date | string
 }
 
 export type EventAnonymousIdCreateWithoutUserInput = {
   id?: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutAnonymousIdsInput
 }
@@ -476,6 +546,7 @@ export type EventAnonymousIdCreateWithoutUserInput = {
 export type EventAnonymousIdUncheckedCreateWithoutUserInput = {
   id?: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
 }
 
@@ -509,12 +580,14 @@ export type EventAnonymousIdCreateManyEventInput = {
   id?: string
   userId: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
 }
 
 export type EventAnonymousIdUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAnonymousIdsNestedInput
 }
@@ -523,6 +596,7 @@ export type EventAnonymousIdUncheckedUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -530,18 +604,21 @@ export type EventAnonymousIdUncheckedUpdateManyWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventAnonymousIdCreateManyUserInput = {
   id?: string
   anonymousId: string
+  secretVersion?: number
   createdAt?: Date | string
 }
 
 export type EventAnonymousIdUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutAnonymousIdsNestedInput
 }
@@ -549,12 +626,14 @@ export type EventAnonymousIdUpdateWithoutUserInput = {
 export type EventAnonymousIdUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type EventAnonymousIdUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymousId?: Prisma.StringFieldUpdateOperationsInput | string
+  secretVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -565,6 +644,7 @@ export type EventAnonymousIdSelect<ExtArgs extends runtime.Types.Extensions.Inte
   eventId?: boolean
   userId?: boolean
   anonymousId?: boolean
+  secretVersion?: boolean
   createdAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -575,6 +655,7 @@ export type EventAnonymousIdSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   eventId?: boolean
   userId?: boolean
   anonymousId?: boolean
+  secretVersion?: boolean
   createdAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -585,6 +666,7 @@ export type EventAnonymousIdSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   eventId?: boolean
   userId?: boolean
   anonymousId?: boolean
+  secretVersion?: boolean
   createdAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -595,10 +677,11 @@ export type EventAnonymousIdSelectScalar = {
   eventId?: boolean
   userId?: boolean
   anonymousId?: boolean
+  secretVersion?: boolean
   createdAt?: boolean
 }
 
-export type EventAnonymousIdOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "userId" | "anonymousId" | "createdAt", ExtArgs["result"]["eventAnonymousId"]>
+export type EventAnonymousIdOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "userId" | "anonymousId" | "secretVersion" | "createdAt", ExtArgs["result"]["eventAnonymousId"]>
 export type EventAnonymousIdInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -623,6 +706,7 @@ export type $EventAnonymousIdPayload<ExtArgs extends runtime.Types.Extensions.In
     eventId: string
     userId: string
     anonymousId: string
+    secretVersion: number
     createdAt: Date
   }, ExtArgs["result"]["eventAnonymousId"]>
   composites: {}
@@ -1053,6 +1137,7 @@ export interface EventAnonymousIdFieldRefs {
   readonly eventId: Prisma.FieldRef<"EventAnonymousId", 'String'>
   readonly userId: Prisma.FieldRef<"EventAnonymousId", 'String'>
   readonly anonymousId: Prisma.FieldRef<"EventAnonymousId", 'String'>
+  readonly secretVersion: Prisma.FieldRef<"EventAnonymousId", 'Int'>
   readonly createdAt: Prisma.FieldRef<"EventAnonymousId", 'DateTime'>
 }
 

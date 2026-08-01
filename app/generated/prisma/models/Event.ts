@@ -190,6 +190,8 @@ export type EventWhereInput = {
   anonymousIds?: Prisma.EventAnonymousIdListRelationFilter
   artworkPublicIds?: Prisma.ArtworkPublicIdListRelationFilter
   auditLogs?: Prisma.AdminAuditLogListRelationFilter
+  idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
+  legacyPersonLinks?: Prisma.LegacyPersonLinkListRelationFilter
 }
 
 export type EventOrderByWithRelationInput = {
@@ -206,6 +208,8 @@ export type EventOrderByWithRelationInput = {
   anonymousIds?: Prisma.EventAnonymousIdOrderByRelationAggregateInput
   artworkPublicIds?: Prisma.ArtworkPublicIdOrderByRelationAggregateInput
   auditLogs?: Prisma.AdminAuditLogOrderByRelationAggregateInput
+  idempotencyRecords?: Prisma.IdempotencyRecordOrderByRelationAggregateInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkOrderByRelationAggregateInput
 }
 
 export type EventWhereUniqueInput = Prisma.AtLeast<{
@@ -225,6 +229,8 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   anonymousIds?: Prisma.EventAnonymousIdListRelationFilter
   artworkPublicIds?: Prisma.ArtworkPublicIdListRelationFilter
   auditLogs?: Prisma.AdminAuditLogListRelationFilter
+  idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
+  legacyPersonLinks?: Prisma.LegacyPersonLinkListRelationFilter
 }, "id" | "eventKey">
 
 export type EventOrderByWithAggregationInput = {
@@ -263,6 +269,8 @@ export type EventCreateInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateInput = {
@@ -279,6 +287,8 @@ export type EventUncheckedCreateInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventUpdateInput = {
@@ -295,6 +305,8 @@ export type EventUpdateInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateInput = {
@@ -311,6 +323,8 @@ export type EventUncheckedUpdateInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateManyInput = {
@@ -392,6 +406,34 @@ export type EventUpdateOneRequiredWithoutUsersNestedInput = {
   upsert?: Prisma.EventUpsertWithoutUsersInput
   connect?: Prisma.EventWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutUsersInput, Prisma.EventUpdateWithoutUsersInput>, Prisma.EventUncheckedUpdateWithoutUsersInput>
+}
+
+export type EventCreateNestedOneWithoutIdempotencyRecordsInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutIdempotencyRecordsInput, Prisma.EventUncheckedCreateWithoutIdempotencyRecordsInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutIdempotencyRecordsInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutIdempotencyRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutIdempotencyRecordsInput, Prisma.EventUncheckedCreateWithoutIdempotencyRecordsInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutIdempotencyRecordsInput
+  upsert?: Prisma.EventUpsertWithoutIdempotencyRecordsInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutIdempotencyRecordsInput, Prisma.EventUpdateWithoutIdempotencyRecordsInput>, Prisma.EventUncheckedUpdateWithoutIdempotencyRecordsInput>
+}
+
+export type EventCreateNestedOneWithoutLegacyPersonLinksInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutLegacyPersonLinksInput, Prisma.EventUncheckedCreateWithoutLegacyPersonLinksInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutLegacyPersonLinksInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutLegacyPersonLinksNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutLegacyPersonLinksInput, Prisma.EventUncheckedCreateWithoutLegacyPersonLinksInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutLegacyPersonLinksInput
+  upsert?: Prisma.EventUpsertWithoutLegacyPersonLinksInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutLegacyPersonLinksInput, Prisma.EventUpdateWithoutLegacyPersonLinksInput>, Prisma.EventUncheckedUpdateWithoutLegacyPersonLinksInput>
 }
 
 export type EventCreateNestedOneWithoutGroupsInput = {
@@ -491,6 +533,8 @@ export type EventCreateWithoutSettingsInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutSettingsInput = {
@@ -506,6 +550,8 @@ export type EventUncheckedCreateWithoutSettingsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutSettingsInput = {
@@ -537,6 +583,8 @@ export type EventUpdateWithoutSettingsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutSettingsInput = {
@@ -552,6 +600,8 @@ export type EventUncheckedUpdateWithoutSettingsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutUsersInput = {
@@ -567,6 +617,8 @@ export type EventCreateWithoutUsersInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutUsersInput = {
@@ -582,6 +634,8 @@ export type EventUncheckedCreateWithoutUsersInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutUsersInput = {
@@ -613,6 +667,8 @@ export type EventUpdateWithoutUsersInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutUsersInput = {
@@ -628,6 +684,176 @@ export type EventUncheckedUpdateWithoutUsersInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutIdempotencyRecordsInput = {
+  id?: string
+  eventKey: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.EventSettingsCreateNestedOneWithoutEventInput
+  users?: Prisma.UserCreateNestedManyWithoutEventInput
+  groups?: Prisma.GroupCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  assets?: Prisma.AssetCreateNestedManyWithoutEventInput
+  anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
+  auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutIdempotencyRecordsInput = {
+  id?: string
+  eventKey: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.EventSettingsUncheckedCreateNestedOneWithoutEventInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutEventInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutEventInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutIdempotencyRecordsInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutIdempotencyRecordsInput, Prisma.EventUncheckedCreateWithoutIdempotencyRecordsInput>
+}
+
+export type EventUpsertWithoutIdempotencyRecordsInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutIdempotencyRecordsInput, Prisma.EventUncheckedUpdateWithoutIdempotencyRecordsInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutIdempotencyRecordsInput, Prisma.EventUncheckedCreateWithoutIdempotencyRecordsInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutIdempotencyRecordsInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutIdempotencyRecordsInput, Prisma.EventUncheckedUpdateWithoutIdempotencyRecordsInput>
+}
+
+export type EventUpdateWithoutIdempotencyRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.EventSettingsUpdateOneWithoutEventNestedInput
+  users?: Prisma.UserUpdateManyWithoutEventNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutEventNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
+  auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutIdempotencyRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.EventSettingsUncheckedUpdateOneWithoutEventNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutEventNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutEventNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutLegacyPersonLinksInput = {
+  id?: string
+  eventKey: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.EventSettingsCreateNestedOneWithoutEventInput
+  users?: Prisma.UserCreateNestedManyWithoutEventInput
+  groups?: Prisma.GroupCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  assets?: Prisma.AssetCreateNestedManyWithoutEventInput
+  anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
+  auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutLegacyPersonLinksInput = {
+  id?: string
+  eventKey: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.EventSettingsUncheckedCreateNestedOneWithoutEventInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutEventInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutEventInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutLegacyPersonLinksInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutLegacyPersonLinksInput, Prisma.EventUncheckedCreateWithoutLegacyPersonLinksInput>
+}
+
+export type EventUpsertWithoutLegacyPersonLinksInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutLegacyPersonLinksInput, Prisma.EventUncheckedUpdateWithoutLegacyPersonLinksInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutLegacyPersonLinksInput, Prisma.EventUncheckedCreateWithoutLegacyPersonLinksInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutLegacyPersonLinksInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutLegacyPersonLinksInput, Prisma.EventUncheckedUpdateWithoutLegacyPersonLinksInput>
+}
+
+export type EventUpdateWithoutLegacyPersonLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.EventSettingsUpdateOneWithoutEventNestedInput
+  users?: Prisma.UserUpdateManyWithoutEventNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutEventNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
+  auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutLegacyPersonLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.EventSettingsUncheckedUpdateOneWithoutEventNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutEventNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutEventNestedInput
+  anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
+  artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
+  auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutGroupsInput = {
@@ -643,6 +869,8 @@ export type EventCreateWithoutGroupsInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutGroupsInput = {
@@ -658,6 +886,8 @@ export type EventUncheckedCreateWithoutGroupsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutGroupsInput = {
@@ -689,6 +919,8 @@ export type EventUpdateWithoutGroupsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutGroupsInput = {
@@ -704,6 +936,8 @@ export type EventUncheckedUpdateWithoutGroupsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutSubmissionsInput = {
@@ -719,6 +953,8 @@ export type EventCreateWithoutSubmissionsInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutSubmissionsInput = {
@@ -734,6 +970,8 @@ export type EventUncheckedCreateWithoutSubmissionsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutSubmissionsInput = {
@@ -765,6 +1003,8 @@ export type EventUpdateWithoutSubmissionsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutSubmissionsInput = {
@@ -780,6 +1020,8 @@ export type EventUncheckedUpdateWithoutSubmissionsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutAssetsInput = {
@@ -795,6 +1037,8 @@ export type EventCreateWithoutAssetsInput = {
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutAssetsInput = {
@@ -810,6 +1054,8 @@ export type EventUncheckedCreateWithoutAssetsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutAssetsInput = {
@@ -841,6 +1087,8 @@ export type EventUpdateWithoutAssetsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutAssetsInput = {
@@ -856,6 +1104,8 @@ export type EventUncheckedUpdateWithoutAssetsInput = {
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutAnonymousIdsInput = {
@@ -871,6 +1121,8 @@ export type EventCreateWithoutAnonymousIdsInput = {
   assets?: Prisma.AssetCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutAnonymousIdsInput = {
@@ -886,6 +1138,8 @@ export type EventUncheckedCreateWithoutAnonymousIdsInput = {
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutAnonymousIdsInput = {
@@ -917,6 +1171,8 @@ export type EventUpdateWithoutAnonymousIdsInput = {
   assets?: Prisma.AssetUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutAnonymousIdsInput = {
@@ -932,6 +1188,8 @@ export type EventUncheckedUpdateWithoutAnonymousIdsInput = {
   assets?: Prisma.AssetUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutArtworkPublicIdsInput = {
@@ -947,6 +1205,8 @@ export type EventCreateWithoutArtworkPublicIdsInput = {
   assets?: Prisma.AssetCreateNestedManyWithoutEventInput
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutArtworkPublicIdsInput = {
@@ -962,6 +1222,8 @@ export type EventUncheckedCreateWithoutArtworkPublicIdsInput = {
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutEventInput
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   auditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutArtworkPublicIdsInput = {
@@ -993,6 +1255,8 @@ export type EventUpdateWithoutArtworkPublicIdsInput = {
   assets?: Prisma.AssetUpdateManyWithoutEventNestedInput
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutArtworkPublicIdsInput = {
@@ -1008,6 +1272,8 @@ export type EventUncheckedUpdateWithoutArtworkPublicIdsInput = {
   assets?: Prisma.AssetUncheckedUpdateManyWithoutEventNestedInput
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   auditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateWithoutAuditLogsInput = {
@@ -1023,6 +1289,8 @@ export type EventCreateWithoutAuditLogsInput = {
   assets?: Prisma.AssetCreateNestedManyWithoutEventInput
   anonymousIds?: Prisma.EventAnonymousIdCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutAuditLogsInput = {
@@ -1038,6 +1306,8 @@ export type EventUncheckedCreateWithoutAuditLogsInput = {
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutEventInput
   anonymousIds?: Prisma.EventAnonymousIdUncheckedCreateNestedManyWithoutEventInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedCreateNestedManyWithoutEventInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutEventInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutAuditLogsInput = {
@@ -1069,6 +1339,8 @@ export type EventUpdateWithoutAuditLogsInput = {
   assets?: Prisma.AssetUpdateManyWithoutEventNestedInput
   anonymousIds?: Prisma.EventAnonymousIdUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutAuditLogsInput = {
@@ -1084,6 +1356,8 @@ export type EventUncheckedUpdateWithoutAuditLogsInput = {
   assets?: Prisma.AssetUncheckedUpdateManyWithoutEventNestedInput
   anonymousIds?: Prisma.EventAnonymousIdUncheckedUpdateManyWithoutEventNestedInput
   artworkPublicIds?: Prisma.ArtworkPublicIdUncheckedUpdateManyWithoutEventNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutEventNestedInput
+  legacyPersonLinks?: Prisma.LegacyPersonLinkUncheckedUpdateManyWithoutEventNestedInput
 }
 
 
@@ -1099,6 +1373,8 @@ export type EventCountOutputType = {
   anonymousIds: number
   artworkPublicIds: number
   auditLogs: number
+  idempotencyRecords: number
+  legacyPersonLinks: number
 }
 
 export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1109,6 +1385,8 @@ export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   anonymousIds?: boolean | EventCountOutputTypeCountAnonymousIdsArgs
   artworkPublicIds?: boolean | EventCountOutputTypeCountArtworkPublicIdsArgs
   auditLogs?: boolean | EventCountOutputTypeCountAuditLogsArgs
+  idempotencyRecords?: boolean | EventCountOutputTypeCountIdempotencyRecordsArgs
+  legacyPersonLinks?: boolean | EventCountOutputTypeCountLegacyPersonLinksArgs
 }
 
 /**
@@ -1170,6 +1448,20 @@ export type EventCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types
   where?: Prisma.AdminAuditLogWhereInput
 }
 
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountIdempotencyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.IdempotencyRecordWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountLegacyPersonLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegacyPersonLinkWhereInput
+}
+
 
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1185,6 +1477,8 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   anonymousIds?: boolean | Prisma.Event$anonymousIdsArgs<ExtArgs>
   artworkPublicIds?: boolean | Prisma.Event$artworkPublicIdsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Event$auditLogsArgs<ExtArgs>
+  idempotencyRecords?: boolean | Prisma.Event$idempotencyRecordsArgs<ExtArgs>
+  legacyPersonLinks?: boolean | Prisma.Event$legacyPersonLinksArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
@@ -1222,6 +1516,8 @@ export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   anonymousIds?: boolean | Prisma.Event$anonymousIdsArgs<ExtArgs>
   artworkPublicIds?: boolean | Prisma.Event$artworkPublicIdsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Event$auditLogsArgs<ExtArgs>
+  idempotencyRecords?: boolean | Prisma.Event$idempotencyRecordsArgs<ExtArgs>
+  legacyPersonLinks?: boolean | Prisma.Event$legacyPersonLinksArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1238,6 +1534,8 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     anonymousIds: Prisma.$EventAnonymousIdPayload<ExtArgs>[]
     artworkPublicIds: Prisma.$ArtworkPublicIdPayload<ExtArgs>[]
     auditLogs: Prisma.$AdminAuditLogPayload<ExtArgs>[]
+    idempotencyRecords: Prisma.$IdempotencyRecordPayload<ExtArgs>[]
+    legacyPersonLinks: Prisma.$LegacyPersonLinkPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1647,6 +1945,8 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
   anonymousIds<T extends Prisma.Event$anonymousIdsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$anonymousIdsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventAnonymousIdPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   artworkPublicIds<T extends Prisma.Event$artworkPublicIdsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$artworkPublicIdsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ArtworkPublicIdPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Event$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  idempotencyRecords<T extends Prisma.Event$idempotencyRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$idempotencyRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  legacyPersonLinks<T extends Prisma.Event$legacyPersonLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$legacyPersonLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegacyPersonLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2253,6 +2553,54 @@ export type Event$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AdminAuditLogScalarFieldEnum | Prisma.AdminAuditLogScalarFieldEnum[]
+}
+
+/**
+ * Event.idempotencyRecords
+ */
+export type Event$idempotencyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the IdempotencyRecord
+   */
+  select?: Prisma.IdempotencyRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the IdempotencyRecord
+   */
+  omit?: Prisma.IdempotencyRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.IdempotencyRecordInclude<ExtArgs> | null
+  where?: Prisma.IdempotencyRecordWhereInput
+  orderBy?: Prisma.IdempotencyRecordOrderByWithRelationInput | Prisma.IdempotencyRecordOrderByWithRelationInput[]
+  cursor?: Prisma.IdempotencyRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.IdempotencyRecordScalarFieldEnum | Prisma.IdempotencyRecordScalarFieldEnum[]
+}
+
+/**
+ * Event.legacyPersonLinks
+ */
+export type Event$legacyPersonLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegacyPersonLink
+   */
+  select?: Prisma.LegacyPersonLinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegacyPersonLink
+   */
+  omit?: Prisma.LegacyPersonLinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegacyPersonLinkInclude<ExtArgs> | null
+  where?: Prisma.LegacyPersonLinkWhereInput
+  orderBy?: Prisma.LegacyPersonLinkOrderByWithRelationInput | Prisma.LegacyPersonLinkOrderByWithRelationInput[]
+  cursor?: Prisma.LegacyPersonLinkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegacyPersonLinkScalarFieldEnum | Prisma.LegacyPersonLinkScalarFieldEnum[]
 }
 
 /**

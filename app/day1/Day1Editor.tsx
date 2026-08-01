@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import OweekHeader from "@/components/OweekHeader";
 import AvatarUploader from "@/components/AvatarUploader";
 import ImageGrid from "@/components/ImageGrid";
@@ -50,7 +51,7 @@ export default function Day1Editor({ person, allowEdit = false }: { person: Pers
   }
 
   if (submitted && !allowEdit) return (
-    <main className="ow-phone ow-enter"><OweekHeader title="MY PROFILE" action="HOME" actionHref="/home" /><div className="flex items-center justify-between"><h1 className="ow-heading">DAY 1 已提交</h1><span className="ow-chip ow-chip-active">SUBMITTED</span></div><p className="ow-muted mt-3">你已解锁 Browse 中其他人的 Day 1。</p><div className="mt-10 grid grid-cols-2 gap-2"><div className="relative aspect-square overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-[var(--orange)]">{avatarUrl && <img src={avatarUrl} alt="头像" className="h-full w-full object-cover" />}</div>{images.slice(0, 3).map((image) => <div key={image.id} className="aspect-square overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-[var(--orange)]"><img src={image.url} alt="" className="h-full w-full object-cover" /></div>)}</div><div className="mt-28 rounded-[var(--radius-card)] border-[1.5px] border-[var(--orange)] bg-[var(--orange-soft)] p-6"><b className="text-2xl">✓ 已发布 · 只读展示</b><p className="ow-muted mt-2">提交后内容由管理员开放编辑时才可修改。</p></div><Link href="/browse" className="ow-btn mt-24">去 Browse 看看 →</Link><Link href="/home" className="ow-btn ow-btn-outline mt-3">返回首页</Link></main>
+    <main className="ow-phone ow-enter"><OweekHeader title="MY PROFILE" action="HOME" actionHref="/home" /><div className="flex items-center justify-between"><h1 className="ow-heading">DAY 1 已提交</h1><span className="ow-chip ow-chip-active">SUBMITTED</span></div><p className="ow-muted mt-3">你已解锁 Browse 中其他人的 Day 1。</p><div className="mt-10 grid grid-cols-2 gap-2"><div className="relative aspect-square overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-[var(--orange)]">{avatarUrl && <Image src={avatarUrl} alt="头像" fill sizes="50vw" unoptimized className="object-cover" />}</div>{images.slice(0, 3).map((image) => <div key={image.id} className="relative aspect-square overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-[var(--orange)]"><Image src={image.url} alt="" fill sizes="50vw" unoptimized className="object-cover" /></div>)}</div><div className="mt-28 rounded-[var(--radius-card)] border-[1.5px] border-[var(--orange)] bg-[var(--orange-soft)] p-6"><b className="text-2xl">✓ 已发布 · 只读展示</b><p className="ow-muted mt-2">提交后内容由管理员开放编辑时才可修改。</p></div><Link href="/browse" className="ow-btn mt-24">去 Browse 看看 →</Link><Link href="/home" className="ow-btn ow-btn-outline mt-3">返回首页</Link></main>
   );
 
   return (

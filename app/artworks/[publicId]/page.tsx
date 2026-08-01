@@ -1,13 +1,9 @@
-import { notFound } from "next/navigation";
-import { decideArtworkVisibility } from "@/lib/domain/artwork-access";
+import { Suspense } from "react";
+import { PageLoading } from "@/components/student/AsyncState";
+import ArtworkClient from "./ArtworkClient";
 
-interface PageProps {
-  params: Promise<{ publicId: string }>;
-}
-
-export default async function ArtworkPage({ params }: PageProps) {
+export const metadata = { title: "Artwork" };
+export default async function ArtworkPage({ params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
-  const decision = decideArtworkVisibility("artwork", publicId);
-
-  if (!decision.visible) notFound();
+  return <Suspense fallback={<PageLoading label="正在载入作品" />}><ArtworkClient publicId={publicId} /></Suspense>;
 }

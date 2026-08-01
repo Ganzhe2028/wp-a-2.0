@@ -1,7 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { hashLocalPassword, verifyLocalPassword } from "@/lib/server/passwords";
+import { getFormalSession } from "@/lib/server/formal-session";
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -25,6 +26,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 8;
 export async function createAdminSession(
   password: string
 ): Promise<string | null> {
+  if (process.env.ALLOW_LEGACY_ADMIN_PASSWORD !== "true") return null;
   if (password !== getAdminPassword()) return null;
 
   return new SignJWT({ role: "admin" })
@@ -35,6 +37,10 @@ export async function createAdminSession(
 }
 
 export async function verifyAdminSession(): Promise<boolean> {
+  const formal = await getFormalSession();
+  if (formal?.role === "ADMIN") return true;
+  if (process.env.ALLOW_LEGACY_ADMIN_PASSWORD !== "true") return false;
+
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return false;
@@ -82,18 +88,11 @@ export async function verifyEditToken(
 // ── Password Hashing (node:crypto scrypt) ──
 
 export function hashPassword(plain: string): string {
-  const salt = randomBytes(16);
-  const hash = scryptSync(plain, salt, 64);
-  return `${salt.toString("hex")}:${hash.toString("hex")}`;
+  return hashLocalPassword(plain);
 }
 
 export function verifyPassword(plain: string, stored: string): boolean {
-  const [saltHex, hashHex] = stored.split(":");
-  if (!saltHex || !hashHex) return false;
-  const salt = Buffer.from(saltHex, "hex");
-  const expected = Buffer.from(hashHex, "hex");
-  const actual = scryptSync(plain, salt, expected.length);
-  return expected.length === actual.length && timingSafeEqual(expected, actual);
+  return verifyLocalPassword(plain, stored);
 }
 
 // ── Student Session (JWT, httpOnly cookie, 14d) ──
@@ -113,7 +112,13 @@ export async function createStudentSession(personId: string): Promise<string> {
     .sign(getSessionSecret());
 }
 
-export async function verifyStudentSession(): Promise<{ personId: string } | null> {
+export async function verifyStudentSession(): Promise<{ personId: string; userId?: string } | null> {
+  const formal = await getFormalSession();
+  if (formal && formal.role !== "ADMIN") {
+    return { personId: formal.userId, userId: formal.userId };
+  }
+  if (process.env.ALLOW_LEGACY_STUDENT_PASSWORD !== "true") return null;
+
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;

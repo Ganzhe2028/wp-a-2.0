@@ -17,9 +17,11 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/contracts/*.test.mjs",
     "check:generated": "node scripts/check-generated.mjs",
+    "check:openapi": "node scripts/check-openapi.mjs",
     "audit:harness": "node scripts/harness-audit.mjs",
-    "verify:local": "npm run lint && npm run typecheck && npm test && npm run check:generated && npm run build && npm run audit:harness",
-    "verify:ci": "npm run lint && npm run typecheck && npm test && npm run check:generated && npm run build && npm run audit:harness"
+    "migrate:legacy": "node --experimental-strip-types scripts/migrate-legacy-persons.ts",
+    "verify:local": "npm run lint && npm run typecheck && npm test && npm run check:generated && npm run check:openapi && npm run build && npm run audit:harness",
+    "verify:ci": "npm run lint && npm run typecheck && npm test && npm run check:generated && npm run check:openapi && npm run build && npm run audit:harness"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1075.0",

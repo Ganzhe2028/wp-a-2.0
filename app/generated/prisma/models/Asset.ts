@@ -241,8 +241,8 @@ export type AssetGroupByOutputType = {
   ownerUserId: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width: number | null
+  height: number | null
   byteSize: bigint
   checksum: string
   scanStatus: $Enums.AssetScanStatus
@@ -280,8 +280,8 @@ export type AssetWhereInput = {
   ownerUserId?: Prisma.StringFilter<"Asset"> | string
   storageKey?: Prisma.StringFilter<"Asset"> | string
   mimeType?: Prisma.StringFilter<"Asset"> | string
-  width?: Prisma.IntFilter<"Asset"> | number
-  height?: Prisma.IntFilter<"Asset"> | number
+  width?: Prisma.IntNullableFilter<"Asset"> | number | null
+  height?: Prisma.IntNullableFilter<"Asset"> | number | null
   byteSize?: Prisma.BigIntFilter<"Asset"> | bigint | number
   checksum?: Prisma.StringFilter<"Asset"> | string
   scanStatus?: Prisma.EnumAssetScanStatusFilter<"Asset"> | $Enums.AssetScanStatus
@@ -299,8 +299,8 @@ export type AssetOrderByWithRelationInput = {
   ownerUserId?: Prisma.SortOrder
   storageKey?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
-  width?: Prisma.SortOrder
-  height?: Prisma.SortOrder
+  width?: Prisma.SortOrderInput | Prisma.SortOrder
+  height?: Prisma.SortOrderInput | Prisma.SortOrder
   byteSize?: Prisma.SortOrder
   checksum?: Prisma.SortOrder
   scanStatus?: Prisma.SortOrder
@@ -322,8 +322,8 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   eventId?: Prisma.StringFilter<"Asset"> | string
   ownerUserId?: Prisma.StringFilter<"Asset"> | string
   mimeType?: Prisma.StringFilter<"Asset"> | string
-  width?: Prisma.IntFilter<"Asset"> | number
-  height?: Prisma.IntFilter<"Asset"> | number
+  width?: Prisma.IntNullableFilter<"Asset"> | number | null
+  height?: Prisma.IntNullableFilter<"Asset"> | number | null
   byteSize?: Prisma.BigIntFilter<"Asset"> | bigint | number
   checksum?: Prisma.StringFilter<"Asset"> | string
   scanStatus?: Prisma.EnumAssetScanStatusFilter<"Asset"> | $Enums.AssetScanStatus
@@ -341,8 +341,8 @@ export type AssetOrderByWithAggregationInput = {
   ownerUserId?: Prisma.SortOrder
   storageKey?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
-  width?: Prisma.SortOrder
-  height?: Prisma.SortOrder
+  width?: Prisma.SortOrderInput | Prisma.SortOrder
+  height?: Prisma.SortOrderInput | Prisma.SortOrder
   byteSize?: Prisma.SortOrder
   checksum?: Prisma.SortOrder
   scanStatus?: Prisma.SortOrder
@@ -365,8 +365,8 @@ export type AssetScalarWhereWithAggregatesInput = {
   ownerUserId?: Prisma.StringWithAggregatesFilter<"Asset"> | string
   storageKey?: Prisma.StringWithAggregatesFilter<"Asset"> | string
   mimeType?: Prisma.StringWithAggregatesFilter<"Asset"> | string
-  width?: Prisma.IntWithAggregatesFilter<"Asset"> | number
-  height?: Prisma.IntWithAggregatesFilter<"Asset"> | number
+  width?: Prisma.IntNullableWithAggregatesFilter<"Asset"> | number | null
+  height?: Prisma.IntNullableWithAggregatesFilter<"Asset"> | number | null
   byteSize?: Prisma.BigIntWithAggregatesFilter<"Asset"> | bigint | number
   checksum?: Prisma.StringWithAggregatesFilter<"Asset"> | string
   scanStatus?: Prisma.EnumAssetScanStatusWithAggregatesFilter<"Asset"> | $Enums.AssetScanStatus
@@ -379,8 +379,8 @@ export type AssetCreateInput = {
   id?: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -398,8 +398,8 @@ export type AssetUncheckedCreateInput = {
   ownerUserId: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -413,8 +413,8 @@ export type AssetUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -432,8 +432,8 @@ export type AssetUncheckedUpdateInput = {
   ownerUserId?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -449,8 +449,8 @@ export type AssetCreateManyInput = {
   ownerUserId: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -463,8 +463,8 @@ export type AssetUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -479,8 +479,8 @@ export type AssetUncheckedUpdateManyInput = {
   ownerUserId?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -653,6 +653,14 @@ export type AssetUncheckedUpdateManyWithoutOwnerNestedInput = {
   deleteMany?: Prisma.AssetScalarWhereInput | Prisma.AssetScalarWhereInput[]
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type BigIntFieldUpdateOperationsInput = {
   set?: bigint | number
   increment?: bigint | number
@@ -689,8 +697,8 @@ export type AssetCreateWithoutEventInput = {
   id?: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -706,8 +714,8 @@ export type AssetUncheckedCreateWithoutEventInput = {
   ownerUserId: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -752,8 +760,8 @@ export type AssetScalarWhereInput = {
   ownerUserId?: Prisma.StringFilter<"Asset"> | string
   storageKey?: Prisma.StringFilter<"Asset"> | string
   mimeType?: Prisma.StringFilter<"Asset"> | string
-  width?: Prisma.IntFilter<"Asset"> | number
-  height?: Prisma.IntFilter<"Asset"> | number
+  width?: Prisma.IntNullableFilter<"Asset"> | number | null
+  height?: Prisma.IntNullableFilter<"Asset"> | number | null
   byteSize?: Prisma.BigIntFilter<"Asset"> | bigint | number
   checksum?: Prisma.StringFilter<"Asset"> | string
   scanStatus?: Prisma.EnumAssetScanStatusFilter<"Asset"> | $Enums.AssetScanStatus
@@ -766,8 +774,8 @@ export type AssetCreateWithoutOwnerInput = {
   id?: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -782,8 +790,8 @@ export type AssetUncheckedCreateWithoutOwnerInput = {
   id?: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -823,8 +831,8 @@ export type AssetCreateWithoutDay1SlotsInput = {
   id?: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -841,8 +849,8 @@ export type AssetUncheckedCreateWithoutDay1SlotsInput = {
   ownerUserId: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -871,8 +879,8 @@ export type AssetUpdateWithoutDay1SlotsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -889,8 +897,8 @@ export type AssetUncheckedUpdateWithoutDay1SlotsInput = {
   ownerUserId?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -904,8 +912,8 @@ export type AssetCreateManyEventInput = {
   ownerUserId: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -918,8 +926,8 @@ export type AssetUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -935,8 +943,8 @@ export type AssetUncheckedUpdateWithoutEventInput = {
   ownerUserId?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -951,8 +959,8 @@ export type AssetUncheckedUpdateManyWithoutEventInput = {
   ownerUserId?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -965,8 +973,8 @@ export type AssetCreateManyOwnerInput = {
   id?: string
   storageKey: string
   mimeType: string
-  width: number
-  height: number
+  width?: number | null
+  height?: number | null
   byteSize: bigint | number
   checksum: string
   scanStatus?: $Enums.AssetScanStatus
@@ -979,8 +987,8 @@ export type AssetUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -995,8 +1003,8 @@ export type AssetUncheckedUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -1010,8 +1018,8 @@ export type AssetUncheckedUpdateManyWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  width?: Prisma.IntFieldUpdateOperationsInput | number
-  height?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   byteSize?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   checksum?: Prisma.StringFieldUpdateOperationsInput | string
   scanStatus?: Prisma.EnumAssetScanStatusFieldUpdateOperationsInput | $Enums.AssetScanStatus
@@ -1152,8 +1160,8 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     ownerUserId: string
     storageKey: string
     mimeType: string
-    width: number
-    height: number
+    width: number | null
+    height: number | null
     byteSize: bigint
     checksum: string
     scanStatus: $Enums.AssetScanStatus

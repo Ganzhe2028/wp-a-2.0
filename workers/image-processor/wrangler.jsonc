@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "oweek-image-processor",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-31",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "APP_BASE_URL": "https://oweek-wp-a-2.vercel.app",
+    "PUBLIC_ORIGIN": "https://oweek-wp-a-2.vercel.app",
+    "R2_BUCKET_NAME": "oweek-images",
+    "MAX_IMAGE_BYTES": "524288"
+  },
+  "r2_buckets": [
+    {
+      "binding": "IMAGES_BUCKET",
+      "bucket_name": "oweek-images"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  }
+}

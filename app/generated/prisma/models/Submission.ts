@@ -43,6 +43,8 @@ export type SubmissionMinAggregateOutputType = {
   templateVersion: string | null
   version: number | null
   submittedAt: Date | null
+  submitIdempotencyKeyHash: string | null
+  submitRequestHash: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +58,8 @@ export type SubmissionMaxAggregateOutputType = {
   templateVersion: string | null
   version: number | null
   submittedAt: Date | null
+  submitIdempotencyKeyHash: string | null
+  submitRequestHash: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -69,6 +73,9 @@ export type SubmissionCountAggregateOutputType = {
   templateVersion: number
   version: number
   submittedAt: number
+  submitIdempotencyKeyHash: number
+  submitRequestHash: number
+  submitResult: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -92,6 +99,8 @@ export type SubmissionMinAggregateInputType = {
   templateVersion?: true
   version?: true
   submittedAt?: true
+  submitIdempotencyKeyHash?: true
+  submitRequestHash?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -105,6 +114,8 @@ export type SubmissionMaxAggregateInputType = {
   templateVersion?: true
   version?: true
   submittedAt?: true
+  submitIdempotencyKeyHash?: true
+  submitRequestHash?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -118,6 +129,9 @@ export type SubmissionCountAggregateInputType = {
   templateVersion?: true
   version?: true
   submittedAt?: true
+  submitIdempotencyKeyHash?: true
+  submitRequestHash?: true
+  submitResult?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -218,6 +232,9 @@ export type SubmissionGroupByOutputType = {
   templateVersion: string
   version: number
   submittedAt: Date | null
+  submitIdempotencyKeyHash: string | null
+  submitRequestHash: string | null
+  submitResult: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: SubmissionCountAggregateOutputType | null
@@ -254,6 +271,9 @@ export type SubmissionWhereInput = {
   templateVersion?: Prisma.StringFilter<"Submission"> | string
   version?: Prisma.IntFilter<"Submission"> | number
   submittedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.StringNullableFilter<"Submission"> | string | null
+  submitRequestHash?: Prisma.StringNullableFilter<"Submission"> | string | null
+  submitResult?: Prisma.JsonNullableFilter<"Submission">
   createdAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
@@ -271,6 +291,9 @@ export type SubmissionOrderByWithRelationInput = {
   templateVersion?: Prisma.SortOrder
   version?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  submitIdempotencyKeyHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  submitRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  submitResult?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   event?: Prisma.EventOrderByWithRelationInput
@@ -293,6 +316,9 @@ export type SubmissionWhereUniqueInput = Prisma.AtLeast<{
   templateVersion?: Prisma.StringFilter<"Submission"> | string
   version?: Prisma.IntFilter<"Submission"> | number
   submittedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.StringNullableFilter<"Submission"> | string | null
+  submitRequestHash?: Prisma.StringNullableFilter<"Submission"> | string | null
+  submitResult?: Prisma.JsonNullableFilter<"Submission">
   createdAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
@@ -310,6 +336,9 @@ export type SubmissionOrderByWithAggregationInput = {
   templateVersion?: Prisma.SortOrder
   version?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  submitIdempotencyKeyHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  submitRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  submitResult?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SubmissionCountOrderByAggregateInput
@@ -331,6 +360,9 @@ export type SubmissionScalarWhereWithAggregatesInput = {
   templateVersion?: Prisma.StringWithAggregatesFilter<"Submission"> | string
   version?: Prisma.IntWithAggregatesFilter<"Submission"> | number
   submittedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Submission"> | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
+  submitRequestHash?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
+  submitResult?: Prisma.JsonNullableWithAggregatesFilter<"Submission">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Submission"> | Date | string
 }
@@ -342,6 +374,9 @@ export type SubmissionCreateInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutSubmissionsInput
@@ -359,6 +394,9 @@ export type SubmissionUncheckedCreateInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   day1Slots?: Prisma.Day1SlotUncheckedCreateNestedManyWithoutSubmissionInput
@@ -372,6 +410,9 @@ export type SubmissionUpdateInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -389,6 +430,9 @@ export type SubmissionUncheckedUpdateInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day1Slots?: Prisma.Day1SlotUncheckedUpdateManyWithoutSubmissionNestedInput
@@ -404,6 +448,9 @@ export type SubmissionCreateManyInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -415,6 +462,9 @@ export type SubmissionUpdateManyMutationInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -428,6 +478,9 @@ export type SubmissionUncheckedUpdateManyInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -462,6 +515,9 @@ export type SubmissionCountOrderByAggregateInput = {
   templateVersion?: Prisma.SortOrder
   version?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  submitIdempotencyKeyHash?: Prisma.SortOrder
+  submitRequestHash?: Prisma.SortOrder
+  submitResult?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -479,6 +535,8 @@ export type SubmissionMaxOrderByAggregateInput = {
   templateVersion?: Prisma.SortOrder
   version?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  submitIdempotencyKeyHash?: Prisma.SortOrder
+  submitRequestHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -492,6 +550,8 @@ export type SubmissionMinOrderByAggregateInput = {
   templateVersion?: Prisma.SortOrder
   version?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  submitIdempotencyKeyHash?: Prisma.SortOrder
+  submitRequestHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -632,6 +692,9 @@ export type SubmissionCreateWithoutEventInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSubmissionsInput
@@ -647,6 +710,9 @@ export type SubmissionUncheckedCreateWithoutEventInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   day1Slots?: Prisma.Day1SlotUncheckedCreateNestedManyWithoutSubmissionInput
@@ -691,6 +757,9 @@ export type SubmissionScalarWhereInput = {
   templateVersion?: Prisma.StringFilter<"Submission"> | string
   version?: Prisma.IntFilter<"Submission"> | number
   submittedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.StringNullableFilter<"Submission"> | string | null
+  submitRequestHash?: Prisma.StringNullableFilter<"Submission"> | string | null
+  submitResult?: Prisma.JsonNullableFilter<"Submission">
   createdAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
 }
@@ -702,6 +771,9 @@ export type SubmissionCreateWithoutUserInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutSubmissionsInput
@@ -716,6 +788,9 @@ export type SubmissionUncheckedCreateWithoutUserInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   day1Slots?: Prisma.Day1SlotUncheckedCreateNestedManyWithoutSubmissionInput
@@ -755,6 +830,9 @@ export type SubmissionCreateWithoutDay1SlotsInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutSubmissionsInput
@@ -771,6 +849,9 @@ export type SubmissionUncheckedCreateWithoutDay1SlotsInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   day3Bottles?: Prisma.Day3BottleUncheckedCreateNestedManyWithoutSubmissionInput
@@ -799,6 +880,9 @@ export type SubmissionUpdateWithoutDay1SlotsInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -815,6 +899,9 @@ export type SubmissionUncheckedUpdateWithoutDay1SlotsInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day3Bottles?: Prisma.Day3BottleUncheckedUpdateManyWithoutSubmissionNestedInput
@@ -827,6 +914,9 @@ export type SubmissionCreateWithoutDay3BottlesInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutSubmissionsInput
@@ -843,6 +933,9 @@ export type SubmissionUncheckedCreateWithoutDay3BottlesInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   day1Slots?: Prisma.Day1SlotUncheckedCreateNestedManyWithoutSubmissionInput
@@ -871,6 +964,9 @@ export type SubmissionUpdateWithoutDay3BottlesInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -887,6 +983,9 @@ export type SubmissionUncheckedUpdateWithoutDay3BottlesInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day1Slots?: Prisma.Day1SlotUncheckedUpdateManyWithoutSubmissionNestedInput
@@ -900,6 +999,9 @@ export type SubmissionCreateManyEventInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -911,6 +1013,9 @@ export type SubmissionUpdateWithoutEventInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -926,6 +1031,9 @@ export type SubmissionUncheckedUpdateWithoutEventInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day1Slots?: Prisma.Day1SlotUncheckedUpdateManyWithoutSubmissionNestedInput
@@ -940,6 +1048,9 @@ export type SubmissionUncheckedUpdateManyWithoutEventInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -951,6 +1062,9 @@ export type SubmissionCreateManyUserInput = {
   templateVersion: string
   version?: number
   submittedAt?: Date | string | null
+  submitIdempotencyKeyHash?: string | null
+  submitRequestHash?: string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -962,6 +1076,9 @@ export type SubmissionUpdateWithoutUserInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -976,6 +1093,9 @@ export type SubmissionUncheckedUpdateWithoutUserInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day1Slots?: Prisma.Day1SlotUncheckedUpdateManyWithoutSubmissionNestedInput
@@ -989,6 +1109,9 @@ export type SubmissionUncheckedUpdateManyWithoutUserInput = {
   templateVersion?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  submitIdempotencyKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submitResult?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1042,6 +1165,9 @@ export type SubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   templateVersion?: boolean
   version?: boolean
   submittedAt?: boolean
+  submitIdempotencyKeyHash?: boolean
+  submitRequestHash?: boolean
+  submitResult?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
@@ -1060,6 +1186,9 @@ export type SubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   templateVersion?: boolean
   version?: boolean
   submittedAt?: boolean
+  submitIdempotencyKeyHash?: boolean
+  submitRequestHash?: boolean
+  submitResult?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
@@ -1075,6 +1204,9 @@ export type SubmissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   templateVersion?: boolean
   version?: boolean
   submittedAt?: boolean
+  submitIdempotencyKeyHash?: boolean
+  submitRequestHash?: boolean
+  submitResult?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
@@ -1090,11 +1222,14 @@ export type SubmissionSelectScalar = {
   templateVersion?: boolean
   version?: boolean
   submittedAt?: boolean
+  submitIdempotencyKeyHash?: boolean
+  submitRequestHash?: boolean
+  submitResult?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "userId" | "section" | "status" | "templateVersion" | "version" | "submittedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["submission"]>
+export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "userId" | "section" | "status" | "templateVersion" | "version" | "submittedAt" | "submitIdempotencyKeyHash" | "submitRequestHash" | "submitResult" | "createdAt" | "updatedAt", ExtArgs["result"]["submission"]>
 export type SubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1128,6 +1263,9 @@ export type $SubmissionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     templateVersion: string
     version: number
     submittedAt: Date | null
+    submitIdempotencyKeyHash: string | null
+    submitRequestHash: string | null
+    submitResult: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["submission"]>
@@ -1565,6 +1703,9 @@ export interface SubmissionFieldRefs {
   readonly templateVersion: Prisma.FieldRef<"Submission", 'String'>
   readonly version: Prisma.FieldRef<"Submission", 'Int'>
   readonly submittedAt: Prisma.FieldRef<"Submission", 'DateTime'>
+  readonly submitIdempotencyKeyHash: Prisma.FieldRef<"Submission", 'String'>
+  readonly submitRequestHash: Prisma.FieldRef<"Submission", 'String'>
+  readonly submitResult: Prisma.FieldRef<"Submission", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Submission", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Submission", 'DateTime'>
 }

@@ -398,6 +398,12 @@ export const ModelName = {
   Event: 'Event',
   EventSettings: 'EventSettings',
   User: 'User',
+  LocalCredential: 'LocalCredential',
+  OidcIdentity: 'OidcIdentity',
+  Session: 'Session',
+  IdempotencyRecord: 'IdempotencyRecord',
+  LegacyPersonLink: 'LegacyPersonLink',
+  RateLimitBucket: 'RateLimitBucket',
   Group: 'Group',
   Submission: 'Submission',
   Asset: 'Asset',
@@ -421,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "person" | "image" | "locationCard" | "favorite" | "systemSetting" | "event" | "eventSettings" | "user" | "group" | "submission" | "asset" | "day1Slot" | "day3Bottle" | "eventAnonymousId" | "artworkPublicId" | "adminAuditLog"
+    modelProps: "person" | "image" | "locationCard" | "favorite" | "systemSetting" | "event" | "eventSettings" | "user" | "localCredential" | "oidcIdentity" | "session" | "idempotencyRecord" | "legacyPersonLink" | "rateLimitBucket" | "group" | "submission" | "asset" | "day1Slot" | "day3Bottle" | "eventAnonymousId" | "artworkPublicId" | "adminAuditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1014,6 +1020,450 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    LocalCredential: {
+      payload: Prisma.$LocalCredentialPayload<ExtArgs>
+      fields: Prisma.LocalCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LocalCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LocalCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.LocalCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LocalCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.LocalCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.LocalCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.LocalCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LocalCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.LocalCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>
+        }
+        update: {
+          args: Prisma.LocalCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.LocalCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LocalCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LocalCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.LocalCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocalCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.LocalCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLocalCredential>
+        }
+        groupBy: {
+          args: Prisma.LocalCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LocalCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LocalCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LocalCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
+    OidcIdentity: {
+      payload: Prisma.$OidcIdentityPayload<ExtArgs>
+      fields: Prisma.OidcIdentityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OidcIdentityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OidcIdentityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>
+        }
+        findFirst: {
+          args: Prisma.OidcIdentityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OidcIdentityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>
+        }
+        findMany: {
+          args: Prisma.OidcIdentityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>[]
+        }
+        create: {
+          args: Prisma.OidcIdentityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>
+        }
+        createMany: {
+          args: Prisma.OidcIdentityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OidcIdentityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>[]
+        }
+        delete: {
+          args: Prisma.OidcIdentityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>
+        }
+        update: {
+          args: Prisma.OidcIdentityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>
+        }
+        deleteMany: {
+          args: Prisma.OidcIdentityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OidcIdentityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OidcIdentityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>[]
+        }
+        upsert: {
+          args: Prisma.OidcIdentityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OidcIdentityPayload>
+        }
+        aggregate: {
+          args: Prisma.OidcIdentityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOidcIdentity>
+        }
+        groupBy: {
+          args: Prisma.OidcIdentityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OidcIdentityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OidcIdentityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OidcIdentityCountAggregateOutputType> | number
+        }
+      }
+    }
+    Session: {
+      payload: Prisma.$SessionPayload<ExtArgs>
+      fields: Prisma.SessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        findFirst: {
+          args: Prisma.SessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        findMany: {
+          args: Prisma.SessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[]
+        }
+        create: {
+          args: Prisma.SessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        createMany: {
+          args: Prisma.SessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[]
+        }
+        delete: {
+          args: Prisma.SessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        update: {
+          args: Prisma.SessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        aggregate: {
+          args: Prisma.SessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSession>
+        }
+        groupBy: {
+          args: Prisma.SessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    IdempotencyRecord: {
+      payload: Prisma.$IdempotencyRecordPayload<ExtArgs>
+      fields: Prisma.IdempotencyRecordFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IdempotencyRecordFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IdempotencyRecordFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>
+        }
+        findFirst: {
+          args: Prisma.IdempotencyRecordFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IdempotencyRecordFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>
+        }
+        findMany: {
+          args: Prisma.IdempotencyRecordFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>[]
+        }
+        create: {
+          args: Prisma.IdempotencyRecordCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>
+        }
+        createMany: {
+          args: Prisma.IdempotencyRecordCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.IdempotencyRecordCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>[]
+        }
+        delete: {
+          args: Prisma.IdempotencyRecordDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>
+        }
+        update: {
+          args: Prisma.IdempotencyRecordUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>
+        }
+        deleteMany: {
+          args: Prisma.IdempotencyRecordDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IdempotencyRecordUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.IdempotencyRecordUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>[]
+        }
+        upsert: {
+          args: Prisma.IdempotencyRecordUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyRecordPayload>
+        }
+        aggregate: {
+          args: Prisma.IdempotencyRecordAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIdempotencyRecord>
+        }
+        groupBy: {
+          args: Prisma.IdempotencyRecordGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IdempotencyRecordGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IdempotencyRecordCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IdempotencyRecordCountAggregateOutputType> | number
+        }
+      }
+    }
+    LegacyPersonLink: {
+      payload: Prisma.$LegacyPersonLinkPayload<ExtArgs>
+      fields: Prisma.LegacyPersonLinkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegacyPersonLinkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegacyPersonLinkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>
+        }
+        findFirst: {
+          args: Prisma.LegacyPersonLinkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegacyPersonLinkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>
+        }
+        findMany: {
+          args: Prisma.LegacyPersonLinkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>[]
+        }
+        create: {
+          args: Prisma.LegacyPersonLinkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>
+        }
+        createMany: {
+          args: Prisma.LegacyPersonLinkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegacyPersonLinkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>[]
+        }
+        delete: {
+          args: Prisma.LegacyPersonLinkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>
+        }
+        update: {
+          args: Prisma.LegacyPersonLinkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegacyPersonLinkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegacyPersonLinkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegacyPersonLinkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegacyPersonLinkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegacyPersonLinkPayload>
+        }
+        aggregate: {
+          args: Prisma.LegacyPersonLinkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegacyPersonLink>
+        }
+        groupBy: {
+          args: Prisma.LegacyPersonLinkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegacyPersonLinkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegacyPersonLinkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegacyPersonLinkCountAggregateOutputType> | number
+        }
+      }
+    }
+    RateLimitBucket: {
+      payload: Prisma.$RateLimitBucketPayload<ExtArgs>
+      fields: Prisma.RateLimitBucketFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RateLimitBucketFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RateLimitBucketFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>
+        }
+        findFirst: {
+          args: Prisma.RateLimitBucketFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RateLimitBucketFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>
+        }
+        findMany: {
+          args: Prisma.RateLimitBucketFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>[]
+        }
+        create: {
+          args: Prisma.RateLimitBucketCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>
+        }
+        createMany: {
+          args: Prisma.RateLimitBucketCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RateLimitBucketCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>[]
+        }
+        delete: {
+          args: Prisma.RateLimitBucketDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>
+        }
+        update: {
+          args: Prisma.RateLimitBucketUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>
+        }
+        deleteMany: {
+          args: Prisma.RateLimitBucketDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RateLimitBucketUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RateLimitBucketUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>[]
+        }
+        upsert: {
+          args: Prisma.RateLimitBucketUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitBucketPayload>
+        }
+        aggregate: {
+          args: Prisma.RateLimitBucketAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRateLimitBucket>
+        }
+        groupBy: {
+          args: Prisma.RateLimitBucketGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RateLimitBucketGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RateLimitBucketCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RateLimitBucketCountAggregateOutputType> | number
         }
       }
     }
@@ -1737,6 +2187,7 @@ export const EventSettingsScalarFieldEnum = {
   allowEditing: 'allowEditing',
   showName: 'showName',
   fullProfileVisible: 'fullProfileVisible',
+  seniorCanBrowseAll: 'seniorCanBrowseAll',
   version: 'version',
   updatedBy: 'updatedBy',
   updatedAt: 'updatedAt'
@@ -1748,6 +2199,7 @@ export type EventSettingsScalarFieldEnum = (typeof EventSettingsScalarFieldEnum)
 export const UserScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
+  accountCode: 'accountCode',
   issuer: 'issuer',
   externalSubject: 'externalSubject',
   email: 'email',
@@ -1756,6 +2208,7 @@ export const UserScalarFieldEnum = {
   role: 'role',
   groupId: 'groupId',
   status: 'status',
+  protectedSystemAdmin: 'protectedSystemAdmin',
   lastLoginAt: 'lastLoginAt',
   version: 'version',
   archivedAt: 'archivedAt',
@@ -1765,6 +2218,81 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const LocalCredentialScalarFieldEnum = {
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  passwordChangedAt: 'passwordChangedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LocalCredentialScalarFieldEnum = (typeof LocalCredentialScalarFieldEnum)[keyof typeof LocalCredentialScalarFieldEnum]
+
+
+export const OidcIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  issuer: 'issuer',
+  subject: 'subject',
+  boundAt: 'boundAt'
+} as const
+
+export type OidcIdentityScalarFieldEnum = (typeof OidcIdentityScalarFieldEnum)[keyof typeof OidcIdentityScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  lastSeenAt: 'lastSeenAt',
+  ipHash: 'ipHash',
+  userAgentHash: 'userAgentHash',
+  createdAt: 'createdAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const IdempotencyRecordScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  actorUserId: 'actorUserId',
+  scope: 'scope',
+  keyHash: 'keyHash',
+  requestHash: 'requestHash',
+  responseCiphertext: 'responseCiphertext',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type IdempotencyRecordScalarFieldEnum = (typeof IdempotencyRecordScalarFieldEnum)[keyof typeof IdempotencyRecordScalarFieldEnum]
+
+
+export const LegacyPersonLinkScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  legacyPersonId: 'legacyPersonId',
+  userId: 'userId',
+  mappingDigest: 'mappingDigest',
+  createdAt: 'createdAt'
+} as const
+
+export type LegacyPersonLinkScalarFieldEnum = (typeof LegacyPersonLinkScalarFieldEnum)[keyof typeof LegacyPersonLinkScalarFieldEnum]
+
+
+export const RateLimitBucketScalarFieldEnum = {
+  keyHash: 'keyHash',
+  scope: 'scope',
+  count: 'count',
+  windowStartedAt: 'windowStartedAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type RateLimitBucketScalarFieldEnum = (typeof RateLimitBucketScalarFieldEnum)[keyof typeof RateLimitBucketScalarFieldEnum]
 
 
 export const GroupScalarFieldEnum = {
@@ -1789,6 +2317,9 @@ export const SubmissionScalarFieldEnum = {
   templateVersion: 'templateVersion',
   version: 'version',
   submittedAt: 'submittedAt',
+  submitIdempotencyKeyHash: 'submitIdempotencyKeyHash',
+  submitRequestHash: 'submitRequestHash',
+  submitResult: 'submitResult',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1850,6 +2381,7 @@ export const EventAnonymousIdScalarFieldEnum = {
   eventId: 'eventId',
   userId: 'userId',
   anonymousId: 'anonymousId',
+  secretVersion: 'secretVersion',
   createdAt: 'createdAt'
 } as const
 
@@ -1879,6 +2411,8 @@ export const AdminAuditLogScalarFieldEnum = {
   after: 'after',
   requestId: 'requestId',
   summary: 'summary',
+  ipHash: 'ipHash',
+  userAgentHash: 'userAgentHash',
   createdAt: 'createdAt'
 } as const
 
@@ -2201,6 +2735,12 @@ export type GlobalOmitConfig = {
   event?: Prisma.EventOmit
   eventSettings?: Prisma.EventSettingsOmit
   user?: Prisma.UserOmit
+  localCredential?: Prisma.LocalCredentialOmit
+  oidcIdentity?: Prisma.OidcIdentityOmit
+  session?: Prisma.SessionOmit
+  idempotencyRecord?: Prisma.IdempotencyRecordOmit
+  legacyPersonLink?: Prisma.LegacyPersonLinkOmit
+  rateLimitBucket?: Prisma.RateLimitBucketOmit
   group?: Prisma.GroupOmit
   submission?: Prisma.SubmissionOmit
   asset?: Prisma.AssetOmit

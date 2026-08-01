@@ -57,6 +57,12 @@ export const ModelName = {
   Event: 'Event',
   EventSettings: 'EventSettings',
   User: 'User',
+  LocalCredential: 'LocalCredential',
+  OidcIdentity: 'OidcIdentity',
+  Session: 'Session',
+  IdempotencyRecord: 'IdempotencyRecord',
+  LegacyPersonLink: 'LegacyPersonLink',
+  RateLimitBucket: 'RateLimitBucket',
   Group: 'Group',
   Submission: 'Submission',
   Asset: 'Asset',
@@ -172,6 +178,7 @@ export const EventSettingsScalarFieldEnum = {
   allowEditing: 'allowEditing',
   showName: 'showName',
   fullProfileVisible: 'fullProfileVisible',
+  seniorCanBrowseAll: 'seniorCanBrowseAll',
   version: 'version',
   updatedBy: 'updatedBy',
   updatedAt: 'updatedAt'
@@ -183,6 +190,7 @@ export type EventSettingsScalarFieldEnum = (typeof EventSettingsScalarFieldEnum)
 export const UserScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
+  accountCode: 'accountCode',
   issuer: 'issuer',
   externalSubject: 'externalSubject',
   email: 'email',
@@ -191,6 +199,7 @@ export const UserScalarFieldEnum = {
   role: 'role',
   groupId: 'groupId',
   status: 'status',
+  protectedSystemAdmin: 'protectedSystemAdmin',
   lastLoginAt: 'lastLoginAt',
   version: 'version',
   archivedAt: 'archivedAt',
@@ -200,6 +209,81 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const LocalCredentialScalarFieldEnum = {
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  passwordChangedAt: 'passwordChangedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LocalCredentialScalarFieldEnum = (typeof LocalCredentialScalarFieldEnum)[keyof typeof LocalCredentialScalarFieldEnum]
+
+
+export const OidcIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  issuer: 'issuer',
+  subject: 'subject',
+  boundAt: 'boundAt'
+} as const
+
+export type OidcIdentityScalarFieldEnum = (typeof OidcIdentityScalarFieldEnum)[keyof typeof OidcIdentityScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  lastSeenAt: 'lastSeenAt',
+  ipHash: 'ipHash',
+  userAgentHash: 'userAgentHash',
+  createdAt: 'createdAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const IdempotencyRecordScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  actorUserId: 'actorUserId',
+  scope: 'scope',
+  keyHash: 'keyHash',
+  requestHash: 'requestHash',
+  responseCiphertext: 'responseCiphertext',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type IdempotencyRecordScalarFieldEnum = (typeof IdempotencyRecordScalarFieldEnum)[keyof typeof IdempotencyRecordScalarFieldEnum]
+
+
+export const LegacyPersonLinkScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  legacyPersonId: 'legacyPersonId',
+  userId: 'userId',
+  mappingDigest: 'mappingDigest',
+  createdAt: 'createdAt'
+} as const
+
+export type LegacyPersonLinkScalarFieldEnum = (typeof LegacyPersonLinkScalarFieldEnum)[keyof typeof LegacyPersonLinkScalarFieldEnum]
+
+
+export const RateLimitBucketScalarFieldEnum = {
+  keyHash: 'keyHash',
+  scope: 'scope',
+  count: 'count',
+  windowStartedAt: 'windowStartedAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type RateLimitBucketScalarFieldEnum = (typeof RateLimitBucketScalarFieldEnum)[keyof typeof RateLimitBucketScalarFieldEnum]
 
 
 export const GroupScalarFieldEnum = {
@@ -224,6 +308,9 @@ export const SubmissionScalarFieldEnum = {
   templateVersion: 'templateVersion',
   version: 'version',
   submittedAt: 'submittedAt',
+  submitIdempotencyKeyHash: 'submitIdempotencyKeyHash',
+  submitRequestHash: 'submitRequestHash',
+  submitResult: 'submitResult',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -285,6 +372,7 @@ export const EventAnonymousIdScalarFieldEnum = {
   eventId: 'eventId',
   userId: 'userId',
   anonymousId: 'anonymousId',
+  secretVersion: 'secretVersion',
   createdAt: 'createdAt'
 } as const
 
@@ -314,6 +402,8 @@ export const AdminAuditLogScalarFieldEnum = {
   after: 'after',
   requestId: 'requestId',
   summary: 'summary',
+  ipHash: 'ipHash',
+  userAgentHash: 'userAgentHash',
   createdAt: 'createdAt'
 } as const
 

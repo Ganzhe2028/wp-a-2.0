@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import imageCompression from "browser-image-compression";
 
 interface AvatarUploaderProps {
@@ -38,7 +39,7 @@ export default function AvatarUploader({
       const presignRes = await fetch("/api/upload-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contentType: `image/${ext}`, purpose: "avatar" }),
+        body: JSON.stringify({ contentType: `image/${ext}`, byteSize: compressed.size, purpose: "avatar" }),
       });
 
       if (!presignRes.ok) {
@@ -91,7 +92,7 @@ export default function AvatarUploader({
         className="relative aspect-square w-full overflow-hidden rounded-[var(--radius-tile)] border-[1.5px] border-[var(--line)] bg-[var(--paper)] transition-colors disabled:opacity-60 hover:border-[var(--orange)]"
       >
         {currentUrl ? (
-          <img src={currentUrl} alt={label} className="h-full w-full object-cover" />
+          <Image src={currentUrl} alt={label} fill sizes="50vw" unoptimized className="object-cover" />
         ) : (
           <span className="flex h-full w-full items-center justify-center text-3xl font-black text-[var(--orange)]">+</span>
         )}

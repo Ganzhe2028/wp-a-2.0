@@ -12,6 +12,13 @@ const MAX_IP_ATTEMPTS = 20;
 const MAX_USER_ATTEMPTS = 5;
 
 export async function POST(request: NextRequest) {
+  if (process.env.ALLOW_LEGACY_STUDENT_PASSWORD !== "true") {
+    return NextResponse.json(
+      { error: "旧账号入口已停用，请使用 /api/v1/auth/login" },
+      { status: 410, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const forwardedFor = request.headers.get("x-forwarded-for");
   const ip = forwardedFor?.split(",")[0]?.trim() ?? "unknown";
 
