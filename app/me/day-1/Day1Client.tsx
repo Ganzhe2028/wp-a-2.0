@@ -7,13 +7,13 @@ import StudentHeader from "@/components/student/StudentHeader";
 import { PageError, PageLoading, SaveStatus } from "@/components/student/AsyncState";
 import ViewportDialog from "@/components/student/ViewportDialog";
 import { describeApiError, isReadOnlyError, loginUrl, newIdempotencyKey, studentApi, StudentApiError, type SubmissionStatus } from "@/components/student/api";
-import { compressForUpload, putPresignedImage, retryUploadRequest, withUploadPermit } from "@/components/student/image-upload";
+import { compressForUpload, ImageCompressionTooLargeError, LARGE_SOURCE_IMAGE_BYTES, MAX_SOURCE_IMAGE_BYTES, putPresignedImage, retryUploadRequest, withUploadPermit, type CompressionMode } from "@/components/student/image-upload";
 
 interface Crop { x: number; y: number; scale: number }
 interface SlotConfig { slotKey: string; label: string; required: boolean; aspectRatio: number }
 interface SlotValue { slotKey: string; assetId: string; imageUrl?: string; crop: Crop }
 interface PendingPreview { preview: string; crop: Crop }
-interface CropSelection { config: SlotConfig; value?: SlotValue; file?: File; preview: string; pendingCrop?: Crop }
+interface CropSelection { config: SlotConfig; value?: SlotValue; file?: File; preview: string; pendingCrop?: Crop; compressionMode?: CompressionMode }
 interface Day1Data { status: SubmissionStatus; version: number; canAuthor: boolean; readOnlyReason?: string; template: { templateVersion: string; slots: SlotConfig[] }; slots: SlotValue[]; publicId: string }
 
 const EMPTY_CROP: Crop = { x: .5, y: .5, scale: 1 };
@@ -44,6 +44,7 @@ export default function Day1Client() {
   const [reopening, setReopening] = useState(false);
   const [missing, setMissing] = useState<string[]>([]);
   const [activeCrop, setActiveCrop] = useState<CropSelection | null>(null);
+  const [largeImagePrompt, setLargeImagePrompt] = useState<CropSelection | null>(null);
   const [uploadingSlots, setUploadingSlots] = useState<Set<string>>(() => new Set());
   const [uploadStages, setUploadStages] = useState<Record<string, string>>({});
   const [pendingPreviews, setPendingPreviews] = useState<Record<string, PendingPreview>>({});
@@ -139,9 +140,13 @@ export default function Day1Client() {
     const config = selectedConfig.current;
     event.target.value = "";
     if (!file || !config) return;
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) { setError("请选择 10 MB 以内的 JPEG、PNG 或 WebP 图片"); return; }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setError("请选择 JPEG、PNG 或 WebP 图片"); return; }
+    if (file.size > MAX_SOURCE_IMAGE_BYTES) { setError("原图超过 30 MB，手机浏览器可能无法稳定处理；请先截图或选择较小的图片"); return; }
     setFailedCrops((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
-    setActiveCrop({ config, file, preview: URL.createObjectURL(file) });
+    setError("");
+    const selection = { config, file, preview: URL.createObjectURL(file) };
+    if (file.size > LARGE_SOURCE_IMAGE_BYTES) { setLargeImagePrompt(selection); return; }
+    setActiveCrop(selection);
   }
 
   function setUploadStage(slotKey: string, label: string) {
@@ -160,7 +165,7 @@ export default function Day1Client() {
     try {
       const presigned = await withUploadPermit(async () => {
         setUploadStage(config.slotKey, "压缩中 0%");
-        const compressed = await compressForUpload(file, (progress) => setUploadStage(config.slotKey, `压缩中 ${progress}%`));
+        const compressed = await compressForUpload(file, (progress) => setUploadStage(config.slotKey, `压缩中 ${progress}%`), activeCrop.compressionMode);
         setUploadStage(config.slotKey, "准备上传…");
         const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await compressed.arrayBuffer()))).map((byte) => byte.toString(16).padStart(2, "0")).join("");
         const presignKey = newIdempotencyKey();
@@ -208,9 +213,14 @@ export default function Day1Client() {
       URL.revokeObjectURL(preview);
     } catch (caught) {
       if (isReadOnlyError(caught)) setReadOnly(true);
-      setError(`${caught instanceof Error && !(caught instanceof StudentApiError) ? caught.message : describeApiError(caught)}；点按对应格子可直接重试。`);
       setPendingPreviews((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
-      setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview, pendingCrop: crop } }));
+      if (caught instanceof ImageCompressionTooLargeError) {
+        setError(caught.message);
+        URL.revokeObjectURL(preview);
+      } else {
+        setError(`${caught instanceof Error && !(caught instanceof StudentApiError) ? caught.message : describeApiError(caught)}；点按对应格子可直接重试。`);
+        setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview, pendingCrop: crop, compressionMode: activeCrop.compressionMode } }));
+      }
     } finally {
       setUploadingSlots((current) => { const next = new Set(current); next.delete(config.slotKey); return next; });
       setUploadStages((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
@@ -272,9 +282,15 @@ export default function Day1Client() {
       {!readOnly && <button type="button" disabled={uploadingSlots.size > 0} onClick={() => setConfirming(true)} className="ow-btn mt-8">{uploadingSlots.size > 0 ? `正在处理 ${uploadingSlots.size} 张图片…` : "提交 DAY 1 →"}</button>}
       {readOnly && data.publicId && <button type="button" onClick={() => router.push(`/artworks/${encodeURIComponent(data.publicId)}?section=day1`)} className="ow-btn mt-8">查看作品 →</button>}
       {confirming && <Confirm completed={completed} total={data.template.slots.length} cancel={() => setConfirming(false)} submit={() => void submit()} />}
+      {largeImagePrompt && <LargeImagePrompt file={largeImagePrompt.file!} cancel={() => { URL.revokeObjectURL(largeImagePrompt.preview); setLargeImagePrompt(null); }} compress={() => { setActiveCrop({ ...largeImagePrompt, compressionMode: "strong" }); setLargeImagePrompt(null); }} />}
       {activeCrop && <CropDialog source={activeCrop.preview} aspectRatio={activeCrop.config.aspectRatio} initial={activeCrop.pendingCrop || activeCrop.value?.crop || EMPTY_CROP} cancel={() => discardCrop(activeCrop)} replace={() => replaceCrop(activeCrop)} accept={(crop) => void acceptCrop(crop)} />}
     </main>
   );
+}
+
+function LargeImagePrompt({ file, cancel, compress }: { file: File; cancel: () => void; compress: () => void }) {
+  const megabytes = (file.size / (1024 * 1024)).toFixed(1);
+  return <ViewportDialog close={cancel}><div className="ow-modal student-dialog" role="dialog" aria-modal="true" aria-labelledby="large-image-title"><p className="ow-kicker">LARGE IMAGE</p><h2 id="large-image-title" className="ow-heading mt-2">这张照片有 {megabytes} MB</h2><p className="ow-muted mt-4">原图较大。网站可以先在你的手机本地加强压缩，再上传约 500 KB 的 WebP 图片；原图不会发送给第三方压缩网站。</p><button type="button" onClick={compress} className="ow-btn mt-8">压缩后继续 →</button><button type="button" onClick={cancel} className="ow-btn ow-btn-outline mt-3">重新选择图片</button></div></ViewportDialog>;
 }
 
 function Confirm({ completed, total, cancel, submit }: { completed: number; total: number; cancel: () => void; submit: () => void }) {
