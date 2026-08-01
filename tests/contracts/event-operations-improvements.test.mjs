@@ -83,3 +83,18 @@ test("NFC export uses canonical exhibition URLs and never the legacy NFC route",
   assert.match(route, /status: "ACTIVE"/);
   assert.match(accountsUi, /导出 NFC 展览网址/);
 });
+
+test("visible account names keep normal word boundaries across student pages", async () => {
+  const [styles, home, browse, artwork] = await Promise.all([
+    source("../../app/globals.css"),
+    source("../../app/home/HomeClient.tsx"),
+    source("../../app/browse/BrowseClient.tsx"),
+    source("../../app/artworks/[publicId]/ArtworkClient.tsx"),
+  ]);
+  assert.match(styles, /\.student-display-name[^}]*word-break: normal/);
+  assert.match(styles, /\.student-identity-title[^}]*14vw/);
+  for (const page of [home, browse, artwork]) {
+    assert.match(page, /student-display-name/);
+    assert.doesNotMatch(page, /className="[^"]*break-all[^"]*"[^>]*>\{(?:data\.identity\.)?displayTitle\}/);
+  }
+});

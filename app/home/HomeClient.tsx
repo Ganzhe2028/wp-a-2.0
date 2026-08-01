@@ -43,7 +43,7 @@ export default function HomeClient() {
       <StudentHeader title="HOME" backHref={null} showLogout />
       <section className="ow-home-greeting" aria-labelledby="home-greeting">
         <p>{data.identity.isAnonymous ? "ANONYMOUS ID" : "HELLO,"}</p>
-        <h1 id="home-greeting" className="break-all">{data.identity.displayTitle}</h1>
+        <h1 id="home-greeting" className="student-display-name">{data.identity.displayTitle}</h1>
         <h2>今天想做什么？</h2>
       </section>
       <nav className="ow-home-tasks" aria-label="作品入口">

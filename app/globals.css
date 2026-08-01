@@ -201,7 +201,7 @@ img { max-width: 100%; }
 .student-search > span { position: absolute; top: 4px; right: 13px; color: var(--orange); font-size: 2rem; }
 .student-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .student-gallery-card { display: grid; min-width: 0; gap: 8px; color: inherit; text-decoration: none; }
-.student-gallery-card strong { font-size: 1.05rem; }
+.student-gallery-card strong { min-width: 0; font-size: 1.05rem; }
 .student-gallery-card small { color: var(--muted); }
 .student-gallery-media { position: relative; display: flex; aspect-ratio: 1; overflow: hidden; align-items: center; justify-content: center; border: 1.5px solid var(--line); border-radius: var(--radius-tile); background: var(--paper); color: var(--orange); font-size: 3rem; font-weight: 900; }
 .student-gallery-media img { width: 100%; height: 100%; object-fit: cover; }
@@ -210,7 +210,8 @@ img { max-width: 100%; }
 .student-empty-mark { display: block; width: 52px; height: 52px; margin-inline: auto; border: 10px solid var(--orange); border-radius: 999px; }
 .student-artwork-slot { min-height: 180px; margin: 0; }
 .student-identity-only { display: flex; min-height: calc(100svh - 120px); flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.student-identity-title { margin-block: 22px; font-size: clamp(4rem, 20vw, 8rem); font-weight: 900; letter-spacing: -.07em; line-height: .9; }
+.student-display-name { max-width: 100%; overflow-wrap: anywhere; word-break: normal; hyphens: none; text-wrap: balance; }
+.student-identity-title { margin-block: 22px; font-size: clamp(2.75rem, 14vw, 6rem); font-weight: 900; letter-spacing: -.055em; line-height: .94; }
 .student-help-card { display: grid; grid-template-columns: 52px 1fr; gap: 16px; }
 .student-help-card > span { color: var(--orange); font-size: 1.6rem; font-weight: 900; }
 .student-help-card h2,
