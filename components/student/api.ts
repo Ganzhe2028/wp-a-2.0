@@ -1,5 +1,7 @@
 "use client";
 
+import { getUiPreviewData, isUiPreviewActive, uiPreviewWriteError } from "@/lib/preview/ui-preview";
+
 export type Section = "DAY1" | "DAY3";
 export type SubmissionStatus = "NOT_STARTED" | "DRAFT" | "SUBMITTED";
 
@@ -28,6 +30,11 @@ export class StudentApiError extends Error {
 }
 
 export async function studentApi<T>(path: string, init?: RequestInit): Promise<T> {
+  if (isUiPreviewActive()) {
+    if (init?.method && init.method !== "GET") throw uiPreviewWriteError();
+    const preview = getUiPreviewData(path);
+    if (preview !== undefined) return preview as T;
+  }
   const response = await fetch(path, {
     credentials: "same-origin",
     cache: "no-store",

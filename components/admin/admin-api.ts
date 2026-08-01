@@ -1,3 +1,5 @@
+import { getUiPreviewData, isUiPreviewActive, uiPreviewWriteError } from "@/lib/preview/ui-preview";
+
 export type UserRole = "LEARNER" | "SENIOR" | "ADMIN";
 export type AccountStatus = "ACTIVE" | "ARCHIVED";
 export type SubmissionStatus = "NOT_STARTED" | "DRAFT" | "SUBMITTED";
@@ -128,6 +130,11 @@ export class AdminApiError extends Error {
 }
 
 async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  if (isUiPreviewActive()) {
+    if (init?.method && init.method !== "GET") throw new AdminApiError(403, { error: { code: "PREVIEW_READ_ONLY", message: uiPreviewWriteError().message } });
+    const preview = getUiPreviewData(path);
+    if (preview !== undefined) return preview as T;
+  }
   const headers = new Headers(init?.headers);
   if (init?.body && !headers.has("Idempotency-Key")) {
     try {
