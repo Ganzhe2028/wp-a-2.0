@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { verifyStudentSession } from "@/lib/auth";
 import { hasTrustedWriteOrigin } from "@/lib/server/request-security";
+import { requireFormalViewer } from "@/lib/server/student-request";
 
 const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES) || 512 * 1024;
 const KEY_PATTERN = /^(?:[A-Za-z0-9_-]+\/){1,3}[A-Za-z0-9_-]+\.(?:jpeg|jpg|png|webp)$/;
@@ -17,13 +17,13 @@ export async function PUT(request: NextRequest) {
   if (!hasTrustedWriteOrigin(request)) {
     return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   }
-  const session = await verifyStudentSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const context = await requireFormalViewer(request, { write: true });
+  if (!context.ok) return context.response;
 
   const key = request.nextUrl.searchParams.get("key") ?? "";
   const destination = localPath(key);
   const segments = key.split("/");
-  const owned = segments[0] === session.personId || segments.at(-2) === session.personId;
+  const owned = segments.at(-2) === context.viewer.userId;
   if (!destination || !owned) {
     return NextResponse.json({ error: "Invalid upload key" }, { status: 400 });
   }
