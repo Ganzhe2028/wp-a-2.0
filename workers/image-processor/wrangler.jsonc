@@ -7,8 +7,8 @@
     "enabled": true
   },
   "vars": {
-    "APP_BASE_URL": "https://oweek-wp-a-2.vercel.app",
-    "PUBLIC_ORIGIN": "https://oweek-wp-a-2.vercel.app",
+    "APP_BASE_URL": "https://www.msoweek.site",
+    "PUBLIC_ORIGIN": "https://www.msoweek.site",
     "R2_BUCKET_NAME": "oweek-images",
     "MAX_IMAGE_BYTES": "524288"
   },

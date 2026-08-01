@@ -115,7 +115,7 @@ export async function putPresignedImage(
   let lastError: unknown;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 30_000);
+    const timeout = window.setTimeout(() => controller.abort(), 45_000);
     try {
       const response = await fetch(uploadUrl, {
         method: "PUT",
@@ -137,5 +137,6 @@ export async function putPresignedImage(
   }
   if (typeof navigator !== "undefined" && !navigator.onLine) throw new Error("网络已经断开，请联网后点按对应格子重试");
   if (lastError instanceof DOMException && lastError.name === "AbortError") throw new Error("图片上传超时，请重试");
+  if (lastError instanceof TypeError) throw new Error("无法连接图片存储，请检查网络后点按对应格子重试");
   throw lastError instanceof Error ? lastError : new Error("图片上传失败，请重试");
 }

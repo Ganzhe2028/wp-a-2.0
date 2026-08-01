@@ -28,6 +28,12 @@ npx wrangler@latest deploy
 
 `ASSET_PROCESSOR_SECRET` must be the exact same value as the Vercel production variable of the same name. Never put it in `wrangler.jsonc`, `.dev.vars`, Git, screenshots, or chat.
 
-Paste `cors-policy.json` into R2 bucket Settings > CORS Policy. The origin intentionally allows only `https://oweek-wp-a-2.vercel.app`. Keep public bucket access disabled; set `R2_PUBLIC_BASE_URL` in Vercel to `https://oweek-wp-a-2.vercel.app/r2-assets`. Next.js rewrites that stable same-origin path to the Worker, avoiding direct `workers.dev` access from student devices.
+`cors-policy.json` is the dashboard-compatible R2 CORS policy. `cors-policy.wrangler.json` is the equivalent Wrangler CLI input and can be applied with:
+
+```bash
+npx wrangler@latest r2 bucket cors set oweek-images --file cors-policy.wrangler.json
+```
+
+The production origin is `https://www.msoweek.site`; the apex domain and fixed Vercel alias remain explicitly allowed for redirects and operational fallback. Do not replace this list with a wildcard. Keep public bucket access disabled; set `R2_PUBLIC_BASE_URL` in Vercel to `https://www.msoweek.site/r2-assets`. Next.js rewrites that stable same-origin path to the Worker, avoiding direct `workers.dev` access from student devices.
 
 R2 Event Notifications are intentionally not used because Cloudflare currently requires Workers Paid for that integration. Set `ASSET_PROCESSOR_URL` in Vercel to the Worker URL without `/assets`.

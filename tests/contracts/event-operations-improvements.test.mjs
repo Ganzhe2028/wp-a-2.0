@@ -27,6 +27,8 @@ test("Day 1 compression and direct upload remain responsive on mobile and weak n
   assert.match(upload, /WORKER_LIBRARY_PATH = "\/vendor\/browser-image-compression\.js"/);
   assert.match(upload, /MAX_ACTIVE_UPLOADS = 2/);
   assert.match(upload, /putPresignedImage/);
+  assert.match(upload, /45_000/);
+  assert.match(upload, /无法连接图片存储/);
   assert.match(upload, /for \(let attempt = 1; attempt <= 3/);
   assert.match(upload, /AbortController/);
   assert.match(editor, /压缩中 \$\{progress\}%/);

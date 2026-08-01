@@ -7,6 +7,7 @@ const callbackUrl = new URL("../../app/api/internal/assets/[assetId]/processed/r
 const workerUrl = new URL("../../workers/image-processor/src/index.js", import.meta.url);
 const workerConfigUrl = new URL("../../workers/image-processor/wrangler.jsonc", import.meta.url);
 const corsUrl = new URL("../../workers/image-processor/cors-policy.json", import.meta.url);
+const wranglerCorsUrl = new URL("../../workers/image-processor/cors-policy.wrangler.json", import.meta.url);
 
 test("non-local uploads remain processing until an authenticated verified worker result", async () => {
   const [complete, callback] = await Promise.all([readFile(completeUrl, "utf8"), readFile(callbackUrl, "utf8")]);
@@ -22,12 +23,15 @@ test("non-local uploads remain processing until an authenticated verified worker
 });
 
 test("production image worker is signed, sanitizes bytes, and reports an authenticated result", async () => {
-  const [callback, worker, workerConfig, cors] = await Promise.all([
+  const [callback, worker, workerConfig, corsSource, wranglerCorsSource] = await Promise.all([
     readFile(callbackUrl, "utf8"),
     readFile(workerUrl, "utf8"),
     readFile(workerConfigUrl, "utf8"),
     readFile(corsUrl, "utf8"),
+    readFile(wranglerCorsUrl, "utf8"),
   ]);
+  const cors = JSON.parse(corsSource);
+  const wranglerCors = JSON.parse(wranglerCorsSource);
   assert.match(callback, /body\.probe === true/);
   assert.match(callback, /processedKey/);
   assert.match(worker, /env\.IMAGES\.info/);
@@ -48,10 +52,22 @@ test("production image worker is signed, sanitizes bytes, and reports an authent
   assert.match(workerConfig, /"images"/);
   assert.doesNotMatch(workerConfig, /"queues"/);
   assert.match(workerConfig, /"r2_buckets"/);
-  assert.match(cors, /https:\/\/oweek-wp-a-2\.vercel\.app/);
-  assert.match(cors, /"PUT"/);
-  assert.match(cors, /"Content-Type"/);
-  assert.doesNotMatch(cors, /"\*"/);
+  assert.match(workerConfig, /"APP_BASE_URL": "https:\/\/www\.msoweek\.site"/);
+  assert.match(workerConfig, /"PUBLIC_ORIGIN": "https:\/\/www\.msoweek\.site"/);
+  assert.deepEqual(cors[0].AllowedOrigins, [
+    "https://www.msoweek.site",
+    "https://msoweek.site",
+    "https://oweek-wp-a-2.vercel.app",
+  ]);
+  assert.ok(cors[0].AllowedMethods.includes("PUT"));
+  assert.ok(cors[0].AllowedHeaders.includes("Content-Type"));
+  assert.equal(JSON.stringify(cors).includes('"*"'), false);
+  assert.deepEqual(wranglerCors.rules[0].allowed.origins, cors[0].AllowedOrigins);
+  assert.deepEqual(wranglerCors.rules[0].allowed.methods, cors[0].AllowedMethods);
+  assert.deepEqual(wranglerCors.rules[0].allowed.headers, cors[0].AllowedHeaders);
+  assert.deepEqual(wranglerCors.rules[0].exposeHeaders, cors[0].ExposeHeaders);
+  assert.equal(wranglerCors.rules[0].maxAgeSeconds, cors[0].MaxAgeSeconds);
+  assert.equal(JSON.stringify(wranglerCors).includes('"*"'), false);
 });
 
 test("processing dispatch retries and stale processing assets self-heal while being polled", async () => {

@@ -1,6 +1,8 @@
 [
   {
     "AllowedOrigins": [
+      "https://www.msoweek.site",
+      "https://msoweek.site",
       "https://oweek-wp-a-2.vercel.app"
     ],
     "AllowedMethods": [
