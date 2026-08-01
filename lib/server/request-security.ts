@@ -32,7 +32,9 @@ export function hasTrustedWriteOrigin(request: Request): boolean {
   const configured = process.env.APP_BASE_URL?.trim();
   if (configured) {
     try {
-      return origin === new URL(configured).origin;
+      const configuredOrigin = new URL(configured).origin;
+      const requestOrigin = new URL(request.url).origin;
+      return origin === requestOrigin || origin === configuredOrigin;
     } catch {
       return false;
     }
