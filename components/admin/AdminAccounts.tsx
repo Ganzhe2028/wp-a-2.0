@@ -281,6 +281,8 @@ export default function AdminAccounts() {
 
   const selectable = accounts.filter((account) => !isProtectedInitialAdmin(account));
   const selectedAccounts = accounts.filter((account) => selected.has(account.id) && !isProtectedInitialAdmin(account));
+  const selectedAreAllActive = selectedAccounts.length > 0 && selectedAccounts.every((account) => account.status === "ACTIVE");
+  const selectedAreAllArchived = selectedAccounts.length > 0 && selectedAccounts.every((account) => account.status === "ARCHIVED");
 
   function toggleAll() {
     setSelected((current) => selectable.every((account) => current.has(account.id)) ? new Set() : new Set(selectable.map((account) => account.id)));
@@ -329,10 +331,19 @@ export default function AdminAccounts() {
     finally { setGroupBusy(null); }
   }
 
-  async function bulk(operation: "SET_ROLE" | "SET_GROUP" | "ARCHIVE", value?: string) {
+  async function bulk(operation: "SET_ROLE" | "SET_GROUP" | "ARCHIVE" | "PURGE_ARCHIVED", value?: string) {
     if (!selectedAccounts.length) return;
-    const summary = operation === "SET_ROLE" ? `把 ${selectedAccounts.length} 个账号修改为 ${value}` : operation === "SET_GROUP" ? `把 ${selectedAccounts.length} 个账号移动到指定组别` : `归档 ${selectedAccounts.length} 个账号；他们将立即无法登录`;
-    if (!window.confirm(`${summary}？\n\n系统初始 Admin 已自动排除。`)) return;
+    const summary = operation === "SET_ROLE"
+      ? `把 ${selectedAccounts.length} 个账号修改为 ${value}`
+      : operation === "SET_GROUP"
+        ? `把 ${selectedAccounts.length} 个账号移动到指定组别`
+        : operation === "PURGE_ARCHIVED"
+          ? `永久清理 ${selectedAccounts.length} 个已归档账号`
+          : `归档 ${selectedAccounts.length} 个账号；他们将立即无法登录`;
+    const warning = operation === "PURGE_ARCHIVED"
+      ? "账号、登录凭据、作品和图片都会永久删除，无法恢复。ACTIVE 账号不允许执行此操作。"
+      : "系统初始 Admin 已自动排除。";
+    if (!window.confirm(`${summary}？\n\n${warning}`)) return;
     setError(""); setNotice("");
     try {
       type BulkResponse = BulkResult | { affectedCount: number; excludedAccountIds: string[] };
@@ -343,10 +354,38 @@ export default function AdminAccounts() {
     } catch (cause) { setError(cause instanceof AdminApiError ? cause.message : "批量操作失败"); }
   }
 
+  async function downloadSelectedExhibition() {
+    if (!selectedAreAllActive) return;
+    setError(""); setNotice("");
+    try {
+      const response = await fetch("/api/v1/admin/accounts/export-exhibition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ accountIds: selectedAccounts.map((account) => account.id) }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { error?: { message?: string }; requestId?: string } | null;
+        throw new Error(`${body?.error?.message || "导出失败"}${body?.requestId ? ` · ${body.requestId.slice(-8)}` : ""}`);
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "oweek-nfc-exhibition-links.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+      setNotice(`已导出所选 ${selectedAccounts.length} 个 ACTIVE 账号的 NFC 展览网址。`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "导出 NFC 展览网址失败");
+    }
+  }
+
   return (
     <AdminShell title="Accounts">
       <div className="p-5 sm:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-neutral-600">管理账号、角色、组别和提交状态</p><p className="mt-1 text-xs text-neutral-500">固定 SophiaXu Admin 会自动排除所有高风险操作。</p></div><div className="flex flex-wrap gap-3"><a href="/api/v1/admin/accounts/export-exhibition" download className="ow-btn ow-btn-outline !min-h-11 !w-auto">导出 NFC 展览网址</a><button onClick={() => setImportingEmails(true)} className="ow-btn ow-btn-outline !min-h-11 !w-auto">补录学校邮箱</button><button onClick={() => setImporting(true)} className="ow-btn !min-h-11 !w-auto">＋ 导入用户</button></div></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-neutral-600">管理账号、角色、组别和提交状态</p><p className="mt-1 text-xs text-neutral-500">固定 SophiaXu Admin 会自动排除所有高风险操作。</p></div><div className="flex flex-wrap gap-3"><button onClick={() => setImportingEmails(true)} className="ow-btn ow-btn-outline !min-h-11 !w-auto">补录学校邮箱</button><button onClick={() => setImporting(true)} className="ow-btn !min-h-11 !w-auto">＋ 导入用户</button></div></div>
         {error && <p role="alert" className="mt-5 border-l-4 border-red-600 bg-red-50 p-4 text-sm font-bold text-red-700">{error}</p>}
         {notice && <p role="status" className="mt-5 border-l-4 border-emerald-600 bg-emerald-50 p-4 text-sm font-bold text-emerald-800">{notice}</p>}
 
@@ -369,7 +408,14 @@ export default function AdminAccounts() {
           </label>
         </section>
 
-        <section className="mt-4 flex flex-wrap items-center gap-3 border border-[var(--orange)] bg-[var(--orange-soft)] p-4"><b className="mr-auto text-sm">已选择 {selectedAccounts.length} 个账号</b><select aria-label="批量修改角色" defaultValue="" onChange={(event) => { if (event.target.value) void bulk("SET_ROLE", event.target.value); event.target.value = ""; }} disabled={!selectedAccounts.length} className="min-h-10 border border-black bg-white px-3 text-xs font-bold"><option value="">批量角色…</option>{ROLES.map((value) => <option key={value}>{value}</option>)}</select><select aria-label="批量修改组别" defaultValue="" onChange={(event) => { if (event.target.value) void bulk("SET_GROUP", event.target.value); event.target.value = ""; }} disabled={!selectedAccounts.length} className="min-h-10 border border-black bg-white px-3 text-xs font-bold"><option value="">批量组别…</option>{groups.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><button disabled={!selectedAccounts.length} onClick={() => void bulk("ARCHIVE")} className="min-h-10 border border-red-700 px-3 text-xs font-black text-red-700 disabled:opacity-40">批量归档</button></section>
+        <section className="mt-4 flex flex-wrap items-center gap-3 border border-[var(--orange)] bg-[var(--orange-soft)] p-4">
+          <b className="mr-auto text-sm">已选择 {selectedAccounts.length} 个账号</b>
+          <select aria-label="批量修改角色" defaultValue="" onChange={(event) => { if (event.target.value) void bulk("SET_ROLE", event.target.value); event.target.value = ""; }} disabled={!selectedAccounts.length} className="min-h-10 border border-black bg-white px-3 text-xs font-bold"><option value="">批量角色…</option>{ROLES.map((value) => <option key={value}>{value}</option>)}</select>
+          <select aria-label="批量修改组别" defaultValue="" onChange={(event) => { if (event.target.value) void bulk("SET_GROUP", event.target.value); event.target.value = ""; }} disabled={!selectedAccounts.length} className="min-h-10 border border-black bg-white px-3 text-xs font-bold"><option value="">批量组别…</option>{groups.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+          <button disabled={!selectedAreAllActive} title={selectedAccounts.length && !selectedAreAllActive ? "NFC 网址只能导出 ACTIVE 账号" : undefined} onClick={() => void downloadSelectedExhibition()} className="min-h-10 border border-black bg-white px-3 text-xs font-black disabled:opacity-40">导出所选 NFC（{selectedAccounts.length}）</button>
+          <button disabled={!selectedAccounts.length} onClick={() => void bulk("ARCHIVE")} className="min-h-10 border border-red-700 px-3 text-xs font-black text-red-700 disabled:opacity-40">批量归档</button>
+          <button disabled={!selectedAreAllArchived} title={selectedAccounts.length && !selectedAreAllArchived ? "只能永久清理全部为 ARCHIVED 的所选账号" : undefined} onClick={() => void bulk("PURGE_ARCHIVED")} className="min-h-10 bg-red-700 px-3 text-xs font-black text-white disabled:bg-neutral-300">永久清理归档（{selectedAccounts.length}）</button>
+        </section>
 
         <div className="mt-4 overflow-x-auto border border-neutral-300 bg-white"><table className="w-full min-w-[1120px] text-left text-sm"><thead className="bg-black text-white"><tr><th className="p-3"><input type="checkbox" aria-label="选择当前列表全部账号" checked={selectable.length > 0 && selectable.every((account) => selected.has(account.id))} onChange={toggleAll} /></th>{["姓名 / 编号","邮箱","角色","组别","DAY 1","DAY 3","最近登录","状态","操作"].map((label) => <th key={label} className="p-3">{label}</th>)}</tr></thead><tbody>{accounts.map((account) => { const protectedAdmin = isProtectedInitialAdmin(account); return <tr key={account.id} className={`border-b border-neutral-200 ${account.status === "ARCHIVED" ? "bg-neutral-100 text-neutral-500" : ""}`}><td className="p-3"><input type="checkbox" disabled={protectedAdmin} checked={selected.has(account.id)} onChange={() => setSelected((current) => { const next = new Set(current); if (next.has(account.id)) next.delete(account.id); else next.add(account.id); return next; })} aria-label={`选择 ${account.displayName}`} /></td><td className="p-3"><div className="flex items-center gap-2"><b>{account.displayName}</b>{protectedAdmin && <span className="border border-[var(--orange)] bg-[var(--orange-soft)] px-2 py-1 text-[10px] font-black text-[var(--orange)]">系统初始 Admin</span>}</div><code className="mt-1 block text-xs text-neutral-500">{account.accountCode}</code></td><td className="p-3">{account.email ?? "—"}</td><td className="p-3 font-bold">{account.role}</td><td className="p-3">{account.groupName ?? "—"}</td><td className="p-3">{account.day1Status}</td><td className="p-3">{account.day3Status}</td><td className="p-3">{account.lastLoginAt ? new Date(account.lastLoginAt).toLocaleDateString("zh-CN") : "从未"}</td><td className="p-3">{account.status}</td><td className="p-3"><button onClick={() => setDrawer(account)} className="min-h-10 border border-black px-3 font-black">编辑 →</button></td></tr>; })}</tbody></table>{!loading && accounts.length === 0 && <p className="p-10 text-center text-neutral-500">没有符合条件的账号</p>}{loading && <p className="p-6 text-center font-bold text-neutral-500">加载中…</p>}</div>
         {nextCursor && <button disabled={loading} onClick={() => void load(nextCursor, true)} className="ow-btn ow-btn-outline mt-4">加载更多</button>}

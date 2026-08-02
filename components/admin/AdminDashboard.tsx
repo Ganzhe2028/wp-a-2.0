@@ -147,7 +147,7 @@ export default function AdminDashboard() {
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <MetricCard title="DAY 1 / SUBMITTED" value={data.completion.day1} />
               <MetricCard title="DAY 3 / SUBMITTED" value={data.completion.day3} />
-              <article className="border border-neutral-300 bg-white p-5"><p className="text-xs font-black tracking-[.08em] text-neutral-500">已预置账号</p><p className="mt-4 text-4xl font-black tracking-[-.06em]">{data.provisionedAccountCount}</p><p className="mt-7 text-xs text-neutral-500">包含所有角色与账号状态</p></article>
+              <article className="border border-neutral-300 bg-white p-5"><p className="text-xs font-black tracking-[.08em] text-neutral-500">有效账号</p><p className="mt-4 text-4xl font-black tracking-[-.06em]">{data.provisionedAccountCount}</p><p className="mt-7 text-xs text-neutral-500">仅统计 ACTIVE 账号，不含已归档账号</p></article>
             </div>
           </section>
 

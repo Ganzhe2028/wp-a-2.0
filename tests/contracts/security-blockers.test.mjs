@@ -98,19 +98,26 @@ test("missing, malformed, and failed settings do not expand access", async () =>
   }
 });
 
-test("formal accounts cannot be physically deleted", async () => {
-  assert.deepEqual(decideAccountDeletion(), {
+test("only archived, non-protected formal accounts can be physically purged", async () => {
+  assert.deepEqual(decideAccountDeletion({ status: "ARCHIVED", protectedSystemAdmin: false }), { allowed: true });
+  assert.deepEqual(decideAccountDeletion({ status: "ACTIVE", protectedSystemAdmin: false }), {
     allowed: false,
-    code: "FORBIDDEN",
+    code: "ACCOUNT_NOT_ARCHIVED",
+  });
+  assert.deepEqual(decideAccountDeletion({ status: "ARCHIVED", protectedSystemAdmin: true }), {
+    allowed: false,
+    code: "PROTECTED_ACCOUNT",
   });
 
-  const formalRoutes = await Promise.all([
+  const [singleRoute, bulkRoute] = await Promise.all([
     "../../app/api/v1/admin/accounts/[id]/route.ts",
     "../../app/api/v1/admin/accounts/bulk/route.ts",
   ].map((path) => readFile(new URL(path, import.meta.url), "utf8")));
-  for (const source of formalRoutes) {
-    assert.doesNotMatch(source, /(?:prisma|tx)\.user\.(?:delete|deleteMany)\s*\(/);
-  }
+  assert.doesNotMatch(singleRoute, /(?:prisma|tx)\.user\.(?:delete|deleteMany)\s*\(/);
+  assert.match(bulkRoute, /operation === "PURGE_ARCHIVED"/);
+  assert.match(bulkRoute, /decideAccountDeletion\(target\)/);
+  assert.match(bulkRoute, /status: "ARCHIVED", protectedSystemAdmin: false/);
+  assert.match(bulkRoute, /tx\.user\.deleteMany\s*\(/);
 });
 
 test("legacy runtime APIs and migration tooling are absent", async () => {
@@ -143,7 +150,19 @@ test("admin account list puts archived accounts last and can hide them", async (
 
   assert.match(routeSource, /\{ status: "asc" \}/);
   assert.match(uiSource, /params\.set\("status", "ACTIVE"\)/);
+  assert.match(routeSource, /users: \{ where: \{ status: "ACTIVE" \} \}/);
   assert.match(uiSource, /隐藏已归档账号/);
+  assert.match(uiSource, /永久清理归档/);
+  assert.match(uiSource, /selectedAreAllArchived/);
+});
+
+test("dashboard account statistics exclude archived accounts", async () => {
+  const [routeSource, uiSource] = await Promise.all([
+    readFile(new URL("../../app/api/v1/admin/dashboard/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../components/admin/AdminDashboard.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(routeSource, /prisma\.user\.count\(\{ where: \{ eventId, status: "ACTIVE" \} \}\)/);
+  assert.match(uiSource, /仅统计 ACTIVE 账号/);
 });
 
 test("Day 3 rejects structurally empty submissions", () => {

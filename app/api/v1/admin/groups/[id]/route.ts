@@ -45,7 +45,7 @@ export async function PATCH(request: Request, routeContext: RouteContext) {
       if (!existing) throw new Error("GROUP_NOT_FOUND");
       const duplicate = await tx.group.findFirst({ where: { eventId: context.admin.eventId, id: { not: id }, name: { equals: name, mode: "insensitive" } }, select: { id: true } });
       if (duplicate) throw new Error("GROUP_NAME_CONFLICT");
-      const group = await tx.group.update({ where: { id }, data: { name }, select: { id: true, name: true, _count: { select: { users: true } } } });
+      const group = await tx.group.update({ where: { id }, data: { name }, select: { id: true, name: true, _count: { select: { users: { where: { status: "ACTIVE" } } } } } });
       await writeAuditLog(tx, { eventId: context.admin.eventId, actorUserId: context.admin.userId, requestId: context.requestId, metadata: getRequestMetadata(request), change: { action: "GROUP_RENAMED", targetType: "GROUP", targetId: id, summary: "Group renamed", before: { groupId: id }, after: { groupId: id } } });
       return { group: { id: group.id, name: group.name, memberCount: group._count.users } };
     });

@@ -136,7 +136,7 @@ test("Admin can rename and delete groups without deleting accounts or artworks",
   assert.match(accountsUi, /删除组别/);
 });
 
-test("NFC export uses canonical exhibition URLs and never the legacy NFC route", async () => {
+test("NFC export uses the shared account selection and canonical exhibition URLs", async () => {
   const [route, accountsUi] = await Promise.all([
     source("../../app/api/v1/admin/accounts/export-exhibition/route.ts"),
     source("../../components/admin/AdminAccounts.tsx"),
@@ -144,7 +144,11 @@ test("NFC export uses canonical exhibition URLs and never the legacy NFC route",
   assert.match(route, /\/artworks\//);
   assert.doesNotMatch(route, /\/nfc\//);
   assert.match(route, /status: "ACTIVE"/);
-  assert.match(accountsUi, /导出 NFC 展览网址/);
+  assert.match(route, /export async function POST\(request: Request\)/);
+  assert.match(route, /id: \{ in: accountIds \}/);
+  assert.match(accountsUi, /selectedAccounts\.map\(\(account\) => account\.id\)/);
+  assert.match(accountsUi, /selectedAreAllActive/);
+  assert.match(accountsUi, /导出所选 NFC/);
 });
 
 test("visible account names keep normal word boundaries across student pages", async () => {

@@ -82,7 +82,7 @@ export async function GET(request: Request) {
     prisma.group.findMany({
       where: { eventId: context.admin.eventId },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-      select: { id: true, name: true, _count: { select: { users: true } } },
+      select: { id: true, name: true, _count: { select: { users: { where: { status: "ACTIVE" } } } } },
     }),
   ]);
   const hasMore = accounts.length > PAGE_SIZE;

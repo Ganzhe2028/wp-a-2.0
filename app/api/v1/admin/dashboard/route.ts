@@ -9,7 +9,7 @@ export async function GET() {
   const eventId = context.admin.eventId;
   const [settings, totalAccounts, learnerAccounts, seniorAccounts, day1Submitted, day3Submitted] = await Promise.all([
     prisma.eventSettings.findUnique({ where: { eventId } }),
-    prisma.user.count({ where: { eventId } }),
+    prisma.user.count({ where: { eventId, status: "ACTIVE" } }),
     prisma.user.count({ where: { eventId, status: "ACTIVE", role: "LEARNER" } }),
     prisma.user.count({ where: { eventId, status: "ACTIVE", role: "SENIOR" } }),
     prisma.submission.count({ where: { eventId, section: "DAY1", status: "SUBMITTED", user: { status: "ACTIVE", role: { in: ["LEARNER", "SENIOR"] } } } }),
