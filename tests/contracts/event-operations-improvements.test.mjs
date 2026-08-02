@@ -80,6 +80,10 @@ test("submitted Day 1 and Day 3 can generate complete saveable share posters", a
   assert.match(day3, /grid grid-cols-2/);
   assert.match(share, /drawDay1Poster/);
   assert.match(share, /DAY1_TEMPLATE\.slots/);
+  assert.match(share, /const DAY1_MOSAIC_LAYOUT: readonly Day1MosaicTile\[\] = \[/);
+  assert.match(share, /DAY1_TEMPLATE\.slots\.length !== DAY1_MOSAIC_LAYOUT\.length/);
+  assert.match(share, /context\.fillText\("It's me"/);
+  assert.match(share, /拼贴分享图已生成/);
   assert.match(share, /drawDay3Poster/);
   assert.match(share, /DAY3_TEMPLATE\.bottles/);
   assert.match(share, /studentApi<HomeIdentityResponse>\("\/api\/v1\/home"\)/);

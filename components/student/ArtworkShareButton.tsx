@@ -21,12 +21,40 @@ interface ArtworkBottle {
 
 interface HomeIdentityResponse { identity: { displayTitle: string } }
 
+interface Day1MosaicTile {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 const POSTER_WIDTH = 900;
 const POSTER_PADDING = 48;
 const POSTER_ORANGE = "#ff530f";
 const POSTER_BLACK = "#0b0b0a";
 const POSTER_PAPER = "#f7f7f7";
-const POSTER_GAP = 14;
+const DAY1_POSTER_HEIGHT = 1130;
+
+// Fixed 15-tile composition approved for the Day 1 social share poster.
+// The order intentionally follows DAY1_TEMPLATE.slots so labels and images
+// remain coupled even when the visible copy changes.
+const DAY1_MOSAIC_LAYOUT: readonly Day1MosaicTile[] = [
+  { x: 520, y: 455, width: 220, height: 245 }, // 头像
+  { x: 280, y: 210, width: 115, height: 115 }, // 喜欢的食物
+  { x: 520, y: 210, width: 220, height: 220 }, // 喜欢的音乐
+  { x: 400, y: 890, width: 115, height: 115 }, // 最喜欢的动物
+  { x: 285, y: 625, width: 225, height: 240 }, // 我的颜色
+  { x: 155, y: 625, width: 115, height: 115 }, // 最近天气
+  { x: 400, y: 480, width: 115, height: 115 }, // 此刻心情
+  { x: 520, y: 725, width: 115, height: 115 }, // 想去的地方
+  { x: 40, y: 475, width: 115, height: 115 }, // 最近在读
+  { x: 155, y: 350, width: 230, height: 250 }, // 一件重要的东西
+  { x: 155, y: 210, width: 115, height: 115 }, // 最喜欢的电影
+  { x: 40, y: 350, width: 115, height: 115 }, // 我的日常
+  { x: 400, y: 350, width: 115, height: 115 }, // 最近在学
+  { x: 745, y: 475, width: 115, height: 115 }, // 一张旧照片
+  { x: 745, y: 350, width: 115, height: 115 }, // 今天的我
+];
 
 function roundedRect(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
   const safeRadius = Math.min(radius, width / 2, height / 2);
@@ -50,6 +78,7 @@ function drawFittedText(context: CanvasRenderingContext2D, text: string, x: numb
     if (context.measureText(text).width <= maxWidth) break;
     size -= 2;
   }
+  context.font = `900 ${size}px Arial, "PingFang SC", sans-serif`;
   context.fillText(text, x, y, maxWidth);
 }
 
@@ -130,69 +159,73 @@ function drawImageCover(context: CanvasRenderingContext2D, image: HTMLImageEleme
 }
 
 async function drawDay1Poster(displayTitle: string, slots: ArtworkSlot[]) {
-  const headerHeight = 286;
-  const footerHeight = 112;
-  const innerWidth = POSTER_WIDTH - POSTER_PADDING * 2;
-  const halfWidth = (innerWidth - POSTER_GAP) / 2;
-  const fullHeight = 460;
-  const halfHeight = 350;
-  const slotByKey = new Map(slots.map((slot) => [slot.slotKey, slot]));
-  const rows: Array<Array<{ config: (typeof DAY1_TEMPLATE.slots)[number]; x: number; width: number; height: number }>> = [];
-  for (let index = 0; index < DAY1_TEMPLATE.slots.length;) {
-    const config = DAY1_TEMPLATE.slots[index];
-    if (index % 6 === 0 || index % 6 === 3) {
-      rows.push([{ config, x: POSTER_PADDING, width: innerWidth, height: fullHeight }]);
-      index += 1;
-    } else {
-      const pair = DAY1_TEMPLATE.slots.slice(index, index + 2);
-      rows.push(pair.map((item, pairIndex) => ({ config: item, x: POSTER_PADDING + pairIndex * (halfWidth + POSTER_GAP), width: halfWidth, height: halfHeight })));
-      index += pair.length;
-    }
+  if (DAY1_TEMPLATE.slots.length !== DAY1_MOSAIC_LAYOUT.length) {
+    throw new Error("Day 1 分享模板与当前作品模板不一致");
   }
-  const contentHeight = rows.reduce((total, row) => total + row[0].height, 0) + Math.max(0, rows.length - 1) * POSTER_GAP;
+  const slotByKey = new Map(slots.map((slot) => [slot.slotKey, slot]));
   const canvas = document.createElement("canvas");
   canvas.width = POSTER_WIDTH;
-  canvas.height = headerHeight + contentHeight + POSTER_PADDING + footerHeight;
+  canvas.height = DAY1_POSTER_HEIGHT;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("当前浏览器无法生成长图");
-  drawHeader(context, canvas.height, "DAY1", displayTitle);
-  let y = headerHeight;
-  for (const row of rows) {
-    for (const item of row) {
-      roundedRect(context, item.x, y, item.width, item.height, 24);
-      context.save();
-      context.clip();
-      context.fillStyle = POSTER_PAPER;
-      context.fillRect(item.x, y, item.width, item.height);
-      const value = slotByKey.get(item.config.slotKey);
-      const imageSource = value?.imageUrl || value?.url;
-      if (imageSource) {
-        try {
-          const image = await loadPosterImage(imageSource);
-          drawImageCover(context, image, item.x, y, item.width, item.height, value?.crop);
-          image.src = "";
-        } catch {
-          context.fillStyle = "#77736b";
-          context.font = '800 22px Arial, "PingFang SC", sans-serif';
-          context.textAlign = "center";
-          context.fillText("图片暂时无法载入", item.x + item.width / 2, y + item.height / 2);
-          context.textAlign = "left";
-        }
+  context.fillStyle = "#fff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  roundedRect(context, 318, 38, 264, 110, 4);
+  context.fillStyle = POSTER_BLACK;
+  context.fill();
+  context.fillStyle = "#fff";
+  context.font = 'italic 900 56px Arial, "PingFang SC", sans-serif';
+  context.textAlign = "center";
+  context.fillText("It's me", POSTER_WIDTH / 2, 112);
+  context.fillStyle = POSTER_ORANGE;
+  drawFittedText(context, displayTitle, POSTER_WIDTH / 2, 184, 420, 32, 20);
+  context.textAlign = "left";
+
+  for (let index = 0; index < DAY1_TEMPLATE.slots.length; index += 1) {
+    const config = DAY1_TEMPLATE.slots[index];
+    const item = DAY1_MOSAIC_LAYOUT[index];
+    const radius = item.width >= 200 ? 8 : 5;
+    roundedRect(context, item.x, item.y, item.width, item.height, radius);
+    context.save();
+    context.clip();
+    context.fillStyle = POSTER_PAPER;
+    context.fillRect(item.x, item.y, item.width, item.height);
+    const value = slotByKey.get(config.slotKey);
+    const imageSource = value?.imageUrl || value?.url;
+    if (imageSource) {
+      try {
+        const image = await loadPosterImage(imageSource);
+        drawImageCover(context, image, item.x, item.y, item.width, item.height, value?.crop);
+        image.src = "";
+      } catch {
+        context.fillStyle = "#77736b";
+        context.font = `800 ${item.width >= 200 ? 20 : 14}px Arial, "PingFang SC", sans-serif`;
+        context.textAlign = "center";
+        context.fillText("图片载入失败", item.x + item.width / 2, item.y + item.height / 2);
+        context.textAlign = "left";
       }
-      context.fillStyle = "rgba(11,11,10,.86)";
-      context.fillRect(item.x, y + item.height - 58, item.width, 58);
-      context.fillStyle = "#fff";
-      context.font = '800 23px Arial, "PingFang SC", sans-serif';
-      context.fillText(item.config.label, item.x + 18, y + item.height - 20, item.width - 36);
-      context.restore();
-      context.strokeStyle = POSTER_BLACK;
-      context.lineWidth = 3;
-      roundedRect(context, item.x, y, item.width, item.height, 24);
-      context.stroke();
     }
-    y += row[0].height + POSTER_GAP;
+    const labelHeight = item.width >= 200 ? 58 : 48;
+    context.fillStyle = "rgba(11,11,10,.86)";
+    context.fillRect(item.x, item.y + item.height - labelHeight, item.width, labelHeight);
+    context.fillStyle = "#fff";
+    context.font = `800 ${item.width >= 200 ? 20 : 15}px Arial, "PingFang SC", sans-serif`;
+    context.textAlign = "center";
+    drawWrappedText(context, config.label, item.x + item.width / 2, item.y + item.height - labelHeight + (item.width >= 200 ? 25 : 19), item.width - 14, item.width >= 200 ? 22 : 16);
+    context.restore();
+    context.strokeStyle = POSTER_BLACK;
+    context.lineWidth = 3;
+    roundedRect(context, item.x, item.y, item.width, item.height, radius);
+    context.stroke();
   }
-  drawFooter(context, canvas.height - footerHeight);
+  context.textAlign = "center";
+  context.fillStyle = POSTER_BLACK;
+  context.font = '900 19px Arial, "PingFang SC", sans-serif';
+  context.fillText("O—WEEK / 26  ·  MSOWEEK.SITE", POSTER_WIDTH / 2, 1090);
+  context.fillStyle = POSTER_ORANGE;
+  context.fillRect(385, 1104, 130, 5);
+  context.textAlign = "left";
   return canvas;
 }
 
@@ -334,7 +367,7 @@ export default function ArtworkShareButton({ section, slots = [], bottles = [] }
         {generating ? "正在生成长图…" : "截图分享"}
       </button>
       {error && <p className="col-span-2 mt-2 text-sm font-bold text-red-700" role="alert">{error}</p>}
-      {preview && <ViewportDialog close={closePreview}><div className="ow-modal student-dialog" role="dialog" aria-modal="true" aria-labelledby="share-preview-title"><p className="ow-kicker">SHARE POSTER</p><h2 id="share-preview-title" className="ow-heading mt-2">长图已生成</h2><p className="ow-muted mt-3">在 iPhone 或微信中长按下方图片，选择“保存到照片”；也可以使用系统分享或下载图片。</p><div className="mt-5 max-h-[58svh] overflow-y-auto rounded-xl border border-[var(--line)] bg-[var(--paper)]"><img src={preview.url} alt={`${section.replace("DAY", "Day ")} 完整作品长图`} className="block h-auto w-full" /></div>{canSystemShare && <button type="button" disabled={sharing} onClick={() => void shareGenerated()} className="ow-btn mt-5">{sharing ? "正在打开分享…" : "系统分享"}</button>}<a href={preview.url} download={preview.filename} className={`ow-btn ${canSystemShare ? "ow-btn-outline mt-3" : "mt-5"}`}>下载图片</a><button type="button" onClick={closePreview} className="mt-3 min-h-11 w-full font-bold">关闭</button></div></ViewportDialog>}
+      {preview && <ViewportDialog close={closePreview}><div className="ow-modal student-dialog" role="dialog" aria-modal="true" aria-labelledby="share-preview-title"><p className="ow-kicker">SHARE POSTER</p><h2 id="share-preview-title" className="ow-heading mt-2">{section === "DAY1" ? "拼贴分享图已生成" : "长图已生成"}</h2><p className="ow-muted mt-3">在 iPhone 或微信中长按下方图片，选择“保存到照片”；也可以使用系统分享或下载图片。</p><div className="mt-5 max-h-[58svh] overflow-y-auto rounded-xl border border-[var(--line)] bg-[var(--paper)]"><img src={preview.url} alt={`${section.replace("DAY", "Day ")} 完整作品${section === "DAY1" ? "拼贴图" : "长图"}`} className="block h-auto w-full" /></div>{canSystemShare && <button type="button" disabled={sharing} onClick={() => void shareGenerated()} className="ow-btn mt-5">{sharing ? "正在打开分享…" : "系统分享"}</button>}<a href={preview.url} download={preview.filename} className={`ow-btn ${canSystemShare ? "ow-btn-outline mt-3" : "mt-5"}`}>下载图片</a><button type="button" onClick={closePreview} className="mt-3 min-h-11 w-full font-bold">关闭</button></div></ViewportDialog>}
     </>
   );
 }
