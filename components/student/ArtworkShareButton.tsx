@@ -224,8 +224,8 @@ async function preloadDay1Images(items: Array<{ slotKey: string; sources: string
   return loaded;
 }
 
-function drawImageCover(context: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, width: number, height: number, crop = { x: .5, y: .5, scale: 1 }) {
-  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * Math.max(1, crop.scale);
+function drawCroppedImage(context: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, width: number, height: number, crop = { x: .5, y: .5, scale: 1 }) {
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight) * Math.min(3, Math.max(1, crop.scale));
   const drawnWidth = image.naturalWidth * scale;
   const drawnHeight = image.naturalHeight * scale;
   const offsetX = (crop.x - .5) * width * .36;
@@ -288,7 +288,7 @@ async function drawDay1Poster(displayTitle: string, slots: ArtworkSlot[]) {
       const value = slotByKey.get(config.slotKey);
       const loaded = loadedImages.get(config.slotKey);
       if (!loaded) throw new Error("Day 1 分享图片预加载结果不完整");
-      drawImageCover(context, loaded.image, item.x, item.y, item.width, item.height, value?.crop);
+      drawCroppedImage(context, loaded.image, item.x, item.y, item.width, item.height, value?.crop);
       const labelHeight = item.width >= 200 ? 58 : 48;
       context.fillStyle = "rgba(11,11,10,.86)";
       context.fillRect(item.x, item.y + item.height - labelHeight, item.width, labelHeight);
