@@ -117,14 +117,19 @@ export async function GET(request: Request, routeContext: RouteContext) {
           state: "AVAILABLE" as const,
           content: {
             templateVersion: submission.templateVersion,
-            bottles: submission.day3Bottles.map((bottle) => ({
-              bottleKey: bottle.bottleKey,
-              labelSnapshot: bottle.labelSnapshot,
-              level: bottle.level,
-              isConfirmed: bottle.isConfirmed,
-              group: DAY3_CONFIG.get(bottle.bottleKey)?.group ?? "LITTLE BOTTLES",
-              groupSubtitle: DAY3_CONFIG.get(bottle.bottleKey)?.groupSubtitle ?? "",
-            })),
+            bottles: submission.day3Bottles.map((bottle) => {
+              const currentConfig = DAY3_CONFIG.get(bottle.bottleKey);
+              return {
+                bottleKey: bottle.bottleKey,
+                // Copy corrections apply to existing submissions too. A retired
+                // bottle still falls back to its historical snapshot.
+                labelSnapshot: currentConfig?.label ?? bottle.labelSnapshot,
+                level: bottle.level,
+                isConfirmed: bottle.isConfirmed,
+                group: currentConfig?.group ?? "LITTLE BOTTLES",
+                groupSubtitle: currentConfig?.groupSubtitle ?? "",
+              };
+            }),
           },
         };
   };

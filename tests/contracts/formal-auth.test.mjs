@@ -93,7 +93,7 @@ test("all six event presets explicitly set every visibility and authoring switch
 test("formal templates are centralized, versioned, and keep the approved dev cardinalities", async () => {
   const source = await readFile(templateUrl, "utf8");
   assert.match(source, /DAY1_TEMPLATE_VERSION\s*=\s*"day1-dev-v1"/);
-  assert.match(source, /DAY3_TEMPLATE_VERSION\s*=\s*"day3-dev-v1"/);
+  assert.match(source, /DAY3_TEMPLATE_VERSION\s*=\s*"day3-dev-v2"/);
   assert.match(source, /DAY1_PROMPTS\.slice\(0, 15\)/);
   assert.match(source, /DAY3_SECTIONS\.flatMap/);
   assert.match(source, /required:\s*true/g);

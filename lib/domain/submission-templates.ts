@@ -1,7 +1,7 @@
 import { DAY1_PROMPTS, DAY3_SECTIONS } from "@/lib/flow";
 
 export const DAY1_TEMPLATE_VERSION = "day1-dev-v1";
-export const DAY3_TEMPLATE_VERSION = "day3-dev-v1";
+export const DAY3_TEMPLATE_VERSION = "day3-dev-v2";
 
 // Development baseline only. Final geometry/labels remain product-configurable.
 export const DAY1_TEMPLATE = {

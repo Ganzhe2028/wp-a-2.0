@@ -116,9 +116,20 @@ test("Day 3 artwork preserves the two answering themes and subtitles", async () 
     source("../../app/artworks/[publicId]/ArtworkClient.tsx"),
   ]);
   assert.match(template, /groupSubtitle: section\.subtitle/);
-  assert.match(route, /groupSubtitle: DAY3_CONFIG/);
+  assert.match(route, /groupSubtitle: currentConfig\?\.groupSubtitle/);
   assert.match(artwork, /THEME/);
   assert.match(artwork, /theme\.subtitle/);
+});
+
+test("Day 3 uses the reviewed student-appropriate bottle copy everywhere", async () => {
+  const [flow, artworkRoute] = await Promise.all([
+    source("../../lib/flow.ts"),
+    source("../../app/api/v1/artworks/[publicId]/route.ts"),
+  ]);
+  assert.match(flow, /"K歌"/);
+  assert.match(flow, /"跟朋友打电话"/);
+  assert.doesNotMatch(flow, /飞歌|把酒言欢/);
+  assert.match(artworkRoute, /labelSnapshot: currentConfig\?\.label \?\? bottle\.labelSnapshot/);
 });
 
 test("Admin can rename and delete groups without deleting accounts or artworks", async () => {
