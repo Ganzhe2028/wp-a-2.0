@@ -186,3 +186,9 @@ test("visible account names keep normal word boundaries across student pages", a
     assert.doesNotMatch(page, /className="[^"]*break-all[^"]*"[^>]*>\{(?:data\.identity\.)?displayTitle\}/);
   }
 });
+
+test("student help uses a low-friction on-site support message", async () => {
+  const help = await source("../../app/help/page.tsx");
+  assert.match(help, /请联系学长团成员，并提供页面情况。/);
+  assert.doesNotMatch(help, /现场工作人员|requestId|不要发送密码或作品内容/);
+});
