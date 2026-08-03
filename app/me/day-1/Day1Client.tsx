@@ -13,7 +13,7 @@ import { compressForUpload, ImageCompressionTooLargeError, LARGE_SOURCE_IMAGE_BY
 
 interface Crop { x: number; y: number; scale: number }
 interface SlotConfig { slotKey: string; label: string; required: boolean; aspectRatio: number }
-interface SlotValue { slotKey: string; assetId: string; imageUrl?: string; crop: Crop }
+interface SlotValue { slotKey: string; assetId: string; imageUrl?: string; originalUrl?: string; crop: Crop }
 interface PendingPreview { preview: string; crop: Crop }
 interface CropSelection { config: SlotConfig; value?: SlotValue; file?: File; preview: string; pendingCrop?: Crop; compressionMode?: CompressionMode; failureKind?: "too-large" }
 interface Day1Data { status: SubmissionStatus; version: number; canAuthor: boolean; readOnlyReason?: string; template: { templateVersion: string; slots: SlotConfig[] }; slots: SlotValue[]; publicId: string }

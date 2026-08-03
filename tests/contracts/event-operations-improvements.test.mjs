@@ -59,6 +59,7 @@ test("Day 1 display uses processed thumbnails and recovers transient mobile imag
   ]);
   assert.match(r2, /_derived\/\$\{key\}\.thumb\.webp/);
   assert.match(submissionRoute, /getThumbnailUrl/);
+  assert.match(submissionRoute, /originalUrl: slot\.asset \? getPublicUrl\(slot\.asset\.storageKey\)/);
   assert.match(artworkRoute, /getThumbnailUrl/);
   assert.match(editor, /<ResilientImage/);
   assert.match(artwork, /<ResilientImage/);
@@ -82,6 +83,15 @@ test("submitted Day 1 and Day 3 can generate complete saveable share posters", a
   assert.match(share, /DAY1_TEMPLATE\.slots/);
   assert.match(share, /const DAY1_MOSAIC_LAYOUT: readonly Day1MosaicTile\[\] = \[/);
   assert.match(share, /DAY1_TEMPLATE\.slots\.length !== DAY1_MOSAIC_LAYOUT\.length/);
+  assert.match(share, /POSTER_IMAGE_CONCURRENCY = 4/);
+  assert.match(share, /await fetch\(`/);
+  assert.match(share, /URL\.createObjectURL\(blob\)/);
+  assert.match(share, /slot\?\.originalUrl/);
+  assert.match(share, /await Promise\.all\(Array\.from/);
+  assert.match(share, /图片尚未准备好/);
+  assert.match(share, /图片暂时无法载入，分享图未生成/);
+  assert.doesNotMatch(share, /图片载入失败/);
+  assert.match(day1, /originalUrl\?: string/);
   assert.match(share, /context\.fillText\("It's me"/);
   assert.match(share, /拼贴分享图已生成/);
   assert.match(share, /drawDay3Poster/);

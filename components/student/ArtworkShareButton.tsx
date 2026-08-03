@@ -9,6 +9,7 @@ import { DAY1_TEMPLATE, DAY3_TEMPLATE } from "@/lib/domain/submission-templates"
 interface ArtworkSlot {
   slotKey: string;
   imageUrl?: string;
+  originalUrl?: string;
   url?: string;
   crop?: { x: number; y: number; scale: number };
 }
@@ -28,12 +29,20 @@ interface Day1MosaicTile {
   height: number;
 }
 
+interface LoadedPosterImage {
+  image: HTMLImageElement;
+  objectUrl: string;
+}
+
 const POSTER_WIDTH = 900;
 const POSTER_PADDING = 48;
 const POSTER_ORANGE = "#ff530f";
 const POSTER_BLACK = "#0b0b0a";
 const POSTER_PAPER = "#f7f7f7";
 const DAY1_POSTER_HEIGHT = 1130;
+const POSTER_IMAGE_ATTEMPTS = 3;
+const POSTER_IMAGE_TIMEOUT_MS = 15_000;
+const POSTER_IMAGE_CONCURRENCY = 4;
 
 // Fixed 15-tile composition approved for the Day 1 social share poster.
 // The order intentionally follows DAY1_TEMPLATE.slots so labels and images
@@ -127,26 +136,92 @@ function drawFooter(context: CanvasRenderingContext2D, y: number) {
   context.fillText("O—WEEK DIGITAL EXHIBITION", POSTER_PADDING, y + 80);
 }
 
-async function loadPosterImage(source: string): Promise<HTMLImageElement> {
+function delay(milliseconds: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+function decodePosterImage(blob: Blob): Promise<LoadedPosterImage> {
+  const objectUrl = URL.createObjectURL(blob);
+  const image = new Image();
+  image.decoding = "async";
+  return new Promise((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      image.src = "";
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("IMAGE_DECODE_TIMEOUT"));
+    }, POSTER_IMAGE_TIMEOUT_MS);
+    image.onload = () => {
+      window.clearTimeout(timeout);
+      resolve({ image, objectUrl });
+    };
+    image.onerror = () => {
+      window.clearTimeout(timeout);
+      image.src = "";
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("IMAGE_DECODE_FAILED"));
+    };
+    image.src = objectUrl;
+  });
+}
+
+async function fetchPosterImage(source: string, attempt: number) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), POSTER_IMAGE_TIMEOUT_MS);
+  try {
+    const suffix = attempt === 0 ? "" : `${source.includes("?") ? "&" : "?"}ow_share_retry=${attempt}`;
+    const response = await fetch(`${source}${suffix}`, {
+      cache: "no-store",
+      credentials: "same-origin",
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`IMAGE_FETCH_FAILED_${response.status}`);
+    const blob = await response.blob();
+    if (!blob.size || (blob.type && !blob.type.startsWith("image/"))) throw new Error("INVALID_IMAGE_RESPONSE");
+    return await decodePosterImage(blob);
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+async function loadPosterImage(sources: string[]): Promise<LoadedPosterImage> {
   let lastError: unknown;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const image = new Image();
-      image.crossOrigin = "anonymous";
-      image.decoding = "async";
-      const suffix = attempt === 0 ? "" : `${source.includes("?") ? "&" : "?"}ow_share_retry=${attempt}`;
-      image.src = `${source}${suffix}`;
-      await new Promise<void>((resolve, reject) => {
-        image.onload = () => resolve();
-        image.onerror = () => reject(new Error("IMAGE_LOAD_FAILED"));
-      });
-      return image;
-    } catch (error) {
-      lastError = error;
-      await new Promise((resolve) => window.setTimeout(resolve, 350 * (attempt + 1)));
+  for (let attempt = 0; attempt < POSTER_IMAGE_ATTEMPTS; attempt += 1) {
+    for (const source of sources) {
+      try {
+        return await fetchPosterImage(source, attempt);
+      } catch (error) {
+        lastError = error;
+      }
     }
+    if (attempt + 1 < POSTER_IMAGE_ATTEMPTS) await delay(450 * (attempt + 1));
   }
   throw lastError;
+}
+
+async function preloadDay1Images(items: Array<{ slotKey: string; sources: string[] }>) {
+  const loaded = new Map<string, LoadedPosterImage>();
+  const failedSlotKeys: string[] = [];
+  let nextIndex = 0;
+  const worker = async () => {
+    while (nextIndex < items.length) {
+      const item = items[nextIndex];
+      nextIndex += 1;
+      try {
+        loaded.set(item.slotKey, await loadPosterImage(item.sources));
+      } catch {
+        failedSlotKeys.push(item.slotKey);
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(POSTER_IMAGE_CONCURRENCY, items.length) }, () => worker()));
+  if (failedSlotKeys.length) {
+    loaded.forEach(({ image, objectUrl }) => {
+      image.src = "";
+      URL.revokeObjectURL(objectUrl);
+    });
+    throw new Error(`有 ${failedSlotKeys.length} 张图片暂时无法载入，分享图未生成。请检查网络后重试。`);
+  }
+  return loaded;
 }
 
 function drawImageCover(context: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, width: number, height: number, crop = { x: .5, y: .5, scale: 1 }) {
@@ -163,70 +238,84 @@ async function drawDay1Poster(displayTitle: string, slots: ArtworkSlot[]) {
     throw new Error("Day 1 分享模板与当前作品模板不一致");
   }
   const slotByKey = new Map(slots.map((slot) => [slot.slotKey, slot]));
+  const posterItems = DAY1_TEMPLATE.slots.map((config) => {
+    const slot = slotByKey.get(config.slotKey);
+    return {
+      slotKey: config.slotKey,
+      sources: Array.from(new Set([slot?.imageUrl, slot?.url, slot?.originalUrl].filter((source): source is string => Boolean(source)))),
+    };
+  });
+  const missingCount = posterItems.filter((item) => !item.sources.length).length;
+  if (missingCount) {
+    throw new Error(`作品中有 ${missingCount} 张图片尚未准备好，请等待图片处理完成后重试。`);
+  }
+  const loadedImages = await preloadDay1Images(posterItems);
   const canvas = document.createElement("canvas");
   canvas.width = POSTER_WIDTH;
   canvas.height = DAY1_POSTER_HEIGHT;
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("当前浏览器无法生成长图");
-  context.fillStyle = "#fff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
-  roundedRect(context, 318, 38, 264, 110, 4);
-  context.fillStyle = POSTER_BLACK;
-  context.fill();
-  context.fillStyle = "#fff";
-  context.font = 'italic 900 56px Arial, "PingFang SC", sans-serif';
-  context.textAlign = "center";
-  context.fillText("It's me", POSTER_WIDTH / 2, 112);
-  context.fillStyle = POSTER_ORANGE;
-  drawFittedText(context, displayTitle, POSTER_WIDTH / 2, 184, 420, 32, 20);
-  context.textAlign = "left";
-
-  for (let index = 0; index < DAY1_TEMPLATE.slots.length; index += 1) {
-    const config = DAY1_TEMPLATE.slots[index];
-    const item = DAY1_MOSAIC_LAYOUT[index];
-    const radius = item.width >= 200 ? 8 : 5;
-    roundedRect(context, item.x, item.y, item.width, item.height, radius);
-    context.save();
-    context.clip();
-    context.fillStyle = POSTER_PAPER;
-    context.fillRect(item.x, item.y, item.width, item.height);
-    const value = slotByKey.get(config.slotKey);
-    const imageSource = value?.imageUrl || value?.url;
-    if (imageSource) {
-      try {
-        const image = await loadPosterImage(imageSource);
-        drawImageCover(context, image, item.x, item.y, item.width, item.height, value?.crop);
-        image.src = "";
-      } catch {
-        context.fillStyle = "#77736b";
-        context.font = `800 ${item.width >= 200 ? 20 : 14}px Arial, "PingFang SC", sans-serif`;
-        context.textAlign = "center";
-        context.fillText("图片载入失败", item.x + item.width / 2, item.y + item.height / 2);
-        context.textAlign = "left";
-      }
-    }
-    const labelHeight = item.width >= 200 ? 58 : 48;
-    context.fillStyle = "rgba(11,11,10,.86)";
-    context.fillRect(item.x, item.y + item.height - labelHeight, item.width, labelHeight);
-    context.fillStyle = "#fff";
-    context.font = `800 ${item.width >= 200 ? 20 : 15}px Arial, "PingFang SC", sans-serif`;
-    context.textAlign = "center";
-    drawWrappedText(context, config.label, item.x + item.width / 2, item.y + item.height - labelHeight + (item.width >= 200 ? 25 : 19), item.width - 14, item.width >= 200 ? 22 : 16);
-    context.restore();
-    context.strokeStyle = POSTER_BLACK;
-    context.lineWidth = 3;
-    roundedRect(context, item.x, item.y, item.width, item.height, radius);
-    context.stroke();
+  if (!context) {
+    loadedImages.forEach(({ image, objectUrl }) => {
+      image.src = "";
+      URL.revokeObjectURL(objectUrl);
+    });
+    throw new Error("当前浏览器无法生成长图");
   }
-  context.textAlign = "center";
-  context.fillStyle = POSTER_BLACK;
-  context.font = '900 19px Arial, "PingFang SC", sans-serif';
-  context.fillText("O—WEEK / 26  ·  MSOWEEK.SITE", POSTER_WIDTH / 2, 1090);
-  context.fillStyle = POSTER_ORANGE;
-  context.fillRect(385, 1104, 130, 5);
-  context.textAlign = "left";
-  return canvas;
+  try {
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    roundedRect(context, 318, 38, 264, 110, 4);
+    context.fillStyle = POSTER_BLACK;
+    context.fill();
+    context.fillStyle = "#fff";
+    context.font = 'italic 900 56px Arial, "PingFang SC", sans-serif';
+    context.textAlign = "center";
+    context.fillText("It's me", POSTER_WIDTH / 2, 112);
+    context.fillStyle = POSTER_ORANGE;
+    drawFittedText(context, displayTitle, POSTER_WIDTH / 2, 184, 420, 32, 20);
+    context.textAlign = "left";
+
+    for (let index = 0; index < DAY1_TEMPLATE.slots.length; index += 1) {
+      const config = DAY1_TEMPLATE.slots[index];
+      const item = DAY1_MOSAIC_LAYOUT[index];
+      const radius = item.width >= 200 ? 8 : 5;
+      roundedRect(context, item.x, item.y, item.width, item.height, radius);
+      context.save();
+      context.clip();
+      context.fillStyle = POSTER_PAPER;
+      context.fillRect(item.x, item.y, item.width, item.height);
+      const value = slotByKey.get(config.slotKey);
+      const loaded = loadedImages.get(config.slotKey);
+      if (!loaded) throw new Error("Day 1 分享图片预加载结果不完整");
+      drawImageCover(context, loaded.image, item.x, item.y, item.width, item.height, value?.crop);
+      const labelHeight = item.width >= 200 ? 58 : 48;
+      context.fillStyle = "rgba(11,11,10,.86)";
+      context.fillRect(item.x, item.y + item.height - labelHeight, item.width, labelHeight);
+      context.fillStyle = "#fff";
+      context.font = `800 ${item.width >= 200 ? 20 : 15}px Arial, "PingFang SC", sans-serif`;
+      context.textAlign = "center";
+      drawWrappedText(context, config.label, item.x + item.width / 2, item.y + item.height - labelHeight + (item.width >= 200 ? 25 : 19), item.width - 14, item.width >= 200 ? 22 : 16);
+      context.restore();
+      context.strokeStyle = POSTER_BLACK;
+      context.lineWidth = 3;
+      roundedRect(context, item.x, item.y, item.width, item.height, radius);
+      context.stroke();
+    }
+    context.textAlign = "center";
+    context.fillStyle = POSTER_BLACK;
+    context.font = '900 19px Arial, "PingFang SC", sans-serif';
+    context.fillText("O—WEEK / 26  ·  MSOWEEK.SITE", POSTER_WIDTH / 2, 1090);
+    context.fillStyle = POSTER_ORANGE;
+    context.fillRect(385, 1104, 130, 5);
+    context.textAlign = "left";
+    return canvas;
+  } finally {
+    loadedImages.forEach(({ image, objectUrl }) => {
+      image.src = "";
+      URL.revokeObjectURL(objectUrl);
+    });
+  }
 }
 
 function drawBottle(context: CanvasRenderingContext2D, centerX: number, y: number, level: number) {

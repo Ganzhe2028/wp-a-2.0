@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireFormalViewer } from "@/lib/server/student-request";
 import { decideAuthoring } from "@/lib/domain/authoring";
 import { DAY1_TEMPLATE, DAY3_TEMPLATE, parseFormalSection } from "@/lib/domain/submission-templates";
-import { getThumbnailUrl } from "@/lib/r2";
+import { getPublicUrl, getThumbnailUrl } from "@/lib/r2";
 
 interface RouteContext { params: Promise<{ section: string }> }
 
@@ -41,6 +41,7 @@ export async function GET(_request: Request, routeContext: RouteContext) {
           slotKey: slot.slotKey,
           assetId: slot.assetId!,
           imageUrl: slot.asset ? getThumbnailUrl(slot.asset.storageKey) : undefined,
+          originalUrl: slot.asset ? getPublicUrl(slot.asset.storageKey) : undefined,
           crop: { x: slot.cropX ?? 0.5, y: slot.cropY ?? 0.5, scale: slot.cropScale ?? 1 },
         })) ?? [],
       }
