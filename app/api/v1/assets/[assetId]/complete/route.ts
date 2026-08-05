@@ -1,23 +1,15 @@
 import { after, NextResponse } from "next/server";
-import { createHash } from "node:crypto";
 import { failure, success } from "@/lib/contracts";
 import { prisma } from "@/lib/prisma";
 import { requireFormalViewer } from "@/lib/server/student-request";
 import { decideAuthoring } from "@/lib/domain/authoring";
-import { getPublicUrl, headR2Object, readR2Object } from "@/lib/r2";
+import { getPublicUrl, headR2Object } from "@/lib/r2";
 import { createIdempotencyContext, runIdempotentTransaction } from "@/lib/server/idempotency";
 import { processAssetAfterResponse } from "@/lib/server/asset-processor";
 
 interface RouteContext { params: Promise<{ assetId: string }> }
 
 export const maxDuration = 45;
-
-function detectImageMime(bytes: Buffer): string | null {
-  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
-  if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image/png";
-  if (bytes.length >= 12 && bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP") return "image/webp";
-  return null;
-}
 
 export async function POST(request: Request, routeContext: RouteContext) {
   const context = await requireFormalViewer(request, { write: true });
@@ -49,10 +41,6 @@ export async function POST(request: Request, routeContext: RouteContext) {
     const object = await headR2Object(asset.storageKey);
     if (object.contentType && object.contentType !== asset.mimeType) throw new Error("mime");
     if (object.contentLength && BigInt(object.contentLength) !== asset.byteSize) throw new Error("size");
-    const downloaded = await readR2Object(asset.storageKey, Number(asset.byteSize));
-    if (BigInt(downloaded.bytes.length) !== asset.byteSize) throw new Error("size");
-    if (detectImageMime(downloaded.bytes) !== asset.mimeType) throw new Error("magic");
-    if (createHash("sha256").update(downloaded.bytes).digest("hex") !== asset.checksum) throw new Error("checksum");
   } catch {
     await prisma.asset.update({ where: { id: asset.id }, data: { scanStatus: "FAILED", processingStatus: "FAILED" } });
     return NextResponse.json(failure("ASSET_PROCESSING_FAILED", "图片处理失败", context.requestId), { status: 422 });

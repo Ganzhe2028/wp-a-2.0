@@ -16,8 +16,9 @@ test("non-local uploads remain processing until an authenticated verified worker
   assert.match(complete, /processingStatus:\s*"PROCESSING"/);
   assert.match(callback, /ASSET_PROCESSOR_SECRET/);
   assert.match(callback, /timingSafeEqual/);
-  assert.match(callback, /readR2Object/);
-  assert.match(callback, /createHash\("sha256"\)/);
+  assert.match(callback, /headR2Object/);
+  assert.match(callback, /metadata\.checksum/);
+  assert.doesNotMatch(callback, /readR2Object|createHash\("sha256"\)/);
   assert.match(callback, /width\s*<=\s*0/);
   assert.match(callback, /scanStatus:\s*"PASSED",\s*processingStatus:\s*"READY"/);
 });
@@ -78,6 +79,7 @@ test("processing dispatch retries and stale processing assets self-heal while be
   ]);
   assert.match(processor, /for \(let attempt = 0; attempt < 3/);
   assert.match(statusRoute, /updatedAt:\s*\{ lte:/);
+  assert.match(statusRoute, /STALE_PROCESSING_MS = 30_000/);
   assert.match(statusRoute, /after\(\(\) => processAssetAfterResponse/);
   assert.match(presignRoute, /asset presign rejected/);
   assert.match(presignRoute, /"TOO_LARGE"/);

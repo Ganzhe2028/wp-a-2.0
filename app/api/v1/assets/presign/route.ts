@@ -48,12 +48,13 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) return NextResponse.json(failure("RATE_LIMITED", "上传请求过于频繁", context.requestId), { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } });
   try {
     const idempotency = createIdempotencyContext({ request, body, eventId: context.viewer.eventId, actorUserId: context.viewer.userId, scope: "ASSET_PRESIGN:DAY1" });
+    const totalAssets = await prisma.asset.count();
+    if (totalAssets >= MAX_TOTAL_ASSETS) throw new Error("GLOBAL_ASSET_LIMIT");
+    const assetId = randomUUID();
+    const extension = body.mimeType === "image/jpeg" ? "jpg" : (body.mimeType as string).split("/")[1];
+    const storageKey = `incoming/${context.viewer.eventId}/${context.viewer.userId}/${assetId}.${extension}`;
+    const uploadUrl = await createPresignedUploadUrl(storageKey, body.mimeType as string, body.byteSize as number);
     const result = await runIdempotentTransaction(idempotency, async (tx) => {
-      const totalAssets = await tx.asset.count();
-      if (totalAssets >= MAX_TOTAL_ASSETS) throw new Error("GLOBAL_ASSET_LIMIT");
-      const assetId = randomUUID();
-      const extension = body.mimeType === "image/jpeg" ? "jpg" : (body.mimeType as string).split("/")[1];
-      const storageKey = `incoming/${context.viewer.eventId}/${context.viewer.userId}/${assetId}.${extension}`;
       await tx.asset.create({
         data: {
           id: assetId,
@@ -67,7 +68,6 @@ export async function POST(request: Request) {
           processingStatus: "UPLOADING",
         },
       });
-      const uploadUrl = await createPresignedUploadUrl(storageKey, body.mimeType as string, body.byteSize as number);
       return { assetId, uploadUrl, expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString() };
     });
     return NextResponse.json(success(result.data, context.requestId), { headers: { "Cache-Control": "no-store", ...(result.replayed && { "Idempotency-Replayed": "true" }) } });

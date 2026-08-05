@@ -1,11 +1,12 @@
 import { after, NextResponse } from "next/server";
 import { failure, success } from "@/lib/contracts";
 import { prisma } from "@/lib/prisma";
-import { getPublicUrl } from "@/lib/r2";
+import { getPublicUrl, getThumbnailUrl } from "@/lib/r2";
 import { requireFormalViewer } from "@/lib/server/student-request";
 import { processAssetAfterResponse } from "@/lib/server/asset-processor";
 
 interface RouteContext { params: Promise<{ assetId: string }> }
+const STALE_PROCESSING_MS = 30_000;
 
 export async function GET(_request: Request, routeContext: RouteContext) {
   const context = await requireFormalViewer();
@@ -21,13 +22,13 @@ export async function GET(_request: Request, routeContext: RouteContext) {
     : asset.scanStatus === "PASSED" && asset.processingStatus === "READY"
       ? "READY"
       : "PROCESSING";
-  if (status === "PROCESSING" && asset.updatedAt <= new Date(Date.now() - 12_000)) {
+  if (status === "PROCESSING" && asset.updatedAt <= new Date(Date.now() - STALE_PROCESSING_MS)) {
     const claimed = await prisma.asset.updateMany({
       where: {
         id: asset.id,
         scanStatus: "PROCESSING",
         processingStatus: "PROCESSING",
-        updatedAt: { lte: new Date(Date.now() - 12_000) },
+        updatedAt: { lte: new Date(Date.now() - STALE_PROCESSING_MS) },
       },
       data: { updatedAt: new Date() },
     });
@@ -36,6 +37,6 @@ export async function GET(_request: Request, routeContext: RouteContext) {
   return NextResponse.json(success({
     assetId: asset.id,
     status,
-    ...(status === "READY" && { imageUrl: getPublicUrl(asset.storageKey) }),
+    ...(status === "READY" && { imageUrl: getThumbnailUrl(asset.storageKey), originalUrl: getPublicUrl(asset.storageKey) }),
   }, context.requestId), { headers: { "Cache-Control": "no-store" } });
 }

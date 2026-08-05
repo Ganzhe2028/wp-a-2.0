@@ -25,7 +25,7 @@ test("Day 1 compression and direct upload remain responsive on mobile and weak n
     source("../../package.json"),
   ]);
   assert.match(upload, /WORKER_LIBRARY_PATH = "\/vendor\/browser-image-compression\.js"/);
-  assert.match(upload, /MAX_ACTIVE_UPLOADS = 2/);
+  assert.match(upload, /MAX_ACTIVE_UPLOADS = 1/);
   assert.match(upload, /putPresignedImage/);
   assert.match(upload, /45_000/);
   assert.match(upload, /无法连接图片存储/);
@@ -64,9 +64,38 @@ test("Day 1 display uses processed thumbnails and recovers transient mobile imag
   assert.match(editor, /<ResilientImage/);
   assert.match(artwork, /<ResilientImage/);
   assert.match(resilientImage, /MAX_AUTOMATIC_RETRIES = 2/);
+  assert.match(resilientImage, /IMAGE_LOAD_TIMEOUT_MS = 8_000/);
+  assert.match(resilientImage, /fallbackSrc/);
   assert.match(resilientImage, /ow_image_retry/);
   assert.match(resilientImage, /loading=\{eager \? "eager" : "lazy"\}/);
   assert.match(resilientImage, /图片暂时无法显示，请刷新重试/);
+});
+
+test("Day 1 upload traffic stays bounded during a 100-person burst", async () => {
+  const [completeRoute, callbackRoute, presignRoute, statusRoute, editor, upload] = await Promise.all([
+    source("../../app/api/v1/assets/[assetId]/complete/route.ts"),
+    source("../../app/api/internal/assets/[assetId]/processed/route.ts"),
+    source("../../app/api/v1/assets/presign/route.ts"),
+    source("../../app/api/v1/assets/[assetId]/route.ts"),
+    source("../../app/me/day-1/Day1Client.tsx"),
+    source("../../components/student/image-upload.ts"),
+  ]);
+  assert.doesNotMatch(completeRoute, /readR2Object|createHash/);
+  assert.match(completeRoute, /headR2Object/);
+  assert.doesNotMatch(callbackRoute, /readR2Object/);
+  assert.match(callbackRoute, /headR2Object/);
+  assert.ok(presignRoute.indexOf("prisma.asset.count()") < presignRoute.indexOf("runIdempotentTransaction(idempotency"));
+  assert.match(statusRoute, /getThumbnailUrl/);
+  assert.match(statusRoute, /originalUrl/);
+  assert.match(upload, /MAX_ACTIVE_UPLOADS = 1/);
+  assert.match(editor, /ASSET_PROCESSING_POLL_DELAYS_MS/);
+  assert.doesNotMatch(editor, /attempt < 45/);
+  assert.match(editor, /Math\.random\(\) \* 750/);
+  assert.match(editor, /URL\.createObjectURL\(compressed\)/);
+  assert.match(editor, /fallbackSrc=\{value\?\.originalUrl\}/);
+  assert.match(editor, /const idempotencyKey = newIdempotencyKey\(\)/);
+  assert.match(editor, /await retryUploadRequest\(\(signal\) => requestDraft\(signal\)/);
+  assert.match(editor, /keepalive\s*\?\s*await requestDraft\(\)/);
 });
 
 test("submitted Day 1 and Day 3 can generate complete saveable share posters", async () => {

@@ -19,6 +19,7 @@ interface CropSelection { config: SlotConfig; value?: SlotValue; file?: File; pr
 interface Day1Data { status: SubmissionStatus; version: number; canAuthor: boolean; readOnlyReason?: string; template: { templateVersion: string; slots: SlotConfig[] }; slots: SlotValue[]; publicId: string }
 
 const EMPTY_CROP: Crop = { x: .5, y: .5, scale: 1 };
+const ASSET_PROCESSING_POLL_DELAYS_MS = [1_500, 2_500, 4_000, 6_000, 8_000, 10_000, 12_000, 15_000] as const;
 
 function normalizeDay1(raw: Day1Data): Day1Data {
   const value = raw as Day1Data & { submission?: Partial<Day1Data>; config?: Day1Data["template"]; templateVersion?: string };
@@ -58,6 +59,7 @@ export default function Day1Client() {
   const dirty = useRef(false);
   const revision = useRef(0);
   const lastSave = useRef(0);
+  const localPreviewUrls = useRef(new Set<string>());
 
   const load = useCallback(async () => {
     setError("");
@@ -70,6 +72,10 @@ export default function Day1Client() {
     }
   }, [router]);
   useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
+  useEffect(() => () => {
+    for (const preview of localPreviewUrls.current) URL.revokeObjectURL(preview);
+    localPreviewUrls.current.clear();
+  }, []);
 
   const saveDraft = useCallback(async (keepalive = false) => {
     if (!data || readOnly || !dirty.current) return true;
@@ -78,10 +84,14 @@ export default function Day1Client() {
     setError("");
     setSaveState("saving");
     try {
-      const response = await studentApi<{ version: number }>("/api/v1/submissions/day1/draft", {
-        method: "PUT", keepalive, headers: { "Idempotency-Key": newIdempotencyKey() },
-        body: JSON.stringify({ version: version.current, templateVersion: data.template.templateVersion, slots: snapshot.map(({ slotKey, assetId, crop }) => ({ slotKey, assetId, crop })) }),
+      const idempotencyKey = newIdempotencyKey();
+      const body = JSON.stringify({ version: version.current, templateVersion: data.template.templateVersion, slots: snapshot.map(({ slotKey, assetId, crop }) => ({ slotKey, assetId, crop })) });
+      const requestDraft = (signal?: AbortSignal) => studentApi<{ version: number }>("/api/v1/submissions/day1/draft", {
+        method: "PUT", keepalive, signal, headers: { "Idempotency-Key": idempotencyKey }, body,
       });
+      const response = keepalive
+        ? await requestDraft()
+        : await retryUploadRequest((signal) => requestDraft(signal), () => setSaveState("saving"));
       version.current = response.version; lastSave.current = Date.now();
       if (revision.current === saveRevision) { dirty.current = false; setSaveState("saved"); } else { dirty.current = true; setSaveState("dirty"); }
       return true;
@@ -93,7 +103,7 @@ export default function Day1Client() {
 
   useEffect(() => {
     if (saveState !== "dirty") return;
-    const wait = Math.max(900, 2000 - (Date.now() - lastSave.current));
+    const wait = Math.max(2_500, 5_000 - (Date.now() - lastSave.current));
     const timer = window.setTimeout(() => void saveDraft(), wait);
     return () => window.clearTimeout(timer);
   }, [saveDraft, saveState, slots]);
@@ -137,6 +147,33 @@ export default function Day1Client() {
     fileInput.current?.click();
   }
 
+  function rememberPreview(preview: string) {
+    if (preview.startsWith("blob:")) localPreviewUrls.current.add(preview);
+    return preview;
+  }
+
+  function releasePreview(preview?: string) {
+    if (preview?.startsWith("blob:") && localPreviewUrls.current.delete(preview)) URL.revokeObjectURL(preview);
+  }
+
+  function setSlotPreview(slotKey: string, preview: string, crop: Crop) {
+    setPendingPreviews((current) => {
+      const existing = current[slotKey];
+      if (existing?.preview !== preview) releasePreview(existing?.preview);
+      return { ...current, [slotKey]: { preview, crop } };
+    });
+  }
+
+  function clearSlotPreview(slotKey: string, release: boolean) {
+    setPendingPreviews((current) => {
+      if (!(slotKey in current)) return current;
+      if (release) releasePreview(current[slotKey]?.preview);
+      const next = { ...current };
+      delete next[slotKey];
+      return next;
+    });
+  }
+
   function selectedFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     const config = selectedConfig.current;
@@ -144,9 +181,10 @@ export default function Day1Client() {
     if (!file || !config) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setError("请选择 JPEG、PNG 或 WebP 图片"); return; }
     if (file.size > MAX_SOURCE_IMAGE_BYTES) { setError("原图超过 30 MB，手机浏览器可能无法稳定处理；请先截图或选择较小的图片"); return; }
-    setFailedCrops((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
+    clearSlotPreview(config.slotKey, true);
+    setFailedCrops((current) => { releasePreview(current[config.slotKey]?.preview); const next = { ...current }; delete next[config.slotKey]; return next; });
     setError("");
-    const selection = { config, file, preview: URL.createObjectURL(file) };
+    const selection = { config, file, preview: rememberPreview(URL.createObjectURL(file)) };
     if (file.size > LARGE_SOURCE_IMAGE_BYTES) { setLargeImagePrompt(selection); return; }
     setActiveCrop(selection);
   }
@@ -157,17 +195,24 @@ export default function Day1Client() {
 
   async function acceptCrop(crop: Crop) {
     if (!activeCrop) return;
-    const { config, file, value, preview } = activeCrop;
+    const { config, file, value, preview, compressionMode } = activeCrop;
     setActiveCrop(null); setError("");
-    if (!file && value) { updateSlot({ ...value, crop }); return; }
+    if (!file && value) {
+      updateSlot({ ...value, crop });
+      setPendingPreviews((current) => current[config.slotKey] ? { ...current, [config.slotKey]: { ...current[config.slotKey], crop } } : current);
+      return;
+    }
     if (!file) return;
     setUploadingSlots((current) => new Set(current).add(config.slotKey));
     setUploadStage(config.slotKey, "等待处理…");
-    setPendingPreviews((current) => ({ ...current, [config.slotKey]: { preview, crop } }));
+    setSlotPreview(config.slotKey, preview, crop);
+    let retainedPreview = preview;
     try {
-      const presigned = await withUploadPermit(async () => {
+      const uploaded = await withUploadPermit(async () => {
         setUploadStage(config.slotKey, "压缩中 0%");
-        const compressed = await compressForUpload(file, (progress) => setUploadStage(config.slotKey, `压缩中 ${progress}%`), activeCrop.compressionMode);
+        const compressed = await compressForUpload(file, (progress) => setUploadStage(config.slotKey, `压缩中 ${progress}%`), compressionMode);
+        retainedPreview = rememberPreview(URL.createObjectURL(compressed));
+        setSlotPreview(config.slotKey, retainedPreview, crop);
         setUploadStage(config.slotKey, "准备上传…");
         const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await compressed.arrayBuffer()))).map((byte) => byte.toString(16).padStart(2, "0")).join("");
         const presignKey = newIdempotencyKey();
@@ -182,46 +227,45 @@ export default function Day1Client() {
         );
         setUploadStage(config.slotKey, "上传中…");
         await putPresignedImage(task.uploadUrl, compressed, (attempt) => setUploadStage(config.slotKey, `重新上传 ${attempt}/3…`));
-        return task;
-      }, () => setUploadStage(config.slotKey, "排队中…"));
-      setUploadStage(config.slotKey, "安全处理中…");
-      const completeKey = newIdempotencyKey();
-      const completed = await retryUploadRequest(
-        (signal) => studentApi<{ assetId?: string; imageUrl?: string; url?: string; status?: string }>(`/api/v1/assets/${encodeURIComponent(presigned.assetId)}/complete`, {
-          method: "POST",
-          signal,
-          headers: { "Idempotency-Key": completeKey },
-          body: JSON.stringify({ section: "DAY1" }),
-        }),
-        (attempt) => setUploadStage(config.slotKey, `确认上传 ${attempt}/3…`),
-      );
-      let imageUrl = completed.imageUrl || completed.url;
-      if (!imageUrl && completed.status === "PROCESSING") {
-        for (let attempt = 0; attempt < 45; attempt += 1) {
-          await new Promise((resolve) => window.setTimeout(resolve, attempt < 8 ? 600 : 1_000));
-          const status = await retryUploadRequest(
-            (signal) => studentApi<{ status: "PROCESSING" | "READY" | "FAILED"; imageUrl?: string }>(`/api/v1/assets/${encodeURIComponent(presigned.assetId)}`, { signal }),
-            () => setUploadStage(config.slotKey, "网络波动，自动重试…"),
-            2,
-          );
-          if (status.status === "FAILED") throw new Error("图片安全处理失败，请重新选择图片");
-          if (status.status === "READY" && status.imageUrl) { imageUrl = status.imageUrl; break; }
+        setUploadStage(config.slotKey, "安全处理中…");
+        const completeKey = newIdempotencyKey();
+        const completed = await retryUploadRequest(
+          (signal) => studentApi<{ assetId?: string; imageUrl?: string; originalUrl?: string; url?: string; status?: string }>(`/api/v1/assets/${encodeURIComponent(task.assetId)}/complete`, {
+            method: "POST",
+            signal,
+            headers: { "Idempotency-Key": completeKey },
+            body: JSON.stringify({ section: "DAY1" }),
+          }),
+          (attempt) => setUploadStage(config.slotKey, `确认上传 ${attempt}/3…`),
+        );
+        let imageUrl = completed.imageUrl || completed.url;
+        let originalUrl = completed.originalUrl;
+        if (!imageUrl && completed.status === "PROCESSING") {
+          for (const pollDelay of ASSET_PROCESSING_POLL_DELAYS_MS) {
+            await new Promise((resolve) => window.setTimeout(resolve, pollDelay + Math.floor(Math.random() * 750)));
+            const status = await retryUploadRequest(
+              (signal) => studentApi<{ status: "PROCESSING" | "READY" | "FAILED"; imageUrl?: string; originalUrl?: string }>(`/api/v1/assets/${encodeURIComponent(task.assetId)}`, { signal }),
+              () => setUploadStage(config.slotKey, "网络波动，自动重试…"),
+              2,
+            );
+            if (status.status === "FAILED") throw new Error("图片安全处理失败，请重新选择图片");
+            if (status.status === "READY" && status.imageUrl) { imageUrl = status.imageUrl; originalUrl = status.originalUrl; break; }
+          }
         }
-      }
-      if (!imageUrl) throw new Error("图片仍在安全处理中，请稍后重新尝试");
-      updateSlot({ slotKey: config.slotKey, assetId: completed.assetId || presigned.assetId, imageUrl, crop });
-      setPendingPreviews((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
+        if (!imageUrl) throw new Error("图片仍在安全处理中，请稍后重新尝试");
+        return { assetId: completed.assetId || task.assetId, imageUrl, originalUrl };
+      }, () => setUploadStage(config.slotKey, "排队中…"));
+      updateSlot({ slotKey: config.slotKey, assetId: uploaded.assetId, imageUrl: uploaded.imageUrl, originalUrl: uploaded.originalUrl, crop });
       setFailedCrops((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
-      URL.revokeObjectURL(preview);
     } catch (caught) {
       if (isReadOnlyError(caught)) setReadOnly(true);
-      setPendingPreviews((current) => { const next = { ...current }; delete next[config.slotKey]; return next; });
+      clearSlotPreview(config.slotKey, false);
       if (caught instanceof ImageCompressionTooLargeError) {
         setError(`${caught.message}；点按保留的图片并选择“重新选择图片”。`);
-        setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview, pendingCrop: crop, compressionMode: "strong", failureKind: "too-large" } }));
+        setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview: retainedPreview, pendingCrop: crop, compressionMode: "strong", failureKind: "too-large" } }));
       } else {
         setError(`${caught instanceof Error && !(caught instanceof StudentApiError) ? caught.message : describeApiError(caught)}；点按对应格子可直接重试。`);
-        setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview, pendingCrop: crop, compressionMode: activeCrop.compressionMode } }));
+        setFailedCrops((current) => ({ ...current, [config.slotKey]: { config, file, value, preview: retainedPreview, pendingCrop: crop, compressionMode } }));
       }
     } finally {
       setUploadingSlots((current) => { const next = new Set(current); next.delete(config.slotKey); return next; });
@@ -242,7 +286,7 @@ export default function Day1Client() {
   }
 
   function discardCrop(selection: CropSelection) {
-    if (selection.file) URL.revokeObjectURL(selection.preview);
+    if (selection.file) releasePreview(selection.preview);
     setFailedCrops((current) => { const next = { ...current }; delete next[selection.config.slotKey]; return next; });
     setActiveCrop(null);
   }
@@ -266,7 +310,7 @@ export default function Day1Client() {
         <span className="ow-chip ow-chip-active shrink-0">{completed}/{data.template.slots.length}</span>
       </div>
       {readOnly && <div className="student-notice mt-6"><b>{data.status === "SUBMITTED" ? "作品已经提交" : "当前为只读阶段"}</b><p>{data.status === "SUBMITTED" ? "作品保持只读；只有确认重新编辑后才会恢复为草稿。" : data.readOnlyReason || "现有作品仍可查看，但不能保存、替换或提交。"}</p>{data.status === "SUBMITTED" && data.canAuthor && <button type="button" disabled={reopening} onClick={() => void reopenSubmission()} className="mt-3 min-h-11 font-bold underline">{reopening ? "正在恢复草稿…" : "重新编辑作品"}</button>}</div>}
-      {uploadingSlots.size > 0 && <div className="student-notice mt-5" role="status"><b>后台正在处理 {uploadingSlots.size} 张图片</b><p>系统会自动压缩并在弱网时重试；为避免手机卡顿，每次最多同时上传 2 张。</p></div>}
+      {uploadingSlots.size > 0 && <div className="student-notice mt-5" role="status"><b>后台正在处理 {uploadingSlots.size} 张图片</b><p>系统会自动压缩并在弱网时重试；为保证高峰期稳定，每台设备依次上传，你可以继续选择其他格。</p></div>}
       {error && <p role="alert" className="mt-5 font-bold text-red-700">{error}</p>}
       <div className="student-collage mt-8">
         {data.template.slots.map((config, index) => {
@@ -276,7 +320,7 @@ export default function Day1Client() {
           const imageUrl = pending?.preview || failed?.preview || value?.imageUrl;
           const crop = pending?.crop || failed?.pendingCrop || value?.crop || EMPTY_CROP;
           const uploading = uploadingSlots.has(config.slotKey);
-          return <button id={`slot-${config.slotKey}`} key={config.slotKey} type="button" disabled={readOnly || uploading} onClick={() => failed ? setActiveCrop(failed) : value?.imageUrl ? setActiveCrop({ config, value, preview: value.imageUrl }) : choose(config)} className={`student-slot student-slot-${index % 6} ${missing.includes(config.slotKey) ? "student-slot-missing" : ""}`}><span className="student-slot-media">{imageUrl ? <ResilientImage src={imageUrl} alt="" eager={index < 3} style={{ transform: `translate(${(crop.x - .5) * 36}%, ${(crop.y - .5) * 36}%) scale(${crop.scale})` }} /> : <span className="student-slot-add" aria-hidden="true">＋</span>}</span>{uploading && <span className="absolute top-2 right-2 z-10 max-w-[85%] rounded-full bg-white/95 px-2 py-1 text-[11px] font-black text-[var(--orange)]">{uploadStages[config.slotKey] || "处理中…"}</span>}{failed && <span className="absolute top-2 right-2 z-10 rounded-full bg-red-700 px-2 py-1 text-[11px] font-black text-white">{failed.failureKind === "too-large" ? "请换一张" : "点按重试"}</span>}<span className="student-slot-label">{config.label}{config.required ? " *" : ""}</span></button>;
+          return <button id={`slot-${config.slotKey}`} key={config.slotKey} type="button" disabled={readOnly || uploading} onClick={() => failed ? setActiveCrop(failed) : value?.imageUrl ? setActiveCrop({ config, value, preview: imageUrl || value.imageUrl }) : choose(config)} className={`student-slot student-slot-${index % 6} ${missing.includes(config.slotKey) ? "student-slot-missing" : ""}`}><span className="student-slot-media">{imageUrl ? <ResilientImage src={imageUrl} fallbackSrc={value?.originalUrl} alt="" eager={index < 3} style={{ transform: `translate(${(crop.x - .5) * 36}%, ${(crop.y - .5) * 36}%) scale(${crop.scale})` }} /> : <span className="student-slot-add" aria-hidden="true">＋</span>}</span>{uploading && <span className="absolute top-2 right-2 z-10 max-w-[85%] rounded-full bg-white/95 px-2 py-1 text-[11px] font-black text-[var(--orange)]">{uploadStages[config.slotKey] || "处理中…"}</span>}{failed && <span className="absolute top-2 right-2 z-10 rounded-full bg-red-700 px-2 py-1 text-[11px] font-black text-white">{failed.failureKind === "too-large" ? "请换一张" : "点按重试"}</span>}<span className="student-slot-label">{config.label}{config.required ? " *" : ""}</span></button>;
         })}
       </div>
       <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={selectedFile} className="sr-only" />
@@ -284,7 +328,7 @@ export default function Day1Client() {
       {!readOnly && <button type="button" disabled={uploadingSlots.size > 0} onClick={() => setConfirming(true)} className="ow-btn mt-8">{uploadingSlots.size > 0 ? `正在处理 ${uploadingSlots.size} 张图片…` : "提交 DAY 1 →"}</button>}
       {readOnly && data.publicId && <div className="mt-8 grid grid-cols-2 gap-3"><button type="button" onClick={() => router.push(`/artworks/${encodeURIComponent(data.publicId)}?section=day1`)} className="ow-btn">查看作品 →</button><ArtworkShareButton section="DAY1" slots={slots} /></div>}
       {confirming && <Confirm completed={completed} total={data.template.slots.length} cancel={() => setConfirming(false)} submit={() => void submit()} />}
-      {largeImagePrompt && <LargeImagePrompt file={largeImagePrompt.file!} cancel={() => { URL.revokeObjectURL(largeImagePrompt.preview); setLargeImagePrompt(null); }} compress={() => { setActiveCrop({ ...largeImagePrompt, compressionMode: "strong" }); setLargeImagePrompt(null); }} />}
+      {largeImagePrompt && <LargeImagePrompt file={largeImagePrompt.file!} cancel={() => { releasePreview(largeImagePrompt.preview); setLargeImagePrompt(null); }} compress={() => { setActiveCrop({ ...largeImagePrompt, compressionMode: "strong" }); setLargeImagePrompt(null); }} />}
       {activeCrop && <CropDialog source={activeCrop.preview} aspectRatio={activeCrop.config.aspectRatio} initial={activeCrop.pendingCrop || activeCrop.value?.crop || EMPTY_CROP} cancel={() => discardCrop(activeCrop)} replace={() => replaceCrop(activeCrop)} accept={(crop) => void acceptCrop(crop)} />}
     </main>
   );

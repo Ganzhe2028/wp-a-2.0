@@ -90,12 +90,12 @@ export async function deleteFromR2(key: string): Promise<void> {
   await getS3().send(command);
 }
 
-export async function headR2Object(key: string): Promise<{ contentType?: string; contentLength?: number }> {
+export async function headR2Object(key: string): Promise<{ contentType?: string; contentLength?: number; metadata?: Record<string, string> }> {
   if (process.env.LOCAL_UPLOAD_DIR) {
     return {};
   }
   const result = await getS3().send(new HeadObjectCommand({ Bucket: process.env.R2_BUCKET!, Key: key }));
-  return { contentType: result.ContentType, contentLength: result.ContentLength };
+  return { contentType: result.ContentType, contentLength: result.ContentLength, metadata: result.Metadata };
 }
 
 export async function readR2Object(key: string, maxBytes: number): Promise<{ bytes: Buffer; contentType?: string }> {

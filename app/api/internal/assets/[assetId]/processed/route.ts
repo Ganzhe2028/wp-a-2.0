@@ -1,7 +1,7 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { readR2Object } from "@/lib/r2";
+import { headR2Object } from "@/lib/r2";
 
 interface RouteContext { params: Promise<{ assetId: string }> }
 
@@ -15,13 +15,6 @@ function validSignature(request: Request, body: string): boolean {
   const left = Buffer.from(expected);
   const right = Buffer.from(supplied);
   return left.length === right.length && timingSafeEqual(left, right);
-}
-
-function imageMime(bytes: Buffer): string | null {
-  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
-  if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image/png";
-  if (bytes.length >= 12 && bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP") return "image/webp";
-  return null;
 }
 
 export async function POST(request: Request, routeContext: RouteContext) {
@@ -67,8 +60,9 @@ export async function POST(request: Request, routeContext: RouteContext) {
     return NextResponse.json({ ok: same, status: same ? "READY" : "CONFLICT" }, { status: same ? 200 : 409 });
   }
   try {
-    const object = await readR2Object(processedKey, byteSize);
-    if (object.bytes.length !== byteSize || imageMime(object.bytes) !== mimeType || createHash("sha256").update(object.bytes).digest("hex") !== checksum) throw new Error("mismatch");
+    const object = await headR2Object(processedKey);
+    const metadata = Object.fromEntries(Object.entries(object.metadata || {}).map(([key, value]) => [key.toLowerCase(), value]));
+    if (object.contentLength !== byteSize || object.contentType !== mimeType || metadata.assetid !== asset.id || metadata.mimetype !== mimeType || metadata.bytesize !== String(byteSize) || metadata.width !== String(width) || metadata.height !== String(height) || metadata.checksum !== checksum || metadata.oweekprocessed !== "v1") throw new Error("mismatch");
     await prisma.asset.update({
       where: { id: asset.id },
       data: { storageKey: processedKey, mimeType, byteSize: BigInt(byteSize), width, height, checksum, scanStatus: "PASSED", processingStatus: "READY" },

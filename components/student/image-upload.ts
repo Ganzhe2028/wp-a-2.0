@@ -8,7 +8,7 @@ export type CompressionMode = "standard" | "strong";
 export const MAX_UPLOAD_BYTES = 512 * 1024;
 export const LARGE_SOURCE_IMAGE_BYTES = 10 * 1024 * 1024;
 export const MAX_SOURCE_IMAGE_BYTES = 30 * 1024 * 1024;
-const MAX_ACTIVE_UPLOADS = 2;
+const MAX_ACTIVE_UPLOADS = 1;
 const WORKER_LIBRARY_PATH = "/vendor/browser-image-compression.js";
 const RETRY_DELAYS_MS = [500, 1_200, 2_500];
 
