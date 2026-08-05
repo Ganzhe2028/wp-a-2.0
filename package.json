@@ -16,6 +16,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/contracts/*.test.mjs",
+    "test:load:day1": "node scripts/load-test-day1-upload.mjs",
     "check:generated": "node scripts/check-generated.mjs",
     "check:openapi": "node scripts/check-openapi.mjs",
     "audit:harness": "node scripts/harness-audit.mjs",

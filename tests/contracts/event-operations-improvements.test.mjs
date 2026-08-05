@@ -72,13 +72,15 @@ test("Day 1 display uses processed thumbnails and recovers transient mobile imag
 });
 
 test("Day 1 upload traffic stays bounded during a 100-person burst", async () => {
-  const [completeRoute, callbackRoute, presignRoute, statusRoute, editor, upload] = await Promise.all([
+  const [completeRoute, callbackRoute, presignRoute, statusRoute, editor, upload, loadHarness, packageJson] = await Promise.all([
     source("../../app/api/v1/assets/[assetId]/complete/route.ts"),
     source("../../app/api/internal/assets/[assetId]/processed/route.ts"),
     source("../../app/api/v1/assets/presign/route.ts"),
     source("../../app/api/v1/assets/[assetId]/route.ts"),
     source("../../app/me/day-1/Day1Client.tsx"),
     source("../../components/student/image-upload.ts"),
+    source("../../scripts/load-test-day1-upload.mjs"),
+    source("../../package.json"),
   ]);
   assert.doesNotMatch(completeRoute, /readR2Object|createHash/);
   assert.match(completeRoute, /headR2Object/);
@@ -96,6 +98,13 @@ test("Day 1 upload traffic stays bounded during a 100-person burst", async () =>
   assert.match(editor, /const idempotencyKey = newIdempotencyKey\(\)/);
   assert.match(editor, /await retryUploadRequest\(\(signal\) => requestDraft\(signal\)/);
   assert.match(editor, /keepalive\s*\?\s*await requestDraft\(\)/);
+  assert.match(loadHarness, /VIRTUAL_USERS = 100/);
+  assert.match(loadHarness, /IMAGES_PER_USER = 15/);
+  assert.match(loadHarness, /IMAGE_BYTES = 512 \* 1024/);
+  assert.match(loadHarness, /assert\.equal\(url\.hostname, "127\.0\.0\.1"/);
+  assert.doesNotMatch(loadHarness, /https:\/\//);
+  assert.match(loadHarness, /lostDrafts: 0/);
+  assert.match(packageJson, /"test:load:day1": "node scripts\/load-test-day1-upload\.mjs"/);
 });
 
 test("submitted Day 1 and Day 3 can generate complete saveable share posters", async () => {
