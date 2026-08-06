@@ -2,13 +2,14 @@
 
 ## 唯一当前依据
 
-开发和发布以 `docs/08_v1.1_工程基线与契约.md` 为准；账号与未来 SSO 方案以 `docs/11_账号认证与SSO兼容补充规范_v1.0.md` 为补充。
+开发和发布以 `docs/08_v1.1_工程基线与契约.md` 为准；账号与未来 SSO 方案以 `docs/11_账号认证与SSO兼容补充规范_v1.0.md` 为补充。`docs/13_security-fix_生产部署交接.md` 是当前安全修复的操作手册，不改变工程基线。
 
 旧 `docs/01` 至 `docs/07`、`docs/09`、旧 Person 映射说明和历史 review 报告只供回溯，不能覆盖当前规则。
 
 ## 当前发布状态
 
 - 发布分支：`XuChen`。
+- `XuChen` 已在生产运行；`security-fix` 的安全修复尚须按 docs/13 合并和发布，不能把代码完成误记为生产完成。
 - 正式网址：`https://msoweek.site`；不使用 `www`。
 - 学生登录：账号编号 + 初始密码，发布环境固定 `AUTH_MODE=LOCAL_ONLY`。
 - 学校 SSO / OIDC：P1 后续工作。代码可预留，但本次不配置、不验收、不阻塞发布。
@@ -25,6 +26,8 @@
 - `DATABASE_URL` 只用于应用查询；`DIRECT_URL` 只用于 Prisma migration。
 - 图片必须浏览器直传 R2，正式页面仅使用处理完成的 `Asset`。
 - 密码使用 Node `crypto.scrypt`；明文不得写入数据库、日志、审计或长期文件。
+- `PROTECTED_ADMIN_INITIAL_PASSWORD` 只用于受保护 Admin 的一次安全迁移；成功后必须删除，并再次发布，使最终运行版本不含该变量。
+- Vercel 应用与图片 Worker 分开发布。媒体授权变更必须先发布包含 `/api/internal/assets/authorize` 的应用，再发布 Worker；顺序不可颠倒。
 - 生产发布前不更改 Vercel、域名或 SSO 配置，除非任务明确要求。
 
 ## 文件与数据安全

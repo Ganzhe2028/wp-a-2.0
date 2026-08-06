@@ -1,12 +1,13 @@
 # O-Week 数字迎新作品展
 
-这是本次活动即将上线的正式系统。学生通过账号编号和初始密码登录，完成 Day 1 与 Day 3 作品，再浏览其他同学的作品。
+这是已经上线运行的 O-Week 正式系统。学生通过账号编号和初始密码登录，完成 Day 1 与 Day 3 作品，再浏览其他同学的作品。
 
 ## 当前发布口径
 
 | 项目 | 当前结论 |
 |---|---|
 | 发布分支 | `XuChen` |
+| Security Fix | `security-fix` 已完成代码验证，须按 docs/13 操作并留下交付记录后，才能视为生产完成。 |
 | 正式网址 | [https://msoweek.site](https://msoweek.site) |
 | `www` | 不作为对外入口；当前不使用 `www` 网址、二维码或宣传链接。 |
 | 登录方式 | 账号编号 + 初始密码。 |
@@ -41,7 +42,7 @@ AUTH_MODE=LOCAL_ONLY
 PROTECTED_ADMIN_INITIAL_PASSWORD=<首次初始化专用的随机高强度密码>
 ```
 
-`PROTECTED_ADMIN_INITIAL_PASSWORD` 只用于首次创建或安全迁移受保护 Admin；成功后应从部署环境移除，并通过后台单个密码重置定期轮换。OIDC 变量在本次发布保持为空。后续接入学校 SSO 时，以 `HYBRID` 方式补充，不重建账号、不迁移作品。
+`PROTECTED_ADMIN_INITIAL_PASSWORD` 只用于首次创建或安全迁移受保护 Admin；成功后应从部署环境移除并重新发布一次，使最终运行版本不含该变量。后续通过后台单个密码重置定期轮换。OIDC 变量在本次发布保持为空。后续接入学校 SSO 时，以 `HYBRID` 方式补充，不重建账号、不迁移作品。
 
 本地运行时可访问 `/_preview` 查看学生端和 Admin 的展示数据。该入口仅在 `npm run dev` 可用；不会登录、连接数据库、上传图片或保存任何修改，生产环境返回 404。
 
@@ -61,6 +62,7 @@ npm run audit:harness
 
 - [当前工程基线与发布口径](docs/08_v1.1_工程基线与契约.md)
 - [账号与 SSO 后续方案](docs/11_账号认证与SSO兼容补充规范_v1.0.md)
+- [Security Fix 生产部署交接](docs/13_security-fix_生产部署交接.md)
 - [正式领域模型记录](docs/10_v1.1_domain_schema_handoff.md)
 - [实施与验收历史记录](docs/12_v1.1_完整开发实施与交接记录.md)
 

@@ -73,5 +73,47 @@
     ],
     "expectedFix": "When all Serializable-transaction retries are exhausted due to P2034, the endpoint returns the explicit 503 retry-exhaustion response instead of throwing an unhandled 500.",
     "verification": "app/api/me/images/route.ts breaks out of the retry loop on the final P2034 attempt, allowing the 503 response to be returned."
+  },
+  {
+    "id": "OWK-007",
+    "title": "Protected Admin credential was fixed in repository history and runtime bootstrap",
+    "severity": "P0",
+    "status": "fixed",
+    "source": "codex-security-scan-2026-08-06",
+    "evidence": [
+      "lib/server/bootstrap.ts",
+      "lib/server/passwords.ts",
+      ".env.example",
+      "app/api/v1/admin/accounts/[id]/reset-password/route.ts"
+    ],
+    "expectedFix": "Remove the repository-known password path and rotate the protected Admin through a one-time deployment secret without changing ordinary user credentials.",
+    "verification": "The protected Admin requires a unique 16-128 character PROTECTED_ADMIN_INITIAL_PASSWORD, records PROTECTED_ADMIN_CREDENTIAL_V1_PROVISIONED, revokes prior sessions, and supports only audited single-account rotation afterward."
+  },
+  {
+    "id": "OWK-008",
+    "title": "Processed media URLs bypassed current authorization and revocation",
+    "severity": "P2",
+    "status": "fixed",
+    "source": "codex-security-scan-2026-08-06",
+    "evidence": [
+      "app/api/internal/assets/authorize/route.ts",
+      "lib/server/asset-processor-auth.ts",
+      "workers/image-processor/src/index.js"
+    ],
+    "expectedFix": "Authorize every processed media read against the current application session, submission state, group scope, and visibility settings.",
+    "verification": "The Worker accepts only processed prefixes, calls the signed internal authorization endpoint before each read, fails closed, and returns private, no-store responses."
+  },
+  {
+    "id": "OWK-009",
+    "title": "Production workflow used floating executable references and broad job secrets",
+    "severity": "P2",
+    "status": "fixed",
+    "source": "codex-security-scan-2026-08-06",
+    "evidence": [
+      ".github/workflows/deploy-vercel-production.yml",
+      "tests/contracts/deployment-pinning.test.ts"
+    ],
+    "expectedFix": "Pin executable dependencies and expose production secrets only to the steps that consume them.",
+    "verification": "GitHub Actions use full commit SHAs, Vercel CLI is pinned to 51.2.1, and database/Vercel secrets are step-scoped."
   }
 ]

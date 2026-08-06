@@ -1,5 +1,7 @@
 # wp-a 安全与可靠性评审报告
 
+> **历史评审快照，不代表当前代码或风险状态。** 当前安全边界见 `docs/08_v1.1_工程基线与契约.md`；2026-08-06 安全修复及发布要求见 `docs/13_security-fix_生产部署交接.md`。
+
 > **项目**：OWeek 个人主页系统（`msoweek.site`）
 > **技术栈**：Next.js 16 App Router + Prisma 6 + Neon PostgreSQL + Cloudflare R2
 > **部署**：Vercel（`main` 分支自动部署）
