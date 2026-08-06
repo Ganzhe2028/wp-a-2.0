@@ -1,4 +1,4 @@
-# Security Fix 生产部署交接（Sophia / Agent）
+# Security Fix 生产部署交接（开发者 / Agent）
 
 文档日期：2026-08-06  
 目标分支：`XuChen`  
@@ -8,7 +8,7 @@
 
 ---
 
-## A. 给 Sophia 看的部分（约 1 分钟）
+## A. 给人看的部分（约 1 分钟）
 
 ### 结论
 
@@ -30,7 +30,7 @@
 
 ---
 
-## B. 给 Sophia 的 Agent / Codex 看的部分
+## B. 给 Agent / Codex 看的部分
 
 ### 1. 任务目标
 
