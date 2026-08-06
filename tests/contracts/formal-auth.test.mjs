@@ -11,6 +11,7 @@ import {
 import {
   generateInitialPassword,
   hashLocalPassword,
+  validateProtectedAdminInitialPassword,
   verifyLocalPassword,
 } from "../../lib/server/passwords.ts";
 
@@ -118,18 +119,27 @@ test("formal auth schema stores only credential and session hashes", async () =>
     assert.match(migration, new RegExp(`CREATE TABLE "${table}"`));
   }
   assert.doesNotMatch(migration, /INSERT\s+INTO/i);
-  assert.doesNotMatch(migration, /12138|sophiaxu@moonshotacademy\.cn/i);
+  assert.doesNotMatch(migration, /PROTECTED_ADMIN_INITIAL_PASSWORD|sophiaxu@moonshotacademy\.cn/i);
 });
 
-test("protected SophiaXu bootstrap is exact and only creates a missing credential", async () => {
+test("protected SophiaXu bootstrap requires a deployment secret and remains rotatable", async () => {
   const source = await readFile(bootstrapUrl, "utf8");
   assert.match(source, /PROTECTED_ADMIN_ACCOUNT_CODE\s*=\s*"SophiaXu"/);
   assert.match(source, /PROTECTED_ADMIN_DISPLAY_NAME\s*=\s*"SophiaXu"/);
   assert.match(source, /PROTECTED_ADMIN_EMAIL\s*=\s*"sophiaxu@moonshotacademy\.cn"/);
-  assert.match(source, /PROTECTED_ADMIN_INITIAL_PASSWORD\s*=\s*"12138"/);
+  assert.doesNotMatch(source, /PROTECTED_ADMIN_INITIAL_PASSWORD\s*=\s*["']/);
+  assert.match(source, /process\.env\.PROTECTED_ADMIN_INITIAL_PASSWORD/);
+  assert.match(source, /validateProtectedAdminInitialPassword/);
   assert.match(source, /protectedSystemAdmin:\s*true/);
   assert.match(source, /if \(!credential\)/);
+  assert.match(source, /else if \(before && !secureCredentialMarker\)/);
+  assert.match(source, /PROTECTED_ADMIN_CREDENTIAL_V1_PROVISIONED/);
+  assert.match(source, /tx\.session\.updateMany/);
   assert.match(source, /TransactionIsolationLevel\.Serializable/);
+
+  assert.equal(validateProtectedAdminInitialPassword("A-secure-bootstrap-password-2026"), "A-secure-bootstrap-password-2026");
+  assert.throws(() => validateProtectedAdminInitialPassword(undefined), /PROTECTED_ADMIN_INITIAL_PASSWORD_REQUIRED/);
+  assert.throws(() => validateProtectedAdminInitialPassword("too-short"), /PROTECTED_ADMIN_INITIAL_PASSWORD_INVALID/);
 });
 
 test("batch import forces LEARNER and creates all identity material transactionally", async () => {

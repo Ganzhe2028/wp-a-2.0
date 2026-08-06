@@ -180,7 +180,7 @@ function AccountDrawer({ account, groups, close, saved }: { account: AdminAccoun
   }
 
   async function resetPassword() {
-    if (protectedAdmin || !window.confirm(`重置 ${account.displayName} 的密码？旧密码和所有现有会话将立即失效。`)) return;
+    if (!window.confirm(`重置 ${account.displayName} 的密码？旧密码和所有现有会话将立即失效。`)) return;
     setError("");
     try {
       const result = await adminApi<{ accountCode: string; initialPassword: string }>(`/accounts/${encodeURIComponent(account.id)}/reset-password`, { method: "POST", body: JSON.stringify({ version: account.version, confirm: true, idempotencyKey: newIdempotencyKey() }) });
@@ -201,7 +201,7 @@ function AccountDrawer({ account, groups, close, saved }: { account: AdminAccoun
     <div className="fixed inset-0 z-40 bg-black/45" role="dialog" aria-modal="true" aria-labelledby="drawer-title" onClick={close}>
       <aside className="ml-auto flex h-full w-full max-w-lg flex-col overflow-y-auto border-l-[1.5px] border-black bg-white p-6" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-start justify-between"><div><p className="font-mono text-xs font-bold text-[var(--orange)]">{account.accountCode}</p><h2 id="drawer-title" className="mt-2 text-3xl font-black">Account Drawer</h2></div><button onClick={close} aria-label="关闭" className="h-11 w-11 text-3xl text-[var(--orange)]">×</button></div>
-        {protectedAdmin && <div className="mt-5 border border-[var(--orange)] bg-[var(--orange-soft)] p-4"><b>系统初始 Admin · 受保护</b><p className="mt-2 text-sm">SophiaXu 的姓名、角色和密码不可修改，账号不可降级、归档或删除。</p></div>}
+        {protectedAdmin && <div className="mt-5 border border-[var(--orange)] bg-[var(--orange-soft)] p-4"><b>系统初始 Admin · 受保护</b><p className="mt-2 text-sm">SophiaXu 的姓名和角色不可修改，账号不可降级、归档或删除；密码可通过下方单个重置安全轮换。</p></div>}
         <label className="mt-6 text-sm font-black">姓名<input value={displayName} disabled={protectedAdmin} onChange={(event) => setDisplayName(event.target.value)} className="mt-2 min-h-11 w-full border border-neutral-400 px-3 disabled:bg-neutral-100" /></label>
         <label className="mt-5 text-sm font-black">邮箱（只读）<input value={account.email ?? "尚未补录"} readOnly className="mt-2 min-h-11 w-full border border-neutral-300 bg-neutral-100 px-3 text-neutral-600" /></label>
         <div className="mt-5"><p className="text-sm font-black">角色</p><div className="mt-2 grid grid-cols-3 gap-2">{ROLES.map((value) => <button key={value} disabled={protectedAdmin} onClick={() => setRole(value)} className={`min-h-11 border px-2 text-xs font-black disabled:cursor-not-allowed ${role === value ? "border-[var(--orange)] bg-[var(--orange)]" : "border-neutral-400 bg-white"}`}>{value}</button>)}</div></div>
@@ -209,7 +209,7 @@ function AccountDrawer({ account, groups, close, saved }: { account: AdminAccoun
         <div className="mt-6 grid grid-cols-2 gap-3 bg-[var(--paper)] p-4 text-sm"><p><b>DAY 1</b><span className="mt-1 block">{account.day1Status}</span></p><p><b>DAY 3</b><span className="mt-1 block">{account.day3Status}</span></p><p><b>账号状态</b><span className="mt-1 block">{account.status}</span></p><p><b>匿名 ID</b><span className="mt-1 block font-mono">{account.anonymousId ?? "—"}</span></p><p><b>OIDC</b><span className="mt-1 block">{account.oidcBound ? "已绑定" : "未绑定"}</span></p><p><b>最近登录</b><span className="mt-1 block">{account.lastLoginAt ? new Date(account.lastLoginAt).toLocaleString("zh-CN") : "从未"}</span></p></div>
         {newPassword && <div className="mt-5 border border-emerald-500 bg-emerald-50 p-4"><b>新密码（仅显示一次）</b><div className="mt-2 flex items-center justify-between gap-3"><code className="break-all font-bold">{newPassword}</code><button onClick={() => void copyText(newPassword)} className="min-h-10 border border-black px-3 text-xs font-bold">复制</button></div></div>}
         {error && <p role="alert" className="mt-4 bg-red-50 p-3 text-sm font-bold text-red-700">{error}</p>}
-        <div className="mt-6 grid gap-3"><button disabled={protectedAdmin} onClick={() => void resetPassword()} className="min-h-12 border border-black p-3 text-left font-black disabled:bg-neutral-100 disabled:text-neutral-400">重置密码 <span className="float-right">→</span></button><button disabled={protectedAdmin || account.status === "ARCHIVED"} onClick={() => void archive()} className="min-h-12 border border-red-600 p-3 text-left font-black text-red-700 disabled:border-neutral-300 disabled:bg-neutral-100 disabled:text-neutral-400">归档账号 <span className="float-right">→</span></button></div>
+        <div className="mt-6 grid gap-3"><button onClick={() => void resetPassword()} className="min-h-12 border border-black p-3 text-left font-black">重置密码 <span className="float-right">→</span></button><button disabled={protectedAdmin || account.status === "ARCHIVED"} onClick={() => void archive()} className="min-h-12 border border-red-600 p-3 text-left font-black text-red-700 disabled:border-neutral-300 disabled:bg-neutral-100 disabled:text-neutral-400">归档账号 <span className="float-right">→</span></button></div>
         <div className="mt-auto grid grid-cols-2 gap-3 pt-8"><button onClick={close} className="ow-btn ow-btn-outline">取消</button><button disabled={saving || protectedAdmin || !displayName.trim()} onClick={() => void save()} className="ow-btn">{saving ? "保存中…" : "保存账号"}</button></div>
       </aside>
     </div>

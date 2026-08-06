@@ -240,11 +240,11 @@ async function processAsset(assetId, key, env) {
   };
 
   await env.IMAGES_BUCKET.put(`_derived/${processedKey}.thumb.webp`, transformed.thumbnailBytes, {
-    httpMetadata: { contentType: "image/webp", cacheControl: "public, max-age=31536000, immutable" },
+    httpMetadata: { contentType: "image/webp", cacheControl: "private, no-store" },
     customMetadata: { sourceKey: key, assetId, kind: "thumbnail", oweekProcessed: PROCESSED_VERSION },
   });
   await env.IMAGES_BUCKET.put(processedKey, transformed.canonicalBytes, {
-    httpMetadata: { contentType: mimeType, cacheControl: "public, max-age=31536000, immutable" },
+    httpMetadata: { contentType: mimeType, cacheControl: "private, no-store" },
     customMetadata,
   });
   await notifyReady(env, assetId, result);
@@ -271,20 +271,40 @@ function publicObjectKey(pathname) {
   try {
     const key = decodeURIComponent(pathname.slice("/assets/".length));
     if (!key || key.includes("..") || key.includes("\\") || !/^[A-Za-z0-9._/-]+$/.test(key)) return null;
-    if (key.startsWith("incoming/") || key.startsWith("_derived/incoming/")) return null;
+    if (!key.startsWith("processed/") && !key.startsWith("_derived/processed/")) return null;
     return key;
   } catch {
     return null;
   }
 }
 
-async function serveAsset(request, env, context, url) {
+async function authorizeAssetRequest(request, env, key) {
+  if (!env.APP_BASE_URL || !env.ASSET_PROCESSOR_SECRET) throw new Error("ASSET_AUTH_CONFIGURATION_MISSING");
+  const body = JSON.stringify({ storageKey: key });
+  const timestamp = String(Math.floor(Date.now() / 1_000));
+  const signature = await hmac(env.ASSET_PROCESSOR_SECRET, `${timestamp}.${body}`);
+  const headers = {
+    "Content-Type": "application/json",
+    "x-oweek-timestamp": timestamp,
+    "x-oweek-signature": signature,
+  };
+  const cookie = request.headers.get("Cookie");
+  if (cookie) headers.Cookie = cookie;
+  const response = await fetch(`${env.APP_BASE_URL.replace(/\/$/, "")}/api/internal/assets/authorize`, {
+    method: "POST",
+    headers,
+    body,
+  });
+  return response.ok;
+}
+
+async function serveAsset(request, env, url) {
   const key = publicObjectKey(url.pathname);
   if (!key || !["GET", "HEAD"].includes(request.method)) return null;
-  const cacheKey = new Request(`${url.origin}${url.pathname}`, { method: "GET" });
-  if (request.method === "GET") {
-    const cached = await caches.default.match(cacheKey);
-    if (cached) return cached;
+  try {
+    if (!(await authorizeAssetRequest(request, env, key))) return json({ error: "Not found" }, 404);
+  } catch {
+    return json({ error: "Asset authorization unavailable" }, 503);
   }
   const object = await env.IMAGES_BUCKET.get(key);
   if (!object) return json({ error: "Not found" }, 404);
@@ -292,12 +312,10 @@ async function serveAsset(request, env, context, url) {
   object.writeHttpMetadata(headers);
   headers.set("ETag", object.httpEtag);
   headers.set("Content-Length", String(object.size));
-  headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  headers.set("Cache-Control", "private, no-store");
   headers.set("Access-Control-Allow-Origin", env.PUBLIC_ORIGIN);
   headers.set("X-Content-Type-Options", "nosniff");
-  const response = new Response(request.method === "HEAD" ? null : object.body, { headers });
-  if (request.method === "GET") context.waitUntil(caches.default.put(cacheKey, response.clone()));
-  return response;
+  return new Response(request.method === "HEAD" ? null : object.body, { headers });
 }
 
 const worker = {
@@ -319,7 +337,7 @@ const worker = {
       context.waitUntil(processAssetWithRetry(payload.assetId, payload.storageKey, env));
       return json({ ok: true, status: "ACCEPTED" }, 202);
     }
-    const assetResponse = await serveAsset(request, env, context, url);
+    const assetResponse = await serveAsset(request, env, url);
     if (assetResponse) return assetResponse;
     return json({ error: "Not found" }, 404);
   },

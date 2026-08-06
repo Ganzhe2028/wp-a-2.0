@@ -31,3 +31,12 @@ export function generateInitialPassword(length = INITIAL_PASSWORD_LENGTH): strin
   }
   return Array.from({ length }, () => PASSWORD_ALPHABET[randomInt(PASSWORD_ALPHABET.length)]).join("");
 }
+
+export function validateProtectedAdminInitialPassword(value: string | undefined): string {
+  if (!value) throw new Error("PROTECTED_ADMIN_INITIAL_PASSWORD_REQUIRED");
+  const length = Array.from(value).length;
+  if (value !== value.trim() || length < 16 || length > 128) {
+    throw new Error("PROTECTED_ADMIN_INITIAL_PASSWORD_INVALID");
+  }
+  return value;
+}

@@ -35,9 +35,8 @@ export async function authenticateLocalAccount(input: {
   metadata?: RequestMetadata;
 }): Promise<LocalAuthResult> {
   if (!localLoginEnabled()) return { ok: false, reason: "LOCAL_LOGIN_DISABLED" };
-  await ensureProtectedAdmin();
-
   const accountCode = normalizeAccountCode(input.accountCode);
+  if (accountCode === "SophiaXu") await ensureProtectedAdmin();
   const user = await prisma.user.findUnique({
     where: { accountCode },
     select: {

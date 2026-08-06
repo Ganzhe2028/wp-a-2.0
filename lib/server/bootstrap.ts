@@ -3,13 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { createRequestId } from "@/lib/contracts";
 import { generateAnonymousId, generateArtworkPublicId } from "@/lib/domain/formal-identifiers";
 import { ANONYMOUS_SYMBOLS } from "@/lib/server/formal-identifiers";
-import { hashLocalPassword } from "@/lib/server/passwords";
+import { hashLocalPassword, validateProtectedAdminInitialPassword } from "@/lib/server/passwords";
 import { writeAuditLog } from "@/lib/server/audit";
 
 export const PROTECTED_ADMIN_ACCOUNT_CODE = "SophiaXu";
 export const PROTECTED_ADMIN_DISPLAY_NAME = "SophiaXu";
 export const PROTECTED_ADMIN_EMAIL = "sophiaxu@moonshotacademy.cn";
-export const PROTECTED_ADMIN_INITIAL_PASSWORD = "12138";
 
 export function getDefaultEventKey(): string {
   return process.env.OWEEK_EVENT_KEY?.trim() || process.env.DEFAULT_EVENT_KEY?.trim() || "oweek-2026";
@@ -47,47 +46,108 @@ export async function ensureProtectedAdmin() {
         throw new Error("PROTECTED_ADMIN_EVENT_CONFLICT");
       }
 
-      const user = await tx.user.upsert({
-        where: { accountCode: PROTECTED_ADMIN_ACCOUNT_CODE },
-        update: {
-          displayName: PROTECTED_ADMIN_DISPLAY_NAME,
-          displayNameSortKey: "sophiaxu",
-          email: PROTECTED_ADMIN_EMAIL,
-          role: "ADMIN",
-          status: "ACTIVE",
-          protectedSystemAdmin: true,
-          archivedAt: null,
-          archivedBy: null,
-        },
-        create: {
-          eventId: event.id,
-          accountCode: PROTECTED_ADMIN_ACCOUNT_CODE,
-          displayName: PROTECTED_ADMIN_DISPLAY_NAME,
-          displayNameSortKey: "sophiaxu",
-          email: PROTECTED_ADMIN_EMAIL,
-          role: "ADMIN",
-          status: "ACTIVE",
-          protectedSystemAdmin: true,
-          localCredential: {
-            create: { passwordHash: hashLocalPassword(PROTECTED_ADMIN_INITIAL_PASSWORD) },
-          },
-        },
-        select: {
-          id: true,
-          eventId: true,
-          accountCode: true,
-          displayName: true,
-          email: true,
-          role: true,
-          status: true,
-          protectedSystemAdmin: true,
-        },
-      });
+      const secureCredentialMarker = before
+        ? await tx.adminAuditLog.findFirst({
+            where: {
+              eventId: event.id,
+              targetId: before.id,
+              action: "PROTECTED_ADMIN_CREDENTIAL_V1_PROVISIONED",
+            },
+            select: { id: true },
+          })
+        : null;
 
-      const credential = await tx.localCredential.findUnique({ where: { userId: user.id } });
+      const userSelect = {
+        id: true,
+        eventId: true,
+        accountCode: true,
+        displayName: true,
+        email: true,
+        role: true,
+        status: true,
+        protectedSystemAdmin: true,
+      } as const;
+      const user = before
+        ? await tx.user.update({
+            where: { id: before.id },
+            data: {
+              displayName: PROTECTED_ADMIN_DISPLAY_NAME,
+              displayNameSortKey: "sophiaxu",
+              email: PROTECTED_ADMIN_EMAIL,
+              role: "ADMIN",
+              status: "ACTIVE",
+              protectedSystemAdmin: true,
+              archivedAt: null,
+              archivedBy: null,
+            },
+            select: userSelect,
+          })
+        : await tx.user.create({
+            data: {
+              eventId: event.id,
+              accountCode: PROTECTED_ADMIN_ACCOUNT_CODE,
+              displayName: PROTECTED_ADMIN_DISPLAY_NAME,
+              displayNameSortKey: "sophiaxu",
+              email: PROTECTED_ADMIN_EMAIL,
+              role: "ADMIN",
+              status: "ACTIVE",
+              protectedSystemAdmin: true,
+              localCredential: {
+                create: {
+                  passwordHash: hashLocalPassword(
+                    validateProtectedAdminInitialPassword(process.env.PROTECTED_ADMIN_INITIAL_PASSWORD),
+                  ),
+                  passwordChangedAt: new Date(),
+                },
+              },
+            },
+            select: userSelect,
+          });
+
+      const credential = await tx.localCredential.findUnique({
+        where: { userId: user.id },
+        select: { passwordChangedAt: true },
+      });
       if (!credential) {
         await tx.localCredential.create({
-          data: { userId: user.id, passwordHash: hashLocalPassword(PROTECTED_ADMIN_INITIAL_PASSWORD) },
+          data: {
+            userId: user.id,
+            passwordHash: hashLocalPassword(
+              validateProtectedAdminInitialPassword(process.env.PROTECTED_ADMIN_INITIAL_PASSWORD),
+            ),
+            passwordChangedAt: new Date(),
+          },
+        });
+      } else if (before && !secureCredentialMarker) {
+        await tx.localCredential.update({
+          where: { userId: user.id },
+          data: {
+            passwordHash: hashLocalPassword(
+              validateProtectedAdminInitialPassword(process.env.PROTECTED_ADMIN_INITIAL_PASSWORD),
+            ),
+            passwordChangedAt: new Date(),
+          },
+        });
+      }
+      if (!secureCredentialMarker) {
+        if (before) {
+          await tx.session.updateMany({
+            where: { userId: user.id, revokedAt: null },
+            data: { revokedAt: new Date() },
+          });
+        }
+        await writeAuditLog(tx, {
+          eventId: event.id,
+          actorUserId: user.id,
+          requestId: createRequestId(),
+          change: {
+            action: "PROTECTED_ADMIN_CREDENTIAL_V1_PROVISIONED",
+            targetType: "USER",
+            targetId: user.id,
+            summary: before
+              ? "Protected system administrator credential rotated during secure bootstrap"
+              : "Protected system administrator credential provisioned from deployment secret",
+          },
         });
       }
 

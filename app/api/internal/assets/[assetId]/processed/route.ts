@@ -1,25 +1,13 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headR2Object } from "@/lib/r2";
+import { verifyAssetProcessorRequest } from "@/lib/server/asset-processor-auth";
 
 interface RouteContext { params: Promise<{ assetId: string }> }
 
-function validSignature(request: Request, body: string): boolean {
-  const secret = process.env.ASSET_PROCESSOR_SECRET?.trim() || "";
-  const timestamp = request.headers.get("x-oweek-timestamp") || "";
-  const supplied = request.headers.get("x-oweek-signature") || "";
-  const timestampMs = Number(timestamp) * 1_000;
-  if (!secret || !Number.isFinite(timestampMs) || Math.abs(Date.now() - timestampMs) > 5 * 60 * 1_000) return false;
-  const expected = createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex");
-  const left = Buffer.from(expected);
-  const right = Buffer.from(supplied);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
-
 export async function POST(request: Request, routeContext: RouteContext) {
   const rawBody = await request.text();
-  if (!validSignature(request, rawBody)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!verifyAssetProcessorRequest(request, rawBody)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   let body: Record<string, unknown>;
   try {
     const parsed: unknown = JSON.parse(rawBody);

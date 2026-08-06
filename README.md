@@ -38,9 +38,10 @@ npm run dev
 
 ```env
 AUTH_MODE=LOCAL_ONLY
+PROTECTED_ADMIN_INITIAL_PASSWORD=<首次初始化专用的随机高强度密码>
 ```
 
-OIDC 变量在本次发布保持为空。后续接入学校 SSO 时，以 `HYBRID` 方式补充，不重建账号、不迁移作品。
+`PROTECTED_ADMIN_INITIAL_PASSWORD` 只用于首次创建或安全迁移受保护 Admin；成功后应从部署环境移除，并通过后台单个密码重置定期轮换。OIDC 变量在本次发布保持为空。后续接入学校 SSO 时，以 `HYBRID` 方式补充，不重建账号、不迁移作品。
 
 本地运行时可访问 `/_preview` 查看学生端和 Admin 的展示数据。该入口仅在 `npm run dev` 可用；不会登录、连接数据库、上传图片或保存任何修改，生产环境返回 404。
 
