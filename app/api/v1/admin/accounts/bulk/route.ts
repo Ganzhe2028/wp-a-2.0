@@ -93,6 +93,19 @@ export async function POST(request: Request) {
       if (operation === "PURGE_ARCHIVED") {
         const targetIds = eligible.map((target) => target.id);
         await tx.eventSettings.updateMany({ where: { eventId: context.admin.eventId, updatedBy: { in: targetIds } }, data: { updatedBy: null } });
+        // 保留审计归因快照：在清空 actorUserId 前把 actor 标识写入 summary，避免历史审计丢失归因
+        const auditRows = await tx.adminAuditLog.findMany({
+          where: { eventId: context.admin.eventId, actorUserId: { in: targetIds } },
+          select: { id: true, summary: true, actor: { select: { accountCode: true } } },
+        });
+        for (const row of auditRows) {
+          if (row.actor) {
+            await tx.adminAuditLog.update({
+              where: { id: row.id },
+              data: { summary: `${row.summary} [actor purged: ${row.actor.accountCode}]` },
+            });
+          }
+        }
         await tx.adminAuditLog.updateMany({ where: { eventId: context.admin.eventId, actorUserId: { in: targetIds } }, data: { actorUserId: null } });
         await tx.user.updateMany({ where: { eventId: context.admin.eventId, archivedBy: { in: targetIds } }, data: { archivedBy: null } });
         await tx.idempotencyRecord.deleteMany({ where: { eventId: context.admin.eventId, actorUserId: { in: targetIds } } });

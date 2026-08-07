@@ -84,7 +84,7 @@ export async function PATCH(request: Request, routeContext: RouteContext) {
       }
       const result = await tx.user.findUniqueOrThrow({
         where: { id },
-        select: { id: true, accountCode: true, displayName: true, role: true, status: true, groupId: true, version: true, protectedSystemAdmin: true, updatedAt: true },
+        select: { id: true, accountCode: true, displayName: true, displayNameSortKey: true, role: true, status: true, groupId: true, version: true, protectedSystemAdmin: true, updatedAt: true },
       });
       await writeAuditLog(tx, {
         eventId: existing.eventId,
@@ -96,8 +96,8 @@ export async function PATCH(request: Request, routeContext: RouteContext) {
           targetType: "USER",
           targetId: id,
           summary: "Account fields updated",
-          before: { role: existing.role, status: existing.status, groupId: existing.groupId, version: existing.version },
-          after: { role: result.role, status: result.status, groupId: result.groupId, version: result.version },
+          before: { role: existing.role, status: existing.status, groupId: existing.groupId, version: existing.version, displayName: existing.displayName, displayNameSortKey: existing.displayNameSortKey },
+          after: { role: result.role, status: result.status, groupId: result.groupId, version: result.version, displayName: result.displayName, displayNameSortKey: result.displayNameSortKey },
         },
       });
       return result;

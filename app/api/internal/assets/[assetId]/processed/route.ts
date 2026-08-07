@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headR2Object } from "@/lib/r2";
-import { verifyAssetProcessorRequest } from "@/lib/server/asset-processor-auth";
+import { verifyAssetProcessorRequest, readBoundedBody } from "@/lib/server/asset-processor-auth";
 
 interface RouteContext { params: Promise<{ assetId: string }> }
 
 export async function POST(request: Request, routeContext: RouteContext) {
-  const rawBody = await request.text();
+  const rawBody = await readBoundedBody(request);
+  if (rawBody === null) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
   if (!verifyAssetProcessorRequest(request, rawBody)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   let body: Record<string, unknown>;
   try {

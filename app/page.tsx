@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { safeReturnTo } from "@/lib/safe-return-to";
 
 export default async function RootPage({
   searchParams,
@@ -6,12 +7,6 @@ export default async function RootPage({
   searchParams: Promise<{ next?: string; returnTo?: string }>;
 }) {
   const query = await searchParams;
-  const returnTo = query.returnTo || query.next;
-  const safeReturnTo =
-    typeof returnTo === "string" &&
-    returnTo.startsWith("/") &&
-    !returnTo.startsWith("//")
-      ? returnTo
-      : null;
-  redirect(safeReturnTo ? `/login?returnTo=${encodeURIComponent(safeReturnTo)}` : "/login");
+  const returnTo = safeReturnTo(query.returnTo || query.next, "");
+  redirect(returnTo ? `/login?returnTo=${encodeURIComponent(returnTo)}` : "/login");
 }

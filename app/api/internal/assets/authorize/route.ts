@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { canViewerAccessArtworkOwner } from "@/lib/domain/gallery-access";
-import { verifyAssetProcessorRequest } from "@/lib/server/asset-processor-auth";
+import { verifyAssetProcessorRequest, readBoundedBody } from "@/lib/server/asset-processor-auth";
 import { getFormalSession } from "@/lib/server/formal-session";
 
 function originalProcessedKey(requestedKey: string): string | null {
@@ -13,7 +13,10 @@ function originalProcessedKey(requestedKey: string): string | null {
 }
 
 export async function POST(request: Request) {
-  const rawBody = await request.text();
+  const rawBody = await readBoundedBody(request);
+  if (rawBody === null) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413, headers: { "Cache-Control": "no-store" } });
+  }
   if (!verifyAssetProcessorRequest(request, rawBody)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: { "Cache-Control": "no-store" } });
   }

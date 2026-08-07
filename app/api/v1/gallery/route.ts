@@ -5,6 +5,7 @@ import { requireFormalViewer } from "@/lib/server/student-request";
 import { parseFormalSection } from "@/lib/domain/submission-templates";
 import { createGallerySeed, decodeGalleryCursor, encodeGalleryCursor, galleryShuffleKey } from "@/lib/server/gallery-cursor";
 import { resolveGalleryBrowseScope } from "@/lib/domain/gallery-access";
+import { consumePersistentRateLimit } from "@/lib/server/persistent-rate-limit";
 import { digestSensitive } from "@/lib/server/request-security";
 import { getThumbnailUrl } from "@/lib/r2";
 import { createHash } from "node:crypto";
@@ -25,6 +26,15 @@ interface GalleryUserRow {
 export async function GET(request: Request) {
   const context = await requireFormalViewer();
   if (!context.ok) return context.response;
+  let rateLimit;
+  try {
+    rateLimit = await consumePersistentRateLimit({ scope: "GALLERY_READ", identity: context.viewer.userId, limit: 120, windowMs: 5 * 60 * 1000 });
+  } catch {
+    return NextResponse.json(failure("INTERNAL_ERROR", "浏览服务暂时不可用", context.requestId), { status: 500 });
+  }
+  if (!rateLimit.allowed) {
+    return NextResponse.json(failure("RATE_LIMITED", "请求过于频繁", context.requestId), { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } });
+  }
   const url = new URL(request.url);
   const section = parseFormalSection(url.searchParams.get("section") || "");
   const division = url.searchParams.get("division");

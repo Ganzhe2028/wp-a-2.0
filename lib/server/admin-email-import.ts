@@ -88,7 +88,7 @@ export async function validateEmailImport(
       select: { id: true, accountCode: true, displayName: true, email: true, protectedSystemAdmin: true, oidcIdentities: { select: { id: true }, take: 1 } },
     }),
     tx.user.findMany({
-      where: { email: { in: normalized.rows.map((row) => row.email) } },
+      where: { email: { in: normalized.rows.map((row) => row.email), mode: "insensitive" } },
       select: { id: true, email: true },
     }),
   ]);

@@ -20,7 +20,9 @@ const ROLES: UserRole[] = ["LEARNER", "SENIOR", "ADMIN"];
 const DAY_STATES: SubmissionStatus[] = ["NOT_STARTED", "DRAFT", "SUBMITTED"];
 
 function csvCell(value: string) {
-  return /[",\n\r]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+  // 与 lib/csv.ts 保持一致：中和电子表格公式前缀（= + - @ 制表符 回车）
+  const neutralized = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[",\n\r]/.test(neutralized) ? `"${neutralized.replaceAll('"', '""')}"` : neutralized;
 }
 
 function credentialLine(item: Credential) {

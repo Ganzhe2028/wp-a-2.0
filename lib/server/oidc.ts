@@ -74,10 +74,10 @@ export function oidcConfigured(): boolean {
   }
 }
 
+import { safeReturnTo } from "@/lib/safe-return-to";
+
 export function safeOidcReturnTo(value: string | null | undefined): string {
-  return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\")
-    ? value
-    : "/home";
+  return safeReturnTo(value);
 }
 
 export async function discoverOidc(config: OidcConfiguration): Promise<OidcDiscovery> {

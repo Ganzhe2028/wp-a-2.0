@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { describeApiError, safeReturnTo, studentApi } from "@/components/student/api";
+import { describeApiError, studentApi } from "@/components/student/api";
+import { safeReturnTo } from "@/lib/safe-return-to";
 
 const SSO_ERRORS: Record<string, string> = {
   unavailable: "学校统一登录尚未配置或暂时不可用。",

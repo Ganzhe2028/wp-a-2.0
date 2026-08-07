@@ -4,6 +4,7 @@ import { authenticateLocalAccount } from "@/lib/server/local-auth";
 import { getRequestMetadata, hasTrustedWriteOrigin } from "@/lib/server/request-security";
 import { setUnifiedSessionCookie } from "@/lib/server/formal-session";
 import { clientRateLimitIdentity, consumePersistentRateLimit } from "@/lib/server/persistent-rate-limit";
+import { safeReturnTo } from "@/lib/safe-return-to";
 
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 
@@ -22,9 +23,7 @@ export async function handleFormalLogin(request: Request, requiredRole?: "ADMIN"
     const record = body as Record<string, unknown>;
     accountCode = typeof record.accountCode === "string" ? record.accountCode.trim() : "";
     password = typeof record.password === "string" ? record.password : "";
-    returnTo = typeof record.returnTo === "string" && record.returnTo.startsWith("/") && !record.returnTo.startsWith("//")
-      ? record.returnTo
-      : undefined;
+    returnTo = typeof record.returnTo === "string" ? safeReturnTo(record.returnTo) : undefined;
     if (!accountCode || !password) throw new Error("invalid");
   } catch {
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { digestSensitive } from "@/lib/server/request-security";
+import { clientIpAddress, digestSensitive } from "@/lib/server/request-security";
 
 interface RateLimitRow {
   count: number;
@@ -12,9 +12,7 @@ export interface RateLimitResult {
 }
 
 export function clientRateLimitIdentity(request: Request): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-    || request.headers.get("x-real-ip")?.trim()
-    || "unknown-client";
+  return clientIpAddress(request) || "unknown-client";
 }
 
 export async function consumePersistentRateLimit(input: {

@@ -1,13 +1,17 @@
+const FORMULA_PREFIX = /^[=+\-@\t\r]/;
+
 export function csvCell(value: string): string {
+  // 中和电子表格公式前缀（= + - @ 制表符 回车），防止公式注入
+  const neutralized = FORMULA_PREFIX.test(value) ? `'${value}` : value;
   if (
-    value.includes(",") ||
-    value.includes('"') ||
-    value.includes("\n") ||
-    value.includes("\r")
+    neutralized.includes(",") ||
+    neutralized.includes('"') ||
+    neutralized.includes("\n") ||
+    neutralized.includes("\r")
   ) {
-    return `"${value.replace(/"/g, '""')}"`;
+    return `"${neutralized.replace(/"/g, '""')}"`;
   }
-  return value;
+  return neutralized;
 }
 
 export function csvRow(values: string[]): string {

@@ -55,11 +55,7 @@ export async function studentApi<T>(path: string, init?: RequestInit): Promise<T
   return payload.data;
 }
 
-export function safeReturnTo(value: string | null | undefined, fallback = "/home") {
-  return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\")
-    ? value
-    : fallback;
-}
+import { safeReturnTo } from "@/lib/safe-return-to";
 
 export function loginUrl(returnTo: string) {
   return `/login?returnTo=${encodeURIComponent(safeReturnTo(returnTo))}`;

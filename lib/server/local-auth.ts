@@ -6,6 +6,9 @@ import { createFormalSession } from "@/lib/server/formal-session";
 import { localLoginEnabled } from "@/lib/server/auth-mode";
 import type { RequestMetadata } from "@/lib/server/request-security";
 
+// 预生成的固定 dummy hash：账号不存在时也执行等价 scrypt 验证，抹平登录时序差异
+const DUMMY_LOCAL_PASSWORD_HASH = "scrypt-v1:a544c395eb12bff21aa5ac82fd434807:766e8422d52135cbf044b559e1369cc4011575105dbed3970ed77ec379f94cce9cf2e5b8b2c40c0ffe3e08b8dd46e673f3cec2b21670df53ac7cd52065337ff5";
+
 export type LocalAuthFailure =
   | "LOCAL_LOGIN_DISABLED"
   | "INVALID_CREDENTIALS"
@@ -51,7 +54,10 @@ export async function authenticateLocalAccount(input: {
     },
   });
 
-  if (!user?.localCredential || !verifyLocalPassword(input.password, user.localCredential.passwordHash)) {
+  // 无论账号是否存在都执行一次 scrypt 验证，使响应耗时与账号存在性无关
+  const storedHash = user?.localCredential?.passwordHash ?? DUMMY_LOCAL_PASSWORD_HASH;
+  const verified = verifyLocalPassword(input.password, storedHash);
+  if (!user?.localCredential || !verified) {
     return { ok: false, reason: "INVALID_CREDENTIALS" };
   }
   if (user.status !== "ACTIVE") return { ok: false, reason: "ACCOUNT_ARCHIVED" };
