@@ -25,6 +25,13 @@ export type ArtworkSectionState = "AVAILABLE" | "LOCKED" | "NO_CONTENT";
 
 export type ArtworkIdentityOnlyReason = "NO_CONTENT" | "EVENT_IDENTITY_ONLY";
 
+export interface ArtworkSlotContract {
+  slotKey: string;
+  label: string;
+  imageUrl?: string;
+  crop: { x: number; y: number; scale: number };
+}
+
 export interface ArtworkBottleContract {
   bottleKey: string;
   labelSnapshot: string;

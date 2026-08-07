@@ -169,6 +169,22 @@ test("Day 3 artwork preserves the two answering themes and subtitles", async () 
   assert.match(artwork, /theme\.subtitle/);
 });
 
+test("Day 1 editor and artwork wall display the same template descriptions", async () => {
+  const [template, route, editor, artwork, preview] = await Promise.all([
+    source("../../lib/domain/submission-templates.ts"),
+    source("../../app/api/v1/artworks/[publicId]/route.ts"),
+    source("../../app/me/day-1/Day1Client.tsx"),
+    source("../../app/artworks/[publicId]/ArtworkClient.tsx"),
+    source("../../lib/preview/ui-preview.ts"),
+  ]);
+  assert.match(template, /DAY1_PROMPTS\.slice\(0, 15\)/);
+  assert.match(route, /DAY1_CONFIG\.get\(slot\.slotKey\)\?\.label/);
+  assert.match(editor, /config\.label/);
+  assert.match(artwork, /DAY1_LABELS\.get\(slot\.slotKey\)/);
+  assert.match(artwork, /<figcaption>\{label\}<\/figcaption>/);
+  assert.match(preview, /label: slot\.label/);
+});
+
 test("Day 3 uses the reviewed student-appropriate bottle copy everywhere", async () => {
   const [flow, artworkRoute] = await Promise.all([
     source("../../lib/flow.ts"),

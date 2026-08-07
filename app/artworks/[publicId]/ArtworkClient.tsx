@@ -8,6 +8,7 @@ import { PageError, PageLoading } from "@/components/student/AsyncState";
 import ResilientImage from "@/components/student/ResilientImage";
 import { describeApiError, loginUrl, studentApi, StudentApiError, type Section } from "@/components/student/api";
 import type { ArtworkIdentityOnlyReason } from "@/lib/contracts";
+import { DAY1_TEMPLATE } from "@/lib/domain/submission-templates";
 
 type SectionState = "AVAILABLE" | "LOCKED" | "NO_CONTENT";
 interface ArtworkSlot { slotKey: string; label?: string; imageUrl?: string; url?: string; crop?: { x: number; y: number; scale: number } }
@@ -23,6 +24,8 @@ interface ArtworkData {
   navigation?: { canReturnToGallery?: boolean; canNavigateCollection?: boolean; previousPublicId?: string; nextPublicId?: string };
   sections?: Partial<Record<Section, ArtworkSection>>;
 }
+
+const DAY1_LABELS = new Map(DAY1_TEMPLATE.slots.map((slot) => [slot.slotKey, slot.label]));
 
 export default function ArtworkClient({ publicId }: { publicId: string }) {
   const router = useRouter();
@@ -59,7 +62,7 @@ export default function ArtworkClient({ publicId }: { publicId: string }) {
 
 function SectionStateCard({ kind, section }: { kind: "locked" | "empty"; section: Section }) { return <div className="student-state-card text-center"><span className={kind === "locked" ? "student-lock-mark" : "student-empty-mark"} aria-hidden="true" /><h2 className="ow-heading mt-8">{kind === "locked" ? `${section.replace("DAY", "DAY ")} 尚未解锁` : "对方暂未发布此作品"}</h2><p className="ow-muted mt-4 leading-7">{kind === "locked" ? `先提交你自己的 ${section.replace("DAY", "Day ")}，再查看其他人的这一部分。` : "你已经拥有浏览权限；这里目前没有公开内容。"}</p>{kind === "locked" && <Link href={section === "DAY1" ? "/me/day-1" : "/me/day-3"} className="ow-btn mt-8">去完成 {section.replace("DAY", "DAY ")}</Link>}</div>; }
 
-function Day1Artwork({ slots }: { slots: ArtworkSlot[] }) { return slots.length ? <div className="student-artwork-collage">{slots.map((slot, index) => { const url = slot.imageUrl || slot.url; const crop = slot.crop || { x: .5, y: .5, scale: 1 }; return <figure key={slot.slotKey} className={`student-artwork-slot student-slot-${index % 6}`}>{url && <ResilientImage src={url} alt={slot.label || "作品图片"} eager={index < 3} style={{ transform: `translate(${(crop.x - .5) * 36}%, ${(crop.y - .5) * 36}%) scale(${crop.scale})` }} />}<figcaption>{slot.label || "作品图片"}</figcaption></figure>; })}</div> : <p className="student-empty">作品正在准备中。</p>; }
+function Day1Artwork({ slots }: { slots: ArtworkSlot[] }) { return slots.length ? <div className="student-artwork-collage">{slots.map((slot, index) => { const url = slot.imageUrl || slot.url; const crop = slot.crop || { x: .5, y: .5, scale: 1 }; const label = slot.label || DAY1_LABELS.get(slot.slotKey) || "作品图片"; return <figure key={slot.slotKey} className={`student-artwork-slot student-slot-${index % 6}`}>{url && <ResilientImage src={url} alt={label} eager={index < 3} style={{ transform: `translate(${(crop.x - .5) * 36}%, ${(crop.y - .5) * 36}%) scale(${crop.scale})` }} />}<figcaption>{label}</figcaption></figure>; })}</div> : <p className="student-empty">作品正在准备中。</p>; }
 
 function Day3Artwork({ bottles }: { bottles: ArtworkBottle[] }) {
   if (!bottles.length) return <p className="student-empty">作品正在准备中。</p>;

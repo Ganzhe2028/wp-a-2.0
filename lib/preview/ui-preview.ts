@@ -23,6 +23,7 @@ export function isUiPreviewActive() {
 
 const previewDay1Slots = DAY1_TEMPLATE.slots.map((slot, index) => ({
   slotKey: slot.slotKey,
+  label: slot.label,
   assetId: `preview-asset-${index + 1}`,
   imageUrl: PREVIEW_IMAGE,
   crop: { x: 0.5, y: 0.5, scale: 1 },

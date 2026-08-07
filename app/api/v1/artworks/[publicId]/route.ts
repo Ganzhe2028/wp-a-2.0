@@ -5,7 +5,7 @@ import { requireFormalViewer } from "@/lib/server/student-request";
 import { getThumbnailUrl } from "@/lib/r2";
 import { clientRateLimitIdentity, consumePersistentRateLimit } from "@/lib/server/persistent-rate-limit";
 import { canViewerAccessArtworkOwner } from "@/lib/domain/gallery-access";
-import { DAY3_TEMPLATE } from "@/lib/domain/submission-templates";
+import { DAY1_TEMPLATE, DAY3_TEMPLATE } from "@/lib/domain/submission-templates";
 
 interface ArtworkOwnerRow {
   displayName?: string;
@@ -22,6 +22,7 @@ interface ArtworkOwnerRow {
 interface RouteContext { params: Promise<{ publicId: string }> }
 
 const DAY3_CONFIG = new Map(DAY3_TEMPLATE.bottles.map((bottle) => [bottle.bottleKey, bottle]));
+const DAY1_CONFIG = new Map(DAY1_TEMPLATE.slots.map((slot) => [slot.slotKey, slot]));
 
 export async function GET(request: Request, routeContext: RouteContext) {
   const context = await requireFormalViewer();
@@ -108,6 +109,7 @@ export async function GET(request: Request, routeContext: RouteContext) {
             templateVersion: submission.templateVersion,
             slots: submission.day1Slots.map((slot) => ({
               slotKey: slot.slotKey,
+              label: DAY1_CONFIG.get(slot.slotKey)?.label ?? "作品图片",
               imageUrl: slot.asset ? getThumbnailUrl(slot.asset.storageKey) : undefined,
               crop: { x: slot.cropX ?? 0.5, y: slot.cropY ?? 0.5, scale: slot.cropScale ?? 1 },
             })),
