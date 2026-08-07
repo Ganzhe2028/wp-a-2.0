@@ -16,11 +16,11 @@ const PRESETS = [
 const SETTING_LABELS: Array<{ key: keyof Omit<EventSettings, "version">; label: string; note: string }> = [
   { key: "day1Open", label: "Day 1 开放", note: "允许进入 Day 1 编辑或只读页面" },
   { key: "day3Open", label: "Day 3 开放", note: "允许进入 Day 3 编辑或只读页面" },
-  { key: "authoringEnabled", label: "作品编写 / 提交", note: "Learner 与 Senior Group 共用总开关" },
+  { key: "authoringEnabled", label: "作品编写 / 提交", note: "Learner 与 Senior Group（含 Counselor）共用总开关" },
   { key: "allowEditing", label: "已提交作品重新编辑", note: "允许 SUBMITTED 作品回到编辑状态" },
   { key: "showName", label: "显示真实姓名", note: "关闭后前台仅使用 8 位匿名 ID" },
   { key: "fullProfileVisible", label: "显示完整作品", note: "关闭后详情只显示身份标题" },
-  { key: "seniorCanBrowseAll", label: "Senior 可浏览全部主页", note: "关闭时 Senior 只能查看自己组内的 Learner；Admin 始终可以查看全部" },
+  { key: "seniorCanBrowseAll", label: "Senior 可浏览全部主页", note: "关闭时 Senior 只能查看自己组内的 Learner；Counselor、Learner 与 Admin 始终可以查看全部" },
 ];
 
 function MetricCard({ title, value }: { title: string; value: { submitted: number; eligible: number; percentage: number } }) {
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
           </section>
 
           <section aria-labelledby="completion-heading" className="mt-8">
-            <div className="flex items-end justify-between"><h2 id="completion-heading" className="text-lg font-black">完成率</h2><p className="text-xs text-neutral-500">仅 ACTIVE Learner / Senior Group</p></div>
+            <div className="flex items-end justify-between"><h2 id="completion-heading" className="text-lg font-black">完成率</h2><p className="text-xs text-neutral-500">仅 ACTIVE Learner / Senior Group（含 Counselor）</p></div>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <MetricCard title="DAY 1 / SUBMITTED" value={data.completion.day1} />
               <MetricCard title="DAY 3 / SUBMITTED" value={data.completion.day3} />

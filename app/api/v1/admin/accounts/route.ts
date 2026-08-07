@@ -50,7 +50,7 @@ export async function GET(request: Request) {
             { group: { name: { contains: query, mode: "insensitive" } } },
           ],
         }),
-        ...(role === "LEARNER" || role === "SENIOR" || role === "ADMIN" ? { role } : {}),
+        ...(role === "LEARNER" || role === "SENIOR" || role === "COUNSELOR" || role === "ADMIN" ? { role } : {}),
         ...(status === "ACTIVE" || status === "ARCHIVED" ? { status } : {}),
         ...(groupId && { groupId }),
       },

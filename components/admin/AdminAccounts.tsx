@@ -16,7 +16,7 @@ import {
   type UserRole,
 } from "./admin-api";
 
-const ROLES: UserRole[] = ["LEARNER", "SENIOR", "ADMIN"];
+const ROLES: UserRole[] = ["LEARNER", "SENIOR", "COUNSELOR", "ADMIN"];
 const DAY_STATES: SubmissionStatus[] = ["NOT_STARTED", "DRAFT", "SUBMITTED"];
 
 function csvCell(value: string) {
@@ -204,7 +204,7 @@ function AccountDrawer({ account, groups, close, saved }: { account: AdminAccoun
         {protectedAdmin && <div className="mt-5 border border-[var(--orange)] bg-[var(--orange-soft)] p-4"><b>系统初始 Admin · 受保护</b><p className="mt-2 text-sm">SophiaXu 的姓名、角色和密码不可修改，账号不可降级、归档或删除。</p></div>}
         <label className="mt-6 text-sm font-black">姓名<input value={displayName} disabled={protectedAdmin} onChange={(event) => setDisplayName(event.target.value)} className="mt-2 min-h-11 w-full border border-neutral-400 px-3 disabled:bg-neutral-100" /></label>
         <label className="mt-5 text-sm font-black">邮箱（只读）<input value={account.email ?? "尚未补录"} readOnly className="mt-2 min-h-11 w-full border border-neutral-300 bg-neutral-100 px-3 text-neutral-600" /></label>
-        <div className="mt-5"><p className="text-sm font-black">角色</p><div className="mt-2 grid grid-cols-3 gap-2">{ROLES.map((value) => <button key={value} disabled={protectedAdmin} onClick={() => setRole(value)} className={`min-h-11 border px-2 text-xs font-black disabled:cursor-not-allowed ${role === value ? "border-[var(--orange)] bg-[var(--orange)]" : "border-neutral-400 bg-white"}`}>{value}</button>)}</div></div>
+        <div className="mt-5"><p className="text-sm font-black">角色</p><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">{ROLES.map((value) => <button key={value} disabled={protectedAdmin} onClick={() => setRole(value)} className={`min-h-11 border px-2 text-xs font-black disabled:cursor-not-allowed ${role === value ? "border-[var(--orange)] bg-[var(--orange)]" : "border-neutral-400 bg-white"}`}>{value}</button>)}</div></div>
         <label className="mt-5 text-sm font-black">组别<select value={groupId} disabled={protectedAdmin} onChange={(event) => setGroupId(event.target.value)} className="mt-2 min-h-11 w-full border border-neutral-400 bg-white px-3 disabled:bg-neutral-100"><option value="">未分组</option>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label>
         <div className="mt-6 grid grid-cols-2 gap-3 bg-[var(--paper)] p-4 text-sm"><p><b>DAY 1</b><span className="mt-1 block">{account.day1Status}</span></p><p><b>DAY 3</b><span className="mt-1 block">{account.day3Status}</span></p><p><b>账号状态</b><span className="mt-1 block">{account.status}</span></p><p><b>匿名 ID</b><span className="mt-1 block font-mono">{account.anonymousId ?? "—"}</span></p><p><b>OIDC</b><span className="mt-1 block">{account.oidcBound ? "已绑定" : "未绑定"}</span></p><p><b>最近登录</b><span className="mt-1 block">{account.lastLoginAt ? new Date(account.lastLoginAt).toLocaleString("zh-CN") : "从未"}</span></p></div>
         {newPassword && <div className="mt-5 border border-emerald-500 bg-emerald-50 p-4"><b>新密码（仅显示一次）</b><div className="mt-2 flex items-center justify-between gap-3"><code className="break-all font-bold">{newPassword}</code><button onClick={() => void copyText(newPassword)} className="min-h-10 border border-black px-3 text-xs font-bold">复制</button></div></div>}

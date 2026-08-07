@@ -1,6 +1,6 @@
 import { getUiPreviewData, isUiPreviewActive, uiPreviewWriteError } from "@/lib/preview/ui-preview";
 
-export type UserRole = "LEARNER" | "SENIOR" | "ADMIN";
+export type UserRole = "LEARNER" | "SENIOR" | "COUNSELOR" | "ADMIN";
 export type AccountStatus = "ACTIVE" | "ARCHIVED";
 export type SubmissionStatus = "NOT_STARTED" | "DRAFT" | "SUBMITTED";
 

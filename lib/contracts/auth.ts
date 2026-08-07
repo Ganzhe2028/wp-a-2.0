@@ -3,7 +3,7 @@ export interface AuthenticatedAccount {
   eventId: string;
   accountCode: string;
   displayName: string;
-  role: "LEARNER" | "SENIOR" | "ADMIN";
+  role: "LEARNER" | "SENIOR" | "COUNSELOR" | "ADMIN";
   protectedSystemAdmin: boolean;
 }
 

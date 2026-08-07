@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@/app/generated/prisma/client";
 import { failure, success } from "@/lib/contracts";
 import { prisma } from "@/lib/prisma";
 import { requireFormalViewer } from "@/lib/server/student-request";
@@ -11,7 +12,7 @@ import { createHash } from "node:crypto";
 
 interface GalleryUserRow {
   id: string;
-  role: "LEARNER" | "SENIOR" | "ADMIN";
+  role: "LEARNER" | "SENIOR" | "COUNSELOR" | "ADMIN";
   displayName?: string;
   displayNameSortKey?: string;
   anonymousIds: Array<{ anonymousId: string }>;
@@ -47,11 +48,13 @@ export async function GET(request: Request) {
   if (!settings.showName && query && !/^[!@#$%&*+?=]{8}$/.test(query)) {
     return NextResponse.json(success({ viewer: { unlockedSections: [section], browseScope }, items: [], nextCursor: null }, context.requestId));
   }
-  const accountScope = browseScope === "OWN_GROUP_LEARNERS"
+  const accountScope: Prisma.UserWhereInput = browseScope === "OWN_GROUP_LEARNERS"
     ? galleryDivision === "LEARNER" && context.viewer.groupId
       ? { role: "LEARNER" as const, groupId: context.viewer.groupId }
       : { id: "__senior_group_scope_empty__" }
-    : { role: galleryDivision === "SENIOR" ? "SENIOR" as const : "LEARNER" as const };
+    : galleryDivision === "SENIOR"
+      ? { role: { in: ["SENIOR", "COUNSELOR"] } }
+      : { role: "LEARNER" as const };
   const users = await prisma.user.findMany({
     where: {
       eventId: context.viewer.eventId,

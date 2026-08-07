@@ -31,7 +31,7 @@ export async function PATCH(request: Request, routeContext: RouteContext) {
   const status = changes.status;
   const displayName = changes.displayName;
   const groupId = changes.groupId;
-  if (role !== undefined && role !== "LEARNER" && role !== "SENIOR" && role !== "ADMIN") {
+  if (role !== undefined && role !== "LEARNER" && role !== "SENIOR" && role !== "COUNSELOR" && role !== "ADMIN") {
     return NextResponse.json(failure("VALIDATION_ERROR", "角色无效", context.requestId), { status: 400 });
   }
   if (status !== undefined && status !== "ACTIVE" && status !== "ARCHIVED") {

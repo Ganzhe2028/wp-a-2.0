@@ -7,13 +7,12 @@ export async function GET() {
   const context = await requireFormalAdmin();
   if (!context.ok) return context.response;
   const eventId = context.admin.eventId;
-  const [settings, totalAccounts, learnerAccounts, seniorAccounts, day1Submitted, day3Submitted] = await Promise.all([
+  const [settings, totalAccounts, eligibleAccounts, day1Submitted, day3Submitted] = await Promise.all([
     prisma.eventSettings.findUnique({ where: { eventId } }),
     prisma.user.count({ where: { eventId, status: "ACTIVE" } }),
-    prisma.user.count({ where: { eventId, status: "ACTIVE", role: "LEARNER" } }),
-    prisma.user.count({ where: { eventId, status: "ACTIVE", role: "SENIOR" } }),
-    prisma.submission.count({ where: { eventId, section: "DAY1", status: "SUBMITTED", user: { status: "ACTIVE", role: { in: ["LEARNER", "SENIOR"] } } } }),
-    prisma.submission.count({ where: { eventId, section: "DAY3", status: "SUBMITTED", user: { status: "ACTIVE", role: { in: ["LEARNER", "SENIOR"] } } } }),
+    prisma.user.count({ where: { eventId, status: "ACTIVE", role: { in: ["LEARNER", "SENIOR", "COUNSELOR"] } } }),
+    prisma.submission.count({ where: { eventId, section: "DAY1", status: "SUBMITTED", user: { status: "ACTIVE", role: { in: ["LEARNER", "SENIOR", "COUNSELOR"] } } } }),
+    prisma.submission.count({ where: { eventId, section: "DAY3", status: "SUBMITTED", user: { status: "ACTIVE", role: { in: ["LEARNER", "SENIOR", "COUNSELOR"] } } } }),
   ]);
   return NextResponse.json(
     success(
@@ -35,13 +34,13 @@ export async function GET() {
         completion: {
           day1: {
             submitted: day1Submitted,
-            eligible: learnerAccounts + seniorAccounts,
-            percentage: learnerAccounts + seniorAccounts ? Math.round(day1Submitted / (learnerAccounts + seniorAccounts) * 100) : 0,
+            eligible: eligibleAccounts,
+            percentage: eligibleAccounts ? Math.round(day1Submitted / eligibleAccounts * 100) : 0,
           },
           day3: {
             submitted: day3Submitted,
-            eligible: learnerAccounts + seniorAccounts,
-            percentage: learnerAccounts + seniorAccounts ? Math.round(day3Submitted / (learnerAccounts + seniorAccounts) * 100) : 0,
+            eligible: eligibleAccounts,
+            percentage: eligibleAccounts ? Math.round(day3Submitted / eligibleAccounts * 100) : 0,
           },
         },
       },

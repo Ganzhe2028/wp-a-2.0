@@ -1,6 +1,6 @@
 import type { GalleryBrowseScope } from "@/lib/contracts";
 
-type Role = "LEARNER" | "SENIOR" | "ADMIN";
+type Role = "LEARNER" | "SENIOR" | "COUNSELOR" | "ADMIN";
 
 export interface GalleryViewerIdentity {
   userId: string;
@@ -28,7 +28,7 @@ export function canViewerAccessArtworkOwner(
   owner: GalleryOwnerIdentity,
   settings: { seniorCanBrowseAll: boolean },
 ): boolean {
-  if (viewer.userId === owner.userId || viewer.role === "ADMIN" || viewer.role === "LEARNER") return true;
+  if (viewer.userId === owner.userId || viewer.role === "ADMIN" || viewer.role === "LEARNER" || viewer.role === "COUNSELOR") return true;
   if (viewer.role !== "SENIOR" || settings.seniorCanBrowseAll) return true;
   return owner.role === "LEARNER" && viewer.groupId !== null && viewer.groupId === owner.groupId;
 }

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   if (!accountIds.length || accountIds.length > 500 || body.confirm !== true || !["SET_ROLE", "SET_GROUP", "ARCHIVE", "ACTIVATE", "RESET_PASSWORDS", "PURGE_ARCHIVED"].includes(operation)) {
     return NextResponse.json(failure("VALIDATION_ERROR", "批量操作参数无效", context.requestId), { status: 400 });
   }
-  if (operation === "SET_ROLE" && !["LEARNER", "SENIOR", "ADMIN"].includes(String(payload.role))) {
+  if (operation === "SET_ROLE" && !["LEARNER", "SENIOR", "COUNSELOR", "ADMIN"].includes(String(payload.role))) {
     return NextResponse.json(failure("VALIDATION_ERROR", "角色无效", context.requestId), { status: 400 });
   }
   try {
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
             await tx.user.update({
               where: { id: target.id },
               data: {
-                ...(operation === "SET_ROLE" && { role: payload.role as "LEARNER" | "SENIOR" | "ADMIN" }),
+                ...(operation === "SET_ROLE" && { role: payload.role as "LEARNER" | "SENIOR" | "COUNSELOR" | "ADMIN" }),
                 ...(operation === "SET_GROUP" && { groupId: payload.groupId as string | null }),
                 ...(operation === "ARCHIVE" && { status: "ARCHIVED", archivedAt: new Date(), archivedBy: context.admin.userId }),
                 ...(operation === "ACTIVATE" && { status: "ACTIVE", archivedAt: null, archivedBy: null }),
