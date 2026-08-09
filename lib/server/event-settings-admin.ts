@@ -10,6 +10,7 @@ const BOOLEAN_KEYS = [
   "showName",
   "fullProfileVisible",
   "seniorCanBrowseAll",
+  "seniorBrowseAnonymous",
 ] as const;
 
 export type SettingsChanges = Partial<Record<(typeof BOOLEAN_KEYS)[number], boolean>>;

@@ -14,6 +14,13 @@ export interface GalleryOwnerIdentity {
   groupId: string | null;
 }
 
+export function shouldShowNamesToViewer(
+  viewer: GalleryViewerIdentity,
+  settings: { showName: boolean; seniorBrowseAnonymous: boolean },
+): boolean {
+  return settings.showName && !(viewer.role === "SENIOR" && settings.seniorBrowseAnonymous);
+}
+
 export function resolveGalleryBrowseScope(
   viewer: GalleryViewerIdentity,
   settings: { seniorCanBrowseAll: boolean },

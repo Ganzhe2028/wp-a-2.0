@@ -25,6 +25,7 @@ export interface EventSettingsContract {
   showName: boolean;
   fullProfileVisible: boolean;
   seniorCanBrowseAll: boolean;
+  seniorBrowseAnonymous: boolean;
   version: number;
   updatedAt: string;
 }

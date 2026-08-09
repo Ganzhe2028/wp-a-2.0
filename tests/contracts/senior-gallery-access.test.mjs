@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   canViewerAccessArtworkOwner,
   resolveGalleryBrowseScope,
+  shouldShowNamesToViewer,
 } from "../../lib/domain/gallery-access.ts";
 import { decideAuthoring } from "../../lib/domain/authoring.ts";
 
@@ -66,6 +67,34 @@ test("Counselor can author under the same event switches as Learner and Senior",
     }),
     { allowed: true },
   );
+});
+
+test("Senior-only anonymous browsing does not change other roles", () => {
+  const localAnonymous = { showName: true, seniorBrowseAnonymous: true };
+  assert.equal(shouldShowNamesToViewer(senior, localAnonymous), false);
+  assert.equal(shouldShowNamesToViewer(learnerSameGroup, localAnonymous), true);
+  assert.equal(shouldShowNamesToViewer(counselor, localAnonymous), true);
+  assert.equal(shouldShowNamesToViewer({ userId: "admin", role: "ADMIN", groupId: null }, localAnonymous), true);
+  assert.equal(shouldShowNamesToViewer(learnerSameGroup, { showName: false, seniorBrowseAnonymous: false }), false);
+});
+
+test("Senior-only anonymous browsing is persisted, audited, and enforced on lists and direct artwork URLs", async () => {
+  const [migration, settingsService, galleryRoute, artworkRoute, dashboard, schema] = await Promise.all([
+    readFile(new URL("../../prisma/migrations/20260809120000_add_senior_anonymous_browse/migration.sql", import.meta.url), "utf8"),
+    readFile(new URL("../../lib/server/event-settings-admin.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../app/api/v1/gallery/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../app/api/v1/artworks/[publicId]/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../components/admin/AdminDashboard.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../prisma/schema.prisma", import.meta.url), "utf8"),
+  ]);
+  assert.match(migration, /"seniorBrowseAnonymous" BOOLEAN NOT NULL DEFAULT false/);
+  assert.match(schema, /seniorBrowseAnonymous\s+Boolean\s+@default\(false\)/);
+  assert.match(settingsService, /"seniorBrowseAnonymous"/);
+  assert.match(galleryRoute, /shouldShowNamesToViewer/);
+  assert.match(galleryRoute, /showName: showNamesToViewer/);
+  assert.match(artworkRoute, /shouldShowNamesToViewer/);
+  assert.match(artworkRoute, /isAnonymous: !showNamesToViewer/);
+  assert.match(dashboard, /Senior 浏览时隐藏姓名/);
 });
 
 test("Counselor is persisted as a role and grouped into the existing Senior gallery division", async () => {

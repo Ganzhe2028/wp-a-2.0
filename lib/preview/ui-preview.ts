@@ -48,6 +48,7 @@ const previewSettings = {
   showName: true,
   fullProfileVisible: true,
   seniorCanBrowseAll: false,
+  seniorBrowseAnonymous: false,
 };
 
 const previewAccounts = [

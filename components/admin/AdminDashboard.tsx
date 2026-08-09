@@ -21,6 +21,7 @@ const SETTING_LABELS: Array<{ key: keyof Omit<EventSettings, "version">; label: 
   { key: "showName", label: "显示真实姓名", note: "关闭后前台仅使用 8 位匿名 ID" },
   { key: "fullProfileVisible", label: "显示完整作品", note: "关闭后详情只显示身份标题" },
   { key: "seniorCanBrowseAll", label: "Senior 可浏览全部主页", note: "关闭时 Senior 只能查看自己组内的 Learner；Counselor、Learner 与 Admin 始终可以查看全部" },
+  { key: "seniorBrowseAnonymous", label: "Senior 浏览时隐藏姓名", note: "仅 Senior 的 Browse 与作品详情显示 8 位匿名 ID；Learner、Counselor、Admin 和填写页面不受影响" },
 ];
 
 function MetricCard({ title, value }: { title: string; value: { submitted: number; eligible: number; percentage: number } }) {

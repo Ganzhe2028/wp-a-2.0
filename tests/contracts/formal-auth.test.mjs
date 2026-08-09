@@ -80,6 +80,7 @@ test("all six event presets explicitly set every visibility and authoring switch
     "showName",
     "fullProfileVisible",
     "seniorCanBrowseAll",
+    "seniorBrowseAnonymous",
   ];
   for (const preset of Object.values(EVENT_PRESETS)) {
     assert.deepEqual(Object.keys(preset).sort(), required.toSorted());
@@ -88,6 +89,7 @@ test("all six event presets explicitly set every visibility and authoring switch
   assert.equal(EVENT_PRESETS.RULES_PREP.showName, false);
   assert.equal(EVENT_PRESETS.FIND_PACKAGE.fullProfileVisible, false);
   for (const preset of Object.values(EVENT_PRESETS)) assert.equal(preset.seniorCanBrowseAll, false);
+  for (const preset of Object.values(EVENT_PRESETS)) assert.equal(preset.seniorBrowseAnonymous, false);
 });
 
 test("formal templates are centralized, versioned, and keep the approved dev cardinalities", async () => {

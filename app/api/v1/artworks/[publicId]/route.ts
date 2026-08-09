@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireFormalViewer } from "@/lib/server/student-request";
 import { getThumbnailUrl } from "@/lib/r2";
 import { clientRateLimitIdentity, consumePersistentRateLimit } from "@/lib/server/persistent-rate-limit";
-import { canViewerAccessArtworkOwner } from "@/lib/domain/gallery-access";
+import { canViewerAccessArtworkOwner, shouldShowNamesToViewer } from "@/lib/domain/gallery-access";
 import { DAY1_TEMPLATE, DAY3_TEMPLATE } from "@/lib/domain/submission-templates";
 
 interface ArtworkOwnerRow {
@@ -53,13 +53,14 @@ export async function GET(request: Request, routeContext: RouteContext) {
   if (!canViewerAccessArtworkOwner(context.viewer, { userId: address.user.id, role: address.user.role, groupId: address.user.groupId }, settings)) {
     return NextResponse.json(failure("ARTWORK_NOT_FOUND", "作品不存在", context.requestId), { status: 404 });
   }
+  const showNamesToViewer = shouldShowNamesToViewer(context.viewer, settings);
   const unlocked = context.viewer.role === "ADMIN" || context.viewer.userId === address.userId
     ? (["DAY1", "DAY3"] as const)
     : viewerSubmissions.map((item) => item.section);
   const owner = await prisma.user.findUnique({
     where: { id: address.userId },
     select: {
-      ...(settings.showName && { displayName: true }),
+      ...(showNamesToViewer && { displayName: true }),
       anonymousIds: { where: { eventId: context.viewer.eventId }, select: { anonymousId: true }, take: 1 },
       _count: { select: { submissions: { where: { status: "SUBMITTED" } } } },
       ...(settings.fullProfileVisible && {
@@ -79,7 +80,7 @@ export async function GET(request: Request, routeContext: RouteContext) {
     },
   }) as ArtworkOwnerRow | null;
   if (!owner) return NextResponse.json(failure("ARTWORK_NOT_FOUND", "作品不存在", context.requestId), { status: 404 });
-  const displayTitle = settings.showName && owner.displayName ? owner.displayName : owner.anonymousIds[0]?.anonymousId ?? "匿名作品";
+  const displayTitle = showNamesToViewer && owner.displayName ? owner.displayName : owner.anonymousIds[0]?.anonymousId ?? "匿名作品";
   const hasAnyContent = owner._count.submissions > 0;
   if (!settings.fullProfileVisible || !hasAnyContent) {
     return NextResponse.json(
@@ -87,7 +88,7 @@ export async function GET(request: Request, routeContext: RouteContext) {
         {
           publicId,
           displayTitle,
-          isAnonymous: !settings.showName,
+          isAnonymous: !showNamesToViewer,
           profileVisibility: "IDENTITY_ONLY",
           identityOnlyReason: hasAnyContent ? "EVENT_IDENTITY_ONLY" : "NO_CONTENT",
           navigation: { canReturnToGallery: viewerSubmissions.length > 0 || context.viewer.role === "ADMIN", canNavigateCollection: false },
@@ -140,7 +141,7 @@ export async function GET(request: Request, routeContext: RouteContext) {
       {
         publicId,
         displayTitle,
-        isAnonymous: !settings.showName,
+        isAnonymous: !showNamesToViewer,
         profileVisibility: "FULL",
         navigation: { canReturnToGallery: viewerSubmissions.length > 0 || context.viewer.role === "ADMIN", canNavigateCollection: false },
         sections: { DAY1: sectionResult("DAY1"), DAY3: sectionResult("DAY3") },

@@ -24,6 +24,7 @@ export interface EventSettings {
   showName: boolean;
   fullProfileVisible: boolean;
   seniorCanBrowseAll: boolean;
+  seniorBrowseAnonymous: boolean;
 }
 
 export interface CompletionMetric {

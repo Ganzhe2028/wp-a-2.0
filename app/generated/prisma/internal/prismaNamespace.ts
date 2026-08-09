@@ -2188,6 +2188,7 @@ export const EventSettingsScalarFieldEnum = {
   showName: 'showName',
   fullProfileVisible: 'fullProfileVisible',
   seniorCanBrowseAll: 'seniorCanBrowseAll',
+  seniorBrowseAnonymous: 'seniorBrowseAnonymous',
   version: 'version',
   updatedBy: 'updatedBy',
   updatedAt: 'updatedAt'

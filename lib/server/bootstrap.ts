@@ -33,6 +33,7 @@ export async function ensureProtectedAdmin() {
               showName: true,
               fullProfileVisible: true,
               seniorCanBrowseAll: false,
+              seniorBrowseAnonymous: false,
             },
           },
         },

@@ -142,6 +142,7 @@ model EventSettings {
   showName           Boolean  @default(false)
   fullProfileVisible Boolean  @default(false)
   seniorCanBrowseAll Boolean  @default(false)
+  seniorBrowseAnonymous Boolean  @default(false)
   version            Int      @default(1)
   updatedBy          String?
   updater            User?    @relation("EventSettingsUpdater", fields: [updatedBy, eventId], references: [id, eventId], onDelete: Restrict)

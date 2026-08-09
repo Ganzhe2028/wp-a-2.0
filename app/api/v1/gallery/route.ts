@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireFormalViewer } from "@/lib/server/student-request";
 import { parseFormalSection } from "@/lib/domain/submission-templates";
 import { createGallerySeed, decodeGalleryCursor, encodeGalleryCursor, galleryShuffleKey } from "@/lib/server/gallery-cursor";
-import { resolveGalleryBrowseScope } from "@/lib/domain/gallery-access";
+import { resolveGalleryBrowseScope, shouldShowNamesToViewer } from "@/lib/domain/gallery-access";
 import { digestSensitive } from "@/lib/server/request-security";
 import { getThumbnailUrl } from "@/lib/r2";
 import { createHash } from "node:crypto";
@@ -45,7 +45,8 @@ export async function GET(request: Request) {
     return NextResponse.json(failure("SECTION_LOCKED_FOR_VIEWER", "完成对应作品后即可浏览", context.requestId), { status: 403 });
   }
   const browseScope = resolveGalleryBrowseScope(context.viewer, settings);
-  if (!settings.showName && query && !/^[!@#$%&*+?=]{8}$/.test(query)) {
+  const showNamesToViewer = shouldShowNamesToViewer(context.viewer, settings);
+  if (!showNamesToViewer && query && !/^[!@#$%&*+?=]{8}$/.test(query)) {
     return NextResponse.json(success({ viewer: { unlockedSections: [section], browseScope }, items: [], nextCursor: null }, context.requestId));
   }
   const accountScope: Prisma.UserWhereInput = browseScope === "OWN_GROUP_LEARNERS"
@@ -62,15 +63,15 @@ export async function GET(request: Request) {
       ...accountScope,
       artworkPublicIds: { some: { eventId: context.viewer.eventId, revokedAt: null } },
       ...(onlyWithContent && { submissions: { some: { section, status: "SUBMITTED" } } }),
-      ...(query && (settings.showName
+      ...(query && (showNamesToViewer
         ? { displayName: { contains: query, mode: "insensitive" } }
         : { anonymousIds: { some: { eventId: context.viewer.eventId, anonymousId: query } } })),
     },
     select: {
       id: true,
       role: true,
-      ...(settings.showName && { displayName: true }),
-      displayNameSortKey: settings.showName,
+      ...(showNamesToViewer && { displayName: true }),
+      displayNameSortKey: showNamesToViewer,
       anonymousIds: { where: { eventId: context.viewer.eventId }, select: { anonymousId: true }, take: 1 },
       artworkPublicIds: { where: { eventId: context.viewer.eventId, revokedAt: null }, select: { publicId: true }, take: 1 },
       submissions: {
@@ -89,11 +90,11 @@ export async function GET(request: Request) {
   const cursorToken = url.searchParams.get("cursor");
   const queryHash = createHash("sha256").update(query ?? "").digest("hex");
   const accessScopeHash = digestSensitive(`${browseScope}\0${context.viewer.groupId ?? ""}`);
-  const cursorBinding = { section, division: galleryDivision, queryHash, onlyWithContent, accessScopeHash, showName: settings.showName, settingsVersion: settings.version };
+  const cursorBinding = { section, division: galleryDivision, queryHash, onlyWithContent, accessScopeHash, showName: showNamesToViewer, settingsVersion: settings.version };
   const decoded = cursorToken ? decodeGalleryCursor(cursorToken, cursorBinding) : null;
   if (cursorToken && !decoded) return NextResponse.json(failure("VALIDATION_ERROR", "Cursor 无效", context.requestId), { status: 400 });
   const seed = decoded?.seed ?? createGallerySeed();
-  const sortKey = (user: GalleryUserRow) => !settings.showName && galleryDivision === "LEARNER"
+  const sortKey = (user: GalleryUserRow) => !showNamesToViewer && galleryDivision === "LEARNER"
     ? galleryShuffleKey(seed, user.id)
     : `${user.displayNameSortKey ?? ""}\0${user.id}`;
   users.sort((left, right) => sortKey(left).localeCompare(sortKey(right)));
@@ -105,7 +106,7 @@ export async function GET(request: Request) {
     const storageKey = hasContent ? submission.day1Slots?.[0]?.asset?.storageKey : undefined;
     return {
       publicId: user.artworkPublicIds[0].publicId,
-      displayTitle: settings.showName && user.displayName ? user.displayName : user.anonymousIds[0]?.anonymousId ?? "匿名作品",
+      displayTitle: showNamesToViewer && user.displayName ? user.displayName : user.anonymousIds[0]?.anonymousId ?? "匿名作品",
       ...(galleryDivision === "SENIOR" && { roleLabel: "Senior Group" }),
       thumbnail: settings.fullProfileVisible && section === "DAY1" && storageKey ? { url: getThumbnailUrl(storageKey) } : null,
       sectionStates: { [section]: hasContent ? "AVAILABLE" : "NO_CONTENT" },

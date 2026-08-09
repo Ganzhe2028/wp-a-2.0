@@ -43,6 +43,7 @@ export type EventSettingsMinAggregateOutputType = {
   showName: boolean | null
   fullProfileVisible: boolean | null
   seniorCanBrowseAll: boolean | null
+  seniorBrowseAnonymous: boolean | null
   version: number | null
   updatedBy: string | null
   updatedAt: Date | null
@@ -57,6 +58,7 @@ export type EventSettingsMaxAggregateOutputType = {
   showName: boolean | null
   fullProfileVisible: boolean | null
   seniorCanBrowseAll: boolean | null
+  seniorBrowseAnonymous: boolean | null
   version: number | null
   updatedBy: string | null
   updatedAt: Date | null
@@ -71,6 +73,7 @@ export type EventSettingsCountAggregateOutputType = {
   showName: number
   fullProfileVisible: number
   seniorCanBrowseAll: number
+  seniorBrowseAnonymous: number
   version: number
   updatedBy: number
   updatedAt: number
@@ -95,6 +98,7 @@ export type EventSettingsMinAggregateInputType = {
   showName?: true
   fullProfileVisible?: true
   seniorCanBrowseAll?: true
+  seniorBrowseAnonymous?: true
   version?: true
   updatedBy?: true
   updatedAt?: true
@@ -109,6 +113,7 @@ export type EventSettingsMaxAggregateInputType = {
   showName?: true
   fullProfileVisible?: true
   seniorCanBrowseAll?: true
+  seniorBrowseAnonymous?: true
   version?: true
   updatedBy?: true
   updatedAt?: true
@@ -123,6 +128,7 @@ export type EventSettingsCountAggregateInputType = {
   showName?: true
   fullProfileVisible?: true
   seniorCanBrowseAll?: true
+  seniorBrowseAnonymous?: true
   version?: true
   updatedBy?: true
   updatedAt?: true
@@ -224,6 +230,7 @@ export type EventSettingsGroupByOutputType = {
   showName: boolean
   fullProfileVisible: boolean
   seniorCanBrowseAll: boolean
+  seniorBrowseAnonymous: boolean
   version: number
   updatedBy: string | null
   updatedAt: Date
@@ -261,6 +268,7 @@ export type EventSettingsWhereInput = {
   showName?: Prisma.BoolFilter<"EventSettings"> | boolean
   fullProfileVisible?: Prisma.BoolFilter<"EventSettings"> | boolean
   seniorCanBrowseAll?: Prisma.BoolFilter<"EventSettings"> | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFilter<"EventSettings"> | boolean
   version?: Prisma.IntFilter<"EventSettings"> | number
   updatedBy?: Prisma.StringNullableFilter<"EventSettings"> | string | null
   updatedAt?: Prisma.DateTimeFilter<"EventSettings"> | Date | string
@@ -277,6 +285,7 @@ export type EventSettingsOrderByWithRelationInput = {
   showName?: Prisma.SortOrder
   fullProfileVisible?: Prisma.SortOrder
   seniorCanBrowseAll?: Prisma.SortOrder
+  seniorBrowseAnonymous?: Prisma.SortOrder
   version?: Prisma.SortOrder
   updatedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -296,6 +305,7 @@ export type EventSettingsWhereUniqueInput = Prisma.AtLeast<{
   showName?: Prisma.BoolFilter<"EventSettings"> | boolean
   fullProfileVisible?: Prisma.BoolFilter<"EventSettings"> | boolean
   seniorCanBrowseAll?: Prisma.BoolFilter<"EventSettings"> | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFilter<"EventSettings"> | boolean
   version?: Prisma.IntFilter<"EventSettings"> | number
   updatedBy?: Prisma.StringNullableFilter<"EventSettings"> | string | null
   updatedAt?: Prisma.DateTimeFilter<"EventSettings"> | Date | string
@@ -312,6 +322,7 @@ export type EventSettingsOrderByWithAggregationInput = {
   showName?: Prisma.SortOrder
   fullProfileVisible?: Prisma.SortOrder
   seniorCanBrowseAll?: Prisma.SortOrder
+  seniorBrowseAnonymous?: Prisma.SortOrder
   version?: Prisma.SortOrder
   updatedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -334,6 +345,7 @@ export type EventSettingsScalarWhereWithAggregatesInput = {
   showName?: Prisma.BoolWithAggregatesFilter<"EventSettings"> | boolean
   fullProfileVisible?: Prisma.BoolWithAggregatesFilter<"EventSettings"> | boolean
   seniorCanBrowseAll?: Prisma.BoolWithAggregatesFilter<"EventSettings"> | boolean
+  seniorBrowseAnonymous?: Prisma.BoolWithAggregatesFilter<"EventSettings"> | boolean
   version?: Prisma.IntWithAggregatesFilter<"EventSettings"> | number
   updatedBy?: Prisma.StringNullableWithAggregatesFilter<"EventSettings"> | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"EventSettings"> | Date | string
@@ -347,6 +359,7 @@ export type EventSettingsCreateInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutSettingsInput
@@ -362,6 +375,7 @@ export type EventSettingsUncheckedCreateInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedBy?: string | null
   updatedAt?: Date | string
@@ -375,6 +389,7 @@ export type EventSettingsUpdateInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutSettingsNestedInput
@@ -390,6 +405,7 @@ export type EventSettingsUncheckedUpdateInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -404,6 +420,7 @@ export type EventSettingsCreateManyInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedBy?: string | null
   updatedAt?: Date | string
@@ -417,6 +434,7 @@ export type EventSettingsUpdateManyMutationInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -430,6 +448,7 @@ export type EventSettingsUncheckedUpdateManyInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -449,6 +468,7 @@ export type EventSettingsCountOrderByAggregateInput = {
   showName?: Prisma.SortOrder
   fullProfileVisible?: Prisma.SortOrder
   seniorCanBrowseAll?: Prisma.SortOrder
+  seniorBrowseAnonymous?: Prisma.SortOrder
   version?: Prisma.SortOrder
   updatedBy?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -467,6 +487,7 @@ export type EventSettingsMaxOrderByAggregateInput = {
   showName?: Prisma.SortOrder
   fullProfileVisible?: Prisma.SortOrder
   seniorCanBrowseAll?: Prisma.SortOrder
+  seniorBrowseAnonymous?: Prisma.SortOrder
   version?: Prisma.SortOrder
   updatedBy?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -481,6 +502,7 @@ export type EventSettingsMinOrderByAggregateInput = {
   showName?: Prisma.SortOrder
   fullProfileVisible?: Prisma.SortOrder
   seniorCanBrowseAll?: Prisma.SortOrder
+  seniorBrowseAnonymous?: Prisma.SortOrder
   version?: Prisma.SortOrder
   updatedBy?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -582,6 +604,7 @@ export type EventSettingsCreateWithoutEventInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedAt?: Date | string
   updater?: Prisma.UserCreateNestedOneWithoutSettingsUpdatesInput
@@ -595,6 +618,7 @@ export type EventSettingsUncheckedCreateWithoutEventInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedBy?: string | null
   updatedAt?: Date | string
@@ -624,6 +648,7 @@ export type EventSettingsUpdateWithoutEventInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updater?: Prisma.UserUpdateOneWithoutSettingsUpdatesNestedInput
@@ -637,6 +662,7 @@ export type EventSettingsUncheckedUpdateWithoutEventInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -650,6 +676,7 @@ export type EventSettingsCreateWithoutUpdaterInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutSettingsInput
@@ -663,6 +690,7 @@ export type EventSettingsUncheckedCreateWithoutUpdaterInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedAt?: Date | string
 }
@@ -705,6 +733,7 @@ export type EventSettingsScalarWhereInput = {
   showName?: Prisma.BoolFilter<"EventSettings"> | boolean
   fullProfileVisible?: Prisma.BoolFilter<"EventSettings"> | boolean
   seniorCanBrowseAll?: Prisma.BoolFilter<"EventSettings"> | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFilter<"EventSettings"> | boolean
   version?: Prisma.IntFilter<"EventSettings"> | number
   updatedBy?: Prisma.StringNullableFilter<"EventSettings"> | string | null
   updatedAt?: Prisma.DateTimeFilter<"EventSettings"> | Date | string
@@ -718,6 +747,7 @@ export type EventSettingsCreateManyUpdaterInput = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: number
   updatedAt?: Date | string
 }
@@ -730,6 +760,7 @@ export type EventSettingsUpdateWithoutUpdaterInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutSettingsNestedInput
@@ -743,6 +774,7 @@ export type EventSettingsUncheckedUpdateWithoutUpdaterInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -755,6 +787,7 @@ export type EventSettingsUncheckedUpdateManyWithoutUpdaterInput = {
   showName?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fullProfileVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   seniorCanBrowseAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  seniorBrowseAnonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
   version?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -770,6 +803,7 @@ export type EventSettingsSelect<ExtArgs extends runtime.Types.Extensions.Interna
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: boolean
   updatedBy?: boolean
   updatedAt?: boolean
@@ -786,6 +820,7 @@ export type EventSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: boolean
   updatedBy?: boolean
   updatedAt?: boolean
@@ -802,6 +837,7 @@ export type EventSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: boolean
   updatedBy?: boolean
   updatedAt?: boolean
@@ -818,12 +854,13 @@ export type EventSettingsSelectScalar = {
   showName?: boolean
   fullProfileVisible?: boolean
   seniorCanBrowseAll?: boolean
+  seniorBrowseAnonymous?: boolean
   version?: boolean
   updatedBy?: boolean
   updatedAt?: boolean
 }
 
-export type EventSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"eventId" | "day1Open" | "day3Open" | "authoringEnabled" | "allowEditing" | "showName" | "fullProfileVisible" | "seniorCanBrowseAll" | "version" | "updatedBy" | "updatedAt", ExtArgs["result"]["eventSettings"]>
+export type EventSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"eventId" | "day1Open" | "day3Open" | "authoringEnabled" | "allowEditing" | "showName" | "fullProfileVisible" | "seniorCanBrowseAll" | "seniorBrowseAnonymous" | "version" | "updatedBy" | "updatedAt", ExtArgs["result"]["eventSettings"]>
 export type EventSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   updater?: boolean | Prisma.EventSettings$updaterArgs<ExtArgs>
@@ -852,6 +889,7 @@ export type $EventSettingsPayload<ExtArgs extends runtime.Types.Extensions.Inter
     showName: boolean
     fullProfileVisible: boolean
     seniorCanBrowseAll: boolean
+    seniorBrowseAnonymous: boolean
     version: number
     updatedBy: string | null
     updatedAt: Date
@@ -1288,6 +1326,7 @@ export interface EventSettingsFieldRefs {
   readonly showName: Prisma.FieldRef<"EventSettings", 'Boolean'>
   readonly fullProfileVisible: Prisma.FieldRef<"EventSettings", 'Boolean'>
   readonly seniorCanBrowseAll: Prisma.FieldRef<"EventSettings", 'Boolean'>
+  readonly seniorBrowseAnonymous: Prisma.FieldRef<"EventSettings", 'Boolean'>
   readonly version: Prisma.FieldRef<"EventSettings", 'Int'>
   readonly updatedBy: Prisma.FieldRef<"EventSettings", 'String'>
   readonly updatedAt: Prisma.FieldRef<"EventSettings", 'DateTime'>
